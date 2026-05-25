@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-25T16:23:17.517Z",
+  "generatedAt": "2026-05-25T16:52:11.966Z",
   "sourceFileCount": 18,
   "sourceRowCount": 13140,
   "productCount": 18,
@@ -26,6 +26,7 @@
     "productCount": 18,
     "momRevenueGrowth": 9.2
   },
+  "quarterlyBenchmarkBaseQuarter": "2024Q3",
   "topProductsByRevenue": [
     {
       "productId": "B0DNR8RF83",
@@ -1001,6 +1002,7 @@
   },
   "notes": [
     "Daily Catalyst rows are treated as daily snapshots of monthly estimates. Product-month revenue and unit sales are averaged within each month, then summed across products for the brand trend.",
-    "When revenue is absent, it is estimated as price multiplied by unit sales."
+    "When revenue is absent, it is estimated as price multiplied by unit sales.",
+    "Quarterly external revenue is kept in KRW 100M units and compared with tracked Amazon estimates using normalized indices because the source scope and currency differ."
   ]
 }

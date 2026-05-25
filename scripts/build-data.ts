@@ -52,9 +52,46 @@ type ProductMonth = {
   sourceRows: number;
 };
 
+type QuarterlyBenchmark = {
+  quarter: string;
+  externalRevenueEokKrw: number;
+  externalYoY: number | null;
+  externalQoQ: number | null;
+  comment: string;
+};
+
+type QuarterlyComparison = QuarterlyBenchmark & {
+  trackedRevenueUsd: number | null;
+  trackedUnits: number | null;
+  trackedProductCount: number | null;
+  trackedYoY: number | null;
+  trackedQoQ: number | null;
+  monthsPresent: number;
+  isCompleteQuarter: boolean;
+  externalIndex: number | null;
+  trackedIndex: number | null;
+  indexGap: number | null;
+};
+
 const root = process.cwd();
 const rawDir = path.join(root, "data", "raw");
 const outDir = path.join(root, "public", "data");
+
+const quarterlyBenchmark: QuarterlyBenchmark[] = [
+  { quarter: "2023Q1", externalRevenueEokKrw: 269, externalYoY: 83, externalQoQ: null, comment: "성장 초입" },
+  { quarter: "2023Q2", externalRevenueEokKrw: 365, externalYoY: 54, externalQoQ: 35.5, comment: "성장 지속" },
+  { quarter: "2023Q3", externalRevenueEokKrw: 303, externalYoY: 47, externalQoQ: -17.0, comment: "높지만 둔화" },
+  { quarter: "2023Q4", externalRevenueEokKrw: 219, externalYoY: -3, externalQoQ: -27.7, comment: "일시 둔화" },
+  { quarter: "2024Q1", externalRevenueEokKrw: 248, externalYoY: -8, externalQoQ: 13.2, comment: "전년 대비 약함" },
+  { quarter: "2024Q2", externalRevenueEokKrw: 547, externalYoY: 50, externalQoQ: 120.9, comment: "급증" },
+  { quarter: "2024Q3", externalRevenueEokKrw: 491, externalYoY: 62, externalQoQ: -10.3, comment: "고점권 유지" },
+  { quarter: "2024Q4", externalRevenueEokKrw: 464, externalYoY: 112, externalQoQ: -5.4, comment: "정점 구간" },
+  { quarter: "2025Q1", externalRevenueEokKrw: 512, externalYoY: 107, externalQoQ: 10.5, comment: "전년 기저 낮아 YoY 강함" },
+  { quarter: "2025Q2", externalRevenueEokKrw: 388, externalYoY: -29, externalQoQ: -24.2, comment: "하락 전환" },
+  { quarter: "2025Q3", externalRevenueEokKrw: 407, externalYoY: -17, externalQoQ: 4.9, comment: "약한 반등" },
+  { quarter: "2025Q4", externalRevenueEokKrw: 334, externalYoY: -28, externalQoQ: -18.0, comment: "저점" },
+  { quarter: "2026Q1", externalRevenueEokKrw: 451, externalYoY: -12, externalQoQ: 35.0, comment: "바닥 반등 가능성" }
+];
 
 const columnAliases: Record<CanonicalColumn, string[]> = {
   asin: ["asin", "product asin", "product_asin", "amazon asin"],
@@ -225,6 +262,12 @@ function periodGrowth<T extends { month: string; revenue: number }>(rows: T[], m
   const current = sorted.slice(-months);
   const previous = sorted.slice(-(months * 2), -months);
   return growth(sum(current.map((row) => row.revenue)), sum(previous.map((row) => row.revenue)));
+}
+
+function quarterFromMonth(month: string): string {
+  const [year, monthPart] = month.split("-");
+  const quarter = Math.ceil(Number(monthPart) / 3);
+  return `${year}Q${quarter}`;
 }
 
 function lastValue<T>(rows: T[], selector: (row: T) => number | null): number | null {
@@ -460,6 +503,60 @@ const reviewGrowers = products
 const latestBrand = monthlyBrandTrend.at(-1) ?? null;
 const bestRevenueMonth = [...monthlyBrandTrend].sort((a, b) => b.revenue - a.revenue)[0] ?? null;
 
+const trackedQuarters = new Map<string, typeof monthlyBrandTrend>();
+for (const row of monthlyBrandTrend) {
+  const quarter = quarterFromMonth(row.month);
+  trackedQuarters.set(quarter, [...(trackedQuarters.get(quarter) ?? []), row]);
+}
+
+const trackedQuarterRows = [...trackedQuarters.entries()]
+  .map(([quarter, rows]) => ({
+    quarter,
+    trackedRevenueUsd: round(sum(rows.map((row) => row.revenue)), 2) ?? 0,
+    trackedUnits: round(sum(rows.map((row) => row.units)), 0) ?? 0,
+    trackedProductCount: Math.max(...rows.map((row) => row.productCount)),
+    monthsPresent: rows.length,
+    isCompleteQuarter: rows.length === 3,
+    trackedYoY: null as number | null,
+    trackedQoQ: null as number | null
+  }))
+  .sort((a, b) => a.quarter.localeCompare(b.quarter));
+
+const trackedQuarterMap = new Map(trackedQuarterRows.map((row) => [row.quarter, row]));
+for (let index = 0; index < trackedQuarterRows.length; index += 1) {
+  const row = trackedQuarterRows[index];
+  row.trackedQoQ = growth(row.trackedRevenueUsd, index > 0 ? trackedQuarterRows[index - 1].trackedRevenueUsd : null);
+  const previousYear = trackedQuarterMap.get(`${Number(row.quarter.slice(0, 4)) - 1}${row.quarter.slice(4)}`);
+  row.trackedYoY = growth(row.trackedRevenueUsd, previousYear?.trackedRevenueUsd ?? null);
+}
+
+const baseQuarter =
+  quarterlyBenchmark.find((benchmark) => trackedQuarterMap.get(benchmark.quarter)?.isCompleteQuarter)?.quarter ??
+  quarterlyBenchmark.find((benchmark) => trackedQuarterMap.has(benchmark.quarter))?.quarter ??
+  null;
+const baseExternal = quarterlyBenchmark.find((benchmark) => benchmark.quarter === baseQuarter)?.externalRevenueEokKrw ?? null;
+const baseTracked = baseQuarter ? trackedQuarterMap.get(baseQuarter)?.trackedRevenueUsd ?? null : null;
+
+const quarterlyComparison: QuarterlyComparison[] = quarterlyBenchmark.map((benchmark) => {
+  const tracked = trackedQuarterMap.get(benchmark.quarter);
+  const externalIndex = baseExternal ? round((benchmark.externalRevenueEokKrw / baseExternal) * 100, 1) : null;
+  const trackedIndex = tracked && baseTracked ? round((tracked.trackedRevenueUsd / baseTracked) * 100, 1) : null;
+
+  return {
+    ...benchmark,
+    trackedRevenueUsd: tracked?.trackedRevenueUsd ?? null,
+    trackedUnits: tracked?.trackedUnits ?? null,
+    trackedProductCount: tracked?.trackedProductCount ?? null,
+    trackedYoY: tracked?.trackedYoY ?? null,
+    trackedQoQ: tracked?.trackedQoQ ?? null,
+    monthsPresent: tracked?.monthsPresent ?? 0,
+    isCompleteQuarter: tracked?.isCompleteQuarter ?? false,
+    externalIndex,
+    trackedIndex,
+    indexGap: externalIndex !== null && trackedIndex !== null ? round(trackedIndex - externalIndex, 1) : null
+  };
+});
+
 const summary = {
   generatedAt: new Date().toISOString(),
   sourceFileCount: readSourceFiles().length,
@@ -479,6 +576,7 @@ const summary = {
   recent6Growth: periodGrowth(monthlyBrandTrend, 6),
   recent12Growth: periodGrowth(monthlyBrandTrend, 12),
   bestRevenueMonth,
+  quarterlyBenchmarkBaseQuarter: baseQuarter,
   topProductsByRevenue,
   topProductsByGrowth,
   decliningProducts,
@@ -488,7 +586,8 @@ const summary = {
   columnMappings,
   notes: [
     "Daily Catalyst rows are treated as daily snapshots of monthly estimates. Product-month revenue and unit sales are averaged within each month, then summed across products for the brand trend.",
-    "When revenue is absent, it is estimated as price multiplied by unit sales."
+    "When revenue is absent, it is estimated as price multiplied by unit sales.",
+    "Quarterly external revenue is kept in KRW 100M units and compared with tracked Amazon estimates using normalized indices because the source scope and currency differ."
   ]
 };
 
@@ -496,6 +595,7 @@ fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(path.join(outDir, "products.json"), JSON.stringify(products, null, 2));
 fs.writeFileSync(path.join(outDir, "monthly_brand_trend.json"), JSON.stringify(monthlyBrandTrend, null, 2));
 fs.writeFileSync(path.join(outDir, "monthly_product_trend.json"), JSON.stringify(monthlyProductTrend, null, 2));
+fs.writeFileSync(path.join(outDir, "quarterly_comparison.json"), JSON.stringify(quarterlyComparison, null, 2));
 fs.writeFileSync(path.join(outDir, "summary.json"), JSON.stringify(summary, null, 2));
 
 console.log(`Built data from ${summary.sourceFileCount} CSV files.`);

@@ -67,6 +67,7 @@ export type Summary = {
   recent6Growth: number | null;
   recent12Growth: number | null;
   bestRevenueMonth: BrandTrend | null;
+  quarterlyBenchmarkBaseQuarter: string | null;
   topProductsByRevenue: Product[];
   topProductsByGrowth: Product[];
   decliningProducts: Product[];
@@ -74,4 +75,22 @@ export type Summary = {
   reviewGrowers: Array<Product & { reviewGrowth: number | null }>;
   warnings: string[];
   notes: string[];
+};
+
+export type QuarterlyComparison = {
+  quarter: string;
+  externalRevenueEokKrw: number;
+  externalYoY: number | null;
+  externalQoQ: number | null;
+  comment: string;
+  trackedRevenueUsd: number | null;
+  trackedUnits: number | null;
+  trackedProductCount: number | null;
+  trackedYoY: number | null;
+  trackedQoQ: number | null;
+  monthsPresent: number;
+  isCompleteQuarter: boolean;
+  externalIndex: number | null;
+  trackedIndex: number | null;
+  indexGap: number | null;
 };

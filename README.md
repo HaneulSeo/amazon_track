@@ -1,6 +1,6 @@
 # Mighty Patch Revenue Tracker
 
-Amazon / Jungle Scout CSV exports for Mighty Patch products are transformed into a Vercel-ready Next.js dashboard. The dashboard shows brand-level monthly revenue, unit sales, average price, BSR, review trends, product contribution, product detail charts, winners and losers, and a downloadable monthly data table.
+Amazon / Jungle Scout CSV exports for Mighty Patch products are transformed into a Vercel-ready Next.js dashboard. The dashboard shows brand-level monthly revenue, unit sales, average price, BSR, review trends, product contribution, product detail charts, winners and losers, and a downloadable monthly data table. It also compares tracked Amazon ASIN quarterly revenue with a separate quarterly KRW revenue benchmark.
 
 ## Data Location
 
@@ -66,6 +66,7 @@ Generated files:
 - `public/data/products.json`
 - `public/data/monthly_brand_trend.json`
 - `public/data/monthly_product_trend.json`
+- `public/data/quarterly_comparison.json`
 - `public/data/summary.json`
 
 ## Vercel Deployment
@@ -83,6 +84,7 @@ To update the dashboard after changing CSVs, replace files in `data/raw`, run `n
 
 - Jungle Scout values are estimates, not audited actual revenue.
 - This is not total Amazon revenue; it only reflects the tracked ASINs in `data/raw`.
+- The quarterly benchmark is KRW 100M revenue from an external table. The dashboard compares it with tracked Amazon USD estimates using normalized trend indices because currency and business scope differ.
 - If products are missing, brand-level revenue will be underestimated.
 - Currency conversion, Amazon fees, returns, wholesale revenue, ad spend, and margin are not included.
 - Product names are only as complete as the CSV export. If a CSV contains only ASIN metadata, the dashboard labels the product by ASIN.

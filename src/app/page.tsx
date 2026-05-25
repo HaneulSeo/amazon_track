@@ -6,8 +6,9 @@ import { KpiCard } from "@/components/KpiCard";
 import { ProductBreakdownChart } from "@/components/ProductBreakdownChart";
 import { ProductDetail } from "@/components/ProductDetail";
 import { ProductTable } from "@/components/ProductTable";
+import { QuarterlyComparison } from "@/components/QuarterlyComparison";
 import { SectionCard } from "@/components/SectionCard";
-import { monthlyBrandTrend, monthlyProductTrend, productsData, summaryData } from "@/lib/data";
+import { monthlyBrandTrend, monthlyProductTrend, productsData, quarterlyComparisonData, summaryData } from "@/lib/data";
 import { formatCurrency, formatNumber, formatPercent, shortProductName, trendTone } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
@@ -61,7 +62,11 @@ export default function Home() {
         <BrandTrendChart data={monthlyBrandTrend} />
       </SectionCard>
 
-      <SectionCard eyebrow="Section 2" title="Product Breakdown">
+      <SectionCard eyebrow="Section 2" title="Quarterly Benchmark">
+        <QuarterlyComparison rows={quarterlyComparisonData} baseQuarter={summaryData.quarterlyBenchmarkBaseQuarter} />
+      </SectionCard>
+
+      <SectionCard eyebrow="Section 3" title="Product Breakdown">
         <ProductBreakdownChart products={productsData} trends={monthlyProductTrend} latestMonth={summaryData.latestMonth} />
         <div className="mt-6 overflow-auto rounded-lg ring-1 ring-toss-line">
           <table className="min-w-[760px] w-full bg-white text-left text-sm">
@@ -91,11 +96,11 @@ export default function Home() {
         </div>
       </SectionCard>
 
-      <SectionCard eyebrow="Section 3" title="Product Detail">
+      <SectionCard eyebrow="Section 4" title="Product Detail">
         <ProductDetail products={productsData} trends={monthlyProductTrend} />
       </SectionCard>
 
-      <SectionCard eyebrow="Section 4" title="Winners & Losers">
+      <SectionCard eyebrow="Section 5" title="Winners & Losers">
         <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
           <RankingList title="3M growth leaders" icon={TrendingUp} items={summaryData.topProductsByGrowth} metric={(product) => formatPercent(product.recent3Growth)} />
           <RankingList title="3M revenue decliners" icon={Activity} items={summaryData.decliningProducts} metric={(product) => formatPercent(product.recent3Growth)} />
@@ -114,7 +119,7 @@ export default function Home() {
         </div>
       </SectionCard>
 
-      <SectionCard eyebrow="Section 5" title="Raw Data Table">
+      <SectionCard eyebrow="Section 6" title="Raw Data Table">
         <ProductTable rows={monthlyProductTrend} />
       </SectionCard>
 
