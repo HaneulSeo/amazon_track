@@ -1,0 +1,252 @@
+[
+  {
+    "month": "2024-05",
+    "revenue": 220126.59,
+    "units": 14859,
+    "avgPrice": 14.81,
+    "avgRank": 2926,
+    "reviews": 225060,
+    "productCount": 18,
+    "momRevenueGrowth": null
+  },
+  {
+    "month": "2024-06",
+    "revenue": 215500.22,
+    "units": 15193,
+    "avgPrice": 14.18,
+    "avgRank": 2929,
+    "reviews": 228424,
+    "productCount": 18,
+    "momRevenueGrowth": -2.1
+  },
+  {
+    "month": "2024-07",
+    "revenue": 261229.09,
+    "units": 20130,
+    "avgPrice": 12.98,
+    "avgRank": 2872,
+    "reviews": 231077,
+    "productCount": 18,
+    "momRevenueGrowth": 21.2
+  },
+  {
+    "month": "2024-08",
+    "revenue": 257236.66,
+    "units": 17816,
+    "avgPrice": 14.44,
+    "avgRank": 2660,
+    "reviews": 233638,
+    "productCount": 18,
+    "momRevenueGrowth": -1.5
+  },
+  {
+    "month": "2024-09",
+    "revenue": 250863.96,
+    "units": 18136,
+    "avgPrice": 13.83,
+    "avgRank": 2632,
+    "reviews": 235313,
+    "productCount": 18,
+    "momRevenueGrowth": -2.5
+  },
+  {
+    "month": "2024-10",
+    "revenue": 385930.52,
+    "units": 24932,
+    "avgPrice": 15.48,
+    "avgRank": 2235,
+    "reviews": 392567,
+    "productCount": 18,
+    "momRevenueGrowth": 53.8
+  },
+  {
+    "month": "2024-11",
+    "revenue": 428758.19,
+    "units": 26408,
+    "avgPrice": 16.24,
+    "avgRank": 1974,
+    "reviews": 399431,
+    "productCount": 18,
+    "momRevenueGrowth": 11.1
+  },
+  {
+    "month": "2024-12",
+    "revenue": 493109.79,
+    "units": 28795,
+    "avgPrice": 17.12,
+    "avgRank": 2714,
+    "reviews": 401803,
+    "productCount": 18,
+    "momRevenueGrowth": 15
+  },
+  {
+    "month": "2025-01",
+    "revenue": 467711.35,
+    "units": 26983,
+    "avgPrice": 17.33,
+    "avgRank": 3072,
+    "reviews": 404532,
+    "productCount": 18,
+    "momRevenueGrowth": -5.2
+  },
+  {
+    "month": "2025-02",
+    "revenue": 437762.22,
+    "units": 26339,
+    "avgPrice": 16.62,
+    "avgRank": 14152,
+    "reviews": 406837,
+    "productCount": 18,
+    "momRevenueGrowth": -6.4
+  },
+  {
+    "month": "2025-03",
+    "revenue": 410154.76,
+    "units": 24390,
+    "avgPrice": 16.82,
+    "avgRank": 4473,
+    "reviews": 409032,
+    "productCount": 18,
+    "momRevenueGrowth": -6.3
+  },
+  {
+    "month": "2025-04",
+    "revenue": 645178.02,
+    "units": 36330,
+    "avgPrice": 17.76,
+    "avgRank": 2985,
+    "reviews": 588244,
+    "productCount": 18,
+    "momRevenueGrowth": 57.3
+  },
+  {
+    "month": "2025-05",
+    "revenue": 706667.46,
+    "units": 36771,
+    "avgPrice": 19.22,
+    "avgRank": 2860,
+    "reviews": 603985,
+    "productCount": 18,
+    "momRevenueGrowth": 9.5
+  },
+  {
+    "month": "2025-06",
+    "revenue": 804661.5,
+    "units": 41670,
+    "avgPrice": 19.31,
+    "avgRank": 2993,
+    "reviews": 607856,
+    "productCount": 18,
+    "momRevenueGrowth": 13.9
+  },
+  {
+    "month": "2025-07",
+    "revenue": 879039.55,
+    "units": 46039,
+    "avgPrice": 19.09,
+    "avgRank": 2820,
+    "reviews": 611799,
+    "productCount": 18,
+    "momRevenueGrowth": 9.2
+  },
+  {
+    "month": "2025-08",
+    "revenue": 739074.4,
+    "units": 40370,
+    "avgPrice": 18.31,
+    "avgRank": 2381,
+    "reviews": 616200,
+    "productCount": 18,
+    "momRevenueGrowth": -15.9
+  },
+  {
+    "month": "2025-09",
+    "revenue": 804784.64,
+    "units": 41923,
+    "avgPrice": 19.2,
+    "avgRank": 2403,
+    "reviews": 618796,
+    "productCount": 18,
+    "momRevenueGrowth": 8.9
+  },
+  {
+    "month": "2025-10",
+    "revenue": 654971.42,
+    "units": 37379,
+    "avgPrice": 17.52,
+    "avgRank": 2919,
+    "reviews": 623695,
+    "productCount": 18,
+    "momRevenueGrowth": -18.6
+  },
+  {
+    "month": "2025-11",
+    "revenue": 674882.46,
+    "units": 39186,
+    "avgPrice": 17.22,
+    "avgRank": 3288,
+    "reviews": 625341,
+    "productCount": 18,
+    "momRevenueGrowth": 3
+  },
+  {
+    "month": "2025-12",
+    "revenue": 609797.57,
+    "units": 36701,
+    "avgPrice": 16.62,
+    "avgRank": 4580,
+    "reviews": 631141,
+    "productCount": 18,
+    "momRevenueGrowth": -9.6
+  },
+  {
+    "month": "2026-01",
+    "revenue": 429333.41,
+    "units": 32416,
+    "avgPrice": 13.24,
+    "avgRank": 2917,
+    "reviews": 635468,
+    "productCount": 18,
+    "momRevenueGrowth": -29.6
+  },
+  {
+    "month": "2026-02",
+    "revenue": 432220.03,
+    "units": 32088,
+    "avgPrice": 13.47,
+    "avgRank": 3402,
+    "reviews": 638603,
+    "productCount": 18,
+    "momRevenueGrowth": 0.7
+  },
+  {
+    "month": "2026-03",
+    "revenue": 505493.58,
+    "units": 36866,
+    "avgPrice": 13.71,
+    "avgRank": 3265,
+    "reviews": 641995,
+    "productCount": 18,
+    "momRevenueGrowth": 17
+  },
+  {
+    "month": "2026-04",
+    "revenue": 750317.64,
+    "units": 40390,
+    "avgPrice": 18.58,
+    "avgRank": 3619,
+    "reviews": 645216,
+    "productCount": 18,
+    "momRevenueGrowth": 48.4
+  },
+  {
+    "month": "2026-05",
+    "revenue": 764314.82,
+    "units": 40539,
+    "avgPrice": 18.85,
+    "avgRank": 3419,
+    "reviews": 646762,
+    "productCount": 18,
+    "momRevenueGrowth": 1.9
+  }
+]

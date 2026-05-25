@@ -1,0 +1,35 @@
+{
+  "name": "mighty-patch-revenue-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:data": "tsx scripts/build-data.ts",
+    "dev": "next dev",
+    "build": "tsx scripts/build-data.ts && next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@next/eslint-plugin-next": "^14.2.23",
+    "csv-parse": "^5.6.0",
+    "lucide-react": "^0.468.0",
+    "next": "^14.2.23",
+    "papaparse": "^5.4.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.15.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.10",
+    "@types/papaparse": "^5.3.15",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.23",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}
