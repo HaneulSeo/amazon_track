@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mighty Patch Revenue Tracker",
-  description: "Amazon / Jungle Scout CSV based Mighty Patch revenue dashboard"
+  title: "Amazon Revenue Tracker",
+  description: "Industry and company-level Amazon revenue intelligence dashboard"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
