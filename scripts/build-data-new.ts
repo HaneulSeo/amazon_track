@@ -168,6 +168,28 @@ type CompanyIndustryMeta = {
   display_name: string;
 };
 
+type ExistingDashboardJson = {
+  generated_at?: string;
+  summary?: Record<string, unknown>;
+  company_exposure?: Record<string, unknown>;
+  overview?: Record<string, unknown>;
+  industries?: unknown[];
+  companies?: unknown[];
+  monthlyTrend?: unknown[];
+  productFamilies?: unknown[];
+  products?: unknown[];
+  regionalExposure?: unknown[];
+  missingDataChecklist?: unknown[];
+  methodologyNotes?: unknown[];
+  tables?: {
+    amazon_us_monthly?: MonthlyProductRow[];
+    company_monthly_proxy?: CompanyMonthlyRow[];
+    product_family_monthly?: FamilyMonthlyRow[];
+    company_coverage_score?: CoverageScoreRow[];
+    source_gap_map?: SourceGapRow[];
+  };
+};
+
 const root = process.cwd();
 const rawRoot = path.join(root, "data", "raw", "amazon_us");
 const processedRoot = path.join(root, "data", "processed");
@@ -618,6 +640,12 @@ function loadExposureConfig(): Record<Company, CompanyExposureFileConfig> {
 }
 
 const exposureConfig = loadExposureConfig();
+
+function loadExistingDashboardData(): ExistingDashboardJson | null {
+  const existingPath = path.join(publicDataRoot, "dashboard_data.json");
+  if (!fs.existsSync(existingPath)) return null;
+  return JSON.parse(fs.readFileSync(existingPath, "utf8")) as ExistingDashboardJson;
+}
 
 function readRawFiles(): Array<{ company: Company; source_folder: string; file_name: string; file_path: string }> {
   const folderMap: Record<string, Company> = { coway: "coway", cuckoo: "coway", samyang: "samyang", tnl: "tnl" };
@@ -1404,7 +1432,45 @@ function buildMethodologyNotes() {
   ];
 }
 
+function writeOutputsFromExistingDashboard(existing: ExistingDashboardJson) {
+  const tables = existing.tables;
+  if (!tables?.amazon_us_monthly || !tables.company_monthly_proxy || !tables.product_family_monthly || !tables.company_coverage_score || !tables.source_gap_map) {
+    throw new Error("Existing dashboard_data.json is missing required tables for fallback build");
+  }
+
+  fs.mkdirSync(processedRoot, { recursive: true });
+  fs.mkdirSync(publicDataRoot, { recursive: true });
+
+  fs.writeFileSync(path.join(processedRoot, "amazon_us_monthly.csv"), writeCsv(toCsvRows(tables.amazon_us_monthly)));
+  fs.writeFileSync(path.join(processedRoot, "company_monthly_proxy.csv"), writeCsv(toCsvRows(tables.company_monthly_proxy)));
+  fs.writeFileSync(path.join(processedRoot, "product_family_monthly.csv"), writeCsv(toCsvRows(tables.product_family_monthly)));
+  fs.writeFileSync(path.join(processedRoot, "company_coverage_score.csv"), writeCsv(toCsvRows(tables.company_coverage_score)));
+  fs.writeFileSync(path.join(processedRoot, "source_gap_map.csv"), writeCsv(toCsvRows(tables.source_gap_map)));
+
+  const refreshed = {
+    ...existing,
+    generated_at: new Date().toISOString()
+  };
+
+  fs.writeFileSync(path.join(publicDataRoot, "dashboard_data.json"), JSON.stringify(refreshed, null, 2));
+
+  console.log(`reused public/data/dashboard_data.json because ${rawRoot} is missing`);
+  console.log(`wrote data/processed/amazon_us_monthly.csv (${tables.amazon_us_monthly.length} rows)`);
+  console.log(`wrote data/processed/company_monthly_proxy.csv (${tables.company_monthly_proxy.length} rows)`);
+  console.log(`wrote data/processed/product_family_monthly.csv (${tables.product_family_monthly.length} rows)`);
+  console.log(`wrote data/processed/company_coverage_score.csv (${tables.company_coverage_score.length} rows)`);
+  console.log(`wrote data/processed/source_gap_map.csv (${tables.source_gap_map.length} rows)`);
+  console.log(`wrote public/data/dashboard_data.json`);
+}
+
 function main() {
+  if (!fs.existsSync(rawRoot)) {
+    const existing = loadExistingDashboardData();
+    if (!existing) throw new Error(`Missing raw directory and fallback dashboard data: ${rawRoot}`);
+    writeOutputsFromExistingDashboard(existing);
+    return;
+  }
+
   const rawFiles = readRawFiles();
   const dailyRecords = rawFiles.flatMap((file) => normalizeFileRows(file));
   const productMonthly = finalizeRevenueShare(addProductLevelGrowth(buildProductMonthlyRows(dailyRecords)));
