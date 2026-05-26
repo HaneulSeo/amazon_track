@@ -1,0 +1,4 @@
+company,raw_file_count,unique_asin_count,month_count,amazon_data_quality_score,revenue_exposure_score,channel_gap_score,region_gap_score,forecasting_usefulness_score,missing_data_score,next_data_priority_score,amazon_us_direct_coverage_base,interpretation,data_confidence
+"coway","50","50","25","46.63","20","92","90","14.92","85.08","89.03","0.02","Amazon US는 Airmega 미국 수요 확인용. 전사 매출 예측력은 낮음.","low"
+"samyang","82","82","25","63.86","50","88","93","38.65","61.35","80.78","0.05","Amazon US는 미국 Buldak 수요 proxy. Walmart/Costco/Kroger/Target 및 중국/동남아 데이터가 필요.","medium"
+"tnl","18","18","25","73.12","70","84","88","54.69","45.31","72.44","0.07","Amazon US Mighty Patch는 방향성 proxy. 절대금액보다 YoY, rolling 3M, lag correlation이 중요.","medium"

@@ -7,10 +7,12 @@ Amazon / Jungle Scout CSV exports are transformed into a Vercel-ready tracker da
 Put source CSV files in:
 
 ```txt
-data/raw/*.csv
+data/raw/amazon_us/coway/*.csv
+data/raw/amazon_us/samyang/*.csv
+data/raw/amazon_us/tnl/*.csv
 ```
 
-This project currently expects the 18 downloaded Mighty Patch CSV files to live in `data/raw`. No Jungle Scout login automation, web crawling, or account access automation is used.
+The build pipeline reads every CSV under `data/raw/amazon_us` and standardizes them by company, ASIN, and month. No login automation, web crawling, or account access automation is used.
 
 ## Supported Columns
 
@@ -63,11 +65,12 @@ Useful scripts:
 
 Generated files:
 
-- `public/data/products.json`
-- `public/data/monthly_brand_trend.json`
-- `public/data/monthly_product_trend.json`
-- `public/data/quarterly_comparison.json`
-- `public/data/summary.json`
+- `data/processed/amazon_us_monthly.csv`
+- `data/processed/company_monthly_proxy.csv`
+- `data/processed/product_family_monthly.csv`
+- `data/processed/company_coverage_score.csv`
+- `data/processed/source_gap_map.csv`
+- `public/data/dashboard_data.json`
 
 ## App Structure
 

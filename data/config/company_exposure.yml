@@ -1,0 +1,60 @@
+coway:
+  ticker: "021240"
+  total_revenue_exposure:
+    korea: 0.58
+    malaysia: 0.28
+    usa: 0.05
+    thailand: 0.04
+    indonesia: 0.01
+    other_adjustment: 0.04
+  amazon_us_direct_coverage_of_total:
+    low: 0.01
+    base: 0.02
+    high: 0.04
+  interpretation: "Amazon US는 Airmega 미국 수요 확인용. 전사 매출 예측력은 낮음."
+  next_data_to_collect:
+    - "DART/IR: 국내 매출, 해외법인 매출, 렌탈 계정 수, 해지율, ARPU"
+    - "Coway Malaysia 공식몰/eMall: 정수기 SKU, 렌탈 플랜, 프로모션"
+    - "미국: Amazon Airmega, 필터, Cowaymega, Walmart, BestBuy, HomeDepot, Target"
+    - "태국/인도네시아: 공식몰, Shopee, Lazada, Google Trends"
+
+samyang:
+  ticker: "003230"
+  total_revenue_exposure:
+    overseas_total: 0.77
+    domestic: 0.23
+    usa_estimate: 0.20
+    china_estimate: 0.20
+    other_overseas_estimate: 0.37
+  amazon_us_direct_coverage_of_total:
+    low: 0.02
+    base: 0.05
+    high: 0.10
+  interpretation: "Amazon US는 미국 Buldak 수요 proxy. Walmart/Costco/Kroger/Target 및 중국/동남아 데이터가 필요."
+  next_data_to_collect:
+    - "DART: 연결 매출, 수출/내수, 종속회사 매출, 재고, 매출채권"
+    - "HS 190230 국가별 월별 라면 수출액, 중량, 단가"
+    - "미국: Walmart, Costco, Kroger, Target, Instacart, Amazon"
+    - "중국: Tmall, JD, Douyin, Pinduoduo, Xiaohongshu, Baidu Index"
+    - "동남아: Shopee, Lazada, TikTok Shop, Google Trends"
+    - "일본: Amazon JP, Rakuten, Qoo10, Yahoo Shopping"
+
+tnl:
+  ticker: "340570"
+  total_revenue_exposure:
+    hero_mighty_patch_related_low: 0.50
+    hero_mighty_patch_related_base: 0.70
+    hero_mighty_patch_related_high: 0.85
+    other_products_estimate: 0.30
+  amazon_us_direct_coverage_of_total:
+    low: 0.03
+    base: 0.07
+    high: 0.15
+  interpretation: "Amazon US Mighty Patch는 방향성 proxy. 절대금액보다 YoY, rolling 3M, lag correlation이 중요."
+  next_data_to_collect:
+    - "DART: 티앤엘 분기 매출, 창상피복재 매출, 재고, 매출채권"
+    - "SEC EDGAR: Church & Dwight 10-K, 10-Q, 8-K의 Hero/Mighty Patch/inventory 코멘트"
+    - "Keepa: Mighty Patch ASIN별 가격, BSR, 리뷰 수, Buy Box, offer count, stockout history"
+    - "비Amazon 리테일: Target, Walmart, CVS, Walgreens, Ulta, Hero 공식몰, iHerb"
+    - "무역 데이터: HS 300510, 300590, 330499 한국→미국 월별 수출액/중량/단가"
+    - "B/L 데이터: ImportYeti, Panjiva, ImportGenius"

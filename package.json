@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build:data": "tsx scripts/build-data.ts",
+    "build:data": "tsx scripts/build-data-new.ts",
     "dev": "next dev",
-    "build": "tsx scripts/build-data.ts && next build",
+    "build": "tsx scripts/build-data-new.ts && next build",
     "start": "next start",
     "lint": "next lint"
   },
