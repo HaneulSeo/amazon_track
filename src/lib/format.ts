@@ -1,3 +1,5 @@
+export type DisplayCurrency = "USD" | "KRW";
+
 export function formatCurrency(value: number | null | undefined, compact = true): string {
   if (value === null || value === undefined || Number.isNaN(value)) return "-";
   return new Intl.NumberFormat("en-US", {
@@ -6,6 +8,44 @@ export function formatCurrency(value: number | null | undefined, compact = true)
     notation: compact ? "compact" : "standard",
     maximumFractionDigits: compact ? 1 : 0
   }).format(value);
+}
+
+export function formatMoneyFromUsd(
+  valueUsd: number | null | undefined,
+  currency: DisplayCurrency,
+  usdKrw: number,
+  compact = true
+): string {
+  if (valueUsd === null || valueUsd === undefined || Number.isNaN(valueUsd)) return "-";
+  if (currency === "KRW") {
+    return new Intl.NumberFormat("ko-KR", {
+      style: "currency",
+      currency: "KRW",
+      notation: compact ? "compact" : "standard",
+      maximumFractionDigits: 0
+    }).format(valueUsd * usdKrw);
+  }
+
+  return formatCurrency(valueUsd, compact);
+}
+
+export function formatMoneyFromKrw(
+  valueKrw: number | null | undefined,
+  currency: DisplayCurrency,
+  usdKrw: number,
+  compact = true
+): string {
+  if (valueKrw === null || valueKrw === undefined || Number.isNaN(valueKrw)) return "-";
+  if (currency === "USD") {
+    return formatCurrency(valueKrw / usdKrw, compact);
+  }
+
+  return new Intl.NumberFormat("ko-KR", {
+    style: "currency",
+    currency: "KRW",
+    notation: compact ? "compact" : "standard",
+    maximumFractionDigits: 0
+  }).format(valueKrw);
 }
 
 export function formatNumber(value: number | null | undefined, compact = true): string {

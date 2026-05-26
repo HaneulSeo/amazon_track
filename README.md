@@ -1,6 +1,6 @@
 # Mighty Patch Revenue Tracker
 
-Amazon / Jungle Scout CSV exports for Mighty Patch products are transformed into a Vercel-ready Next.js dashboard. The dashboard shows brand-level monthly revenue, unit sales, average price, BSR, review trends, product contribution, product detail charts, winners and losers, and a downloadable monthly data table. It also compares tracked Amazon ASIN quarterly revenue with a separate quarterly KRW revenue benchmark.
+Amazon / Jungle Scout CSV exports are transformed into a Vercel-ready industry intelligence dashboard. The first screen is an industry/company console, with Mighty Patch available as a company inside the Beauty section. Company detail pages show brand-level monthly revenue, unit sales, average price, BSR, review trends, product contribution, product detail charts, winners and losers, a quarterly benchmark comparison, and a downloadable monthly data table.
 
 ## Data Location
 
@@ -69,6 +69,13 @@ Generated files:
 - `public/data/quarterly_comparison.json`
 - `public/data/summary.json`
 
+## App Structure
+
+- Industry overview: browse sectors such as Beauty, Supplements, Food & Grocery, and Home.
+- Company cards: Mighty Patch currently lives under Beauty and opens a dedicated company workspace.
+- Company tabs: Overview, Products, Benchmark, and Data keep the dashboard compact instead of one long report.
+- Currency toggle: USD/KRW buttons convert tracked Amazon USD estimates and KRW benchmark revenue using the live USD/KRW rate from the app API route.
+
 ## Vercel Deployment
 
 1. Push this repository to GitHub.
@@ -85,6 +92,7 @@ To update the dashboard after changing CSVs, replace files in `data/raw`, run `n
 - Jungle Scout values are estimates, not audited actual revenue.
 - This is not total Amazon revenue; it only reflects the tracked ASINs in `data/raw`.
 - The quarterly benchmark is KRW 100M revenue from an external table. The dashboard compares it with tracked Amazon USD estimates using normalized trend indices because currency and business scope differ.
+- FX conversion uses a current USD/KRW API response when available and falls back to a static rate if the API is unavailable.
 - If products are missing, brand-level revenue will be underestimated.
 - Currency conversion, Amazon fees, returns, wholesale revenue, ad spend, and margin are not included.
 - Product names are only as complete as the CSV export. If a CSV contains only ASIN metadata, the dashboard labels the product by ASIN.

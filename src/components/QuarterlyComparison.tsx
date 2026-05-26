@@ -13,16 +13,23 @@ import {
   YAxis
 } from "recharts";
 import type { QuarterlyComparison as QuarterlyComparisonType } from "@/lib/types";
-import { formatCurrency, formatNumber, formatPercent, trendTone } from "@/lib/format";
+import { type DisplayCurrency, formatMoneyFromKrw, formatMoneyFromUsd, formatPercent, trendTone } from "@/lib/format";
 
 type QuarterlyComparisonProps = {
   rows: QuarterlyComparisonType[];
   baseQuarter: string | null;
+  currency: DisplayCurrency;
+  usdKrw: number;
 };
 
-export function QuarterlyComparison({ rows, baseQuarter }: QuarterlyComparisonProps) {
+export function QuarterlyComparison({ rows, baseQuarter, currency, usdKrw }: QuarterlyComparisonProps) {
   const chartRows = rows.filter((row) => row.trackedRevenueUsd !== null || row.externalRevenueEokKrw !== null);
   const tableRows = rows.filter((row) => row.trackedRevenueUsd !== null);
+  const chartData = chartRows.map((row) => ({
+    ...row,
+    externalDisplayRevenue: currency === "KRW" ? row.externalRevenueEokKrw * 100_000_000 : (row.externalRevenueEokKrw * 100_000_000) / usdKrw,
+    trackedDisplayRevenue: row.trackedRevenueUsd === null ? null : currency === "KRW" ? row.trackedRevenueUsd * usdKrw : row.trackedRevenueUsd
+  }));
 
   return (
     <div className="space-y-5">
@@ -34,21 +41,23 @@ export function QuarterlyComparison({ rows, baseQuarter }: QuarterlyComparisonPr
         <div className="min-h-[330px] rounded-lg bg-toss-wash p-4">
           <p className="mb-4 text-sm font-semibold text-toss-gray">Quarterly revenue amount</p>
           <ResponsiveContainer width="100%" height={285}>
-            <BarChart data={chartRows} margin={{ top: 8, right: 10, bottom: 0, left: 0 }}>
+            <BarChart data={chartData} margin={{ top: 8, right: 10, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="#e5e8eb" vertical={false} />
               <XAxis dataKey="quarter" tickLine={false} axisLine={false} minTickGap={16} />
-              <YAxis yAxisId="external" tickLine={false} axisLine={false} width={54} />
-              <YAxis yAxisId="tracked" orientation="right" tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(Number(value))} width={72} />
+              <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => (currency === "KRW" ? formatMoneyFromKrw(Number(value), "KRW", usdKrw) : formatMoneyFromUsd(Number(value), "USD", usdKrw))} width={82} />
               <Tooltip
                 formatter={(value, name) => {
-                  if (name === "External KRW 100M") return `${formatNumber(Number(value), false)}억`;
-                  return formatCurrency(Number(value), false);
+                  const formatted =
+                    currency === "KRW"
+                      ? formatMoneyFromKrw(Number(value), "KRW", usdKrw, false)
+                      : formatMoneyFromUsd(Number(value), "USD", usdKrw, false);
+                  return [formatted, name];
                 }}
                 contentStyle={{ border: "1px solid #e5e8eb", borderRadius: 8 }}
               />
               <Legend />
-              <Bar yAxisId="external" dataKey="externalRevenueEokKrw" name="External KRW 100M" fill="#8b95a1" radius={[6, 6, 0, 0]} />
-              <Bar yAxisId="tracked" dataKey="trackedRevenueUsd" name="Tracked Amazon USD" fill="#3182f6" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="externalDisplayRevenue" name="External benchmark" fill="#8b95a1" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="trackedDisplayRevenue" name="Tracked Amazon" fill="#3182f6" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -91,10 +100,10 @@ export function QuarterlyComparison({ rows, baseQuarter }: QuarterlyComparisonPr
                   {row.quarter}
                   {!row.isCompleteQuarter ? <span className="ml-2 rounded bg-amber-100 px-2 py-1 text-xs text-amber-700">{row.monthsPresent}M</span> : null}
                 </td>
-                <td className="px-4 py-3 text-right font-semibold">{formatNumber(row.externalRevenueEokKrw, false)}억</td>
+                <td className="px-4 py-3 text-right font-semibold">{formatMoneyFromKrw(row.externalRevenueEokKrw * 100_000_000, currency, usdKrw, false)}</td>
                 <td className={`px-4 py-3 text-right font-semibold ${trendTone(row.externalYoY)}`}>{formatPercent(row.externalYoY)}</td>
                 <td className={`px-4 py-3 text-right font-semibold ${trendTone(row.externalQoQ)}`}>{formatPercent(row.externalQoQ)}</td>
-                <td className="px-4 py-3 text-right font-semibold text-toss-blue">{formatCurrency(row.trackedRevenueUsd, false)}</td>
+                <td className="px-4 py-3 text-right font-semibold text-toss-blue">{formatMoneyFromUsd(row.trackedRevenueUsd, currency, usdKrw, false)}</td>
                 <td className={`px-4 py-3 text-right font-semibold ${trendTone(row.trackedYoY)}`}>{formatPercent(row.trackedYoY)}</td>
                 <td className={`px-4 py-3 text-right font-semibold ${trendTone(row.trackedQoQ)}`}>{formatPercent(row.trackedQoQ)}</td>
                 <td className={`px-4 py-3 text-right font-semibold ${trendTone(row.indexGap)}`}>{row.indexGap === null ? "-" : row.indexGap.toFixed(1)}</td>

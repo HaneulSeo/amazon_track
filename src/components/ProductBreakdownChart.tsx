@@ -2,17 +2,19 @@
 
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Product, ProductTrend } from "@/lib/types";
-import { formatCurrency, shortProductName } from "@/lib/format";
+import { type DisplayCurrency, formatMoneyFromUsd, shortProductName } from "@/lib/format";
 
 type ProductBreakdownChartProps = {
   products: Product[];
   trends: ProductTrend[];
   latestMonth: string | null;
+  currency: DisplayCurrency;
+  usdKrw: number;
 };
 
 const colors = ["#3182f6", "#00a661", "#f59f00", "#e64980", "#7048e8", "#12b886", "#ff6b6b", "#228be6", "#868e96"];
 
-export function ProductBreakdownChart({ products, trends, latestMonth }: ProductBreakdownChartProps) {
+export function ProductBreakdownChart({ products, trends, latestMonth, currency, usdKrw }: ProductBreakdownChartProps) {
   const topProducts = products.slice(0, 8);
   const topIds = new Set(topProducts.map((product) => product.productId));
   const labels = new Map(topProducts.map((product) => [product.productId, shortProductName(product.productName, product.asin)]));
@@ -51,8 +53,8 @@ export function ProductBreakdownChart({ products, trends, latestMonth }: Product
           <AreaChart data={stackedData} margin={{ top: 8, right: 10, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="#e5e8eb" vertical={false} />
             <XAxis dataKey="month" tickLine={false} axisLine={false} minTickGap={24} />
-            <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(Number(value))} width={72} />
-            <Tooltip formatter={(value) => formatCurrency(Number(value), false)} contentStyle={{ border: "1px solid #e5e8eb", borderRadius: 8 }} />
+            <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatMoneyFromUsd(Number(value), currency, usdKrw)} width={72} />
+            <Tooltip formatter={(value) => formatMoneyFromUsd(Number(value), currency, usdKrw, false)} contentStyle={{ border: "1px solid #e5e8eb", borderRadius: 8 }} />
             {stackedKeys.map((key, index) => (
               <Area
                 key={key}
@@ -75,7 +77,7 @@ export function ProductBreakdownChart({ products, trends, latestMonth }: Product
             <CartesianGrid stroke="#e5e8eb" horizontal={false} />
             <XAxis type="number" hide />
             <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} width={96} />
-            <Tooltip formatter={(value) => formatCurrency(Number(value), false)} contentStyle={{ border: "1px solid #e5e8eb", borderRadius: 8 }} />
+            <Tooltip formatter={(value) => formatMoneyFromUsd(Number(value), currency, usdKrw, false)} contentStyle={{ border: "1px solid #e5e8eb", borderRadius: 8 }} />
             <Bar dataKey="revenue" name="Revenue" fill="#3182f6" radius={[0, 6, 6, 0]} />
           </BarChart>
         </ResponsiveContainer>

@@ -3,13 +3,15 @@
 import { useMemo, useState } from "react";
 import { Download, Search } from "lucide-react";
 import type { ProductTrend } from "@/lib/types";
-import { formatCurrency, formatNumber } from "@/lib/format";
+import { type DisplayCurrency, formatMoneyFromUsd, formatNumber } from "@/lib/format";
 
 type ProductTableProps = {
   rows: ProductTrend[];
+  currency: DisplayCurrency;
+  usdKrw: number;
 };
 
-export function ProductTable({ rows }: ProductTableProps) {
+export function ProductTable({ rows, currency, usdKrw }: ProductTableProps) {
   const [query, setQuery] = useState("");
   const [month, setMonth] = useState("all");
   const months = useMemo(() => [...new Set(rows.map((row) => row.month))].sort().reverse(), [rows]);
@@ -104,7 +106,7 @@ export function ProductTable({ rows }: ProductTableProps) {
                 <td className="px-4 py-3 font-semibold">{row.month}</td>
                 <td className="px-4 py-3 text-toss-gray">{row.asin}</td>
                 <td className="px-4 py-3">{row.productName}</td>
-                <td className="px-4 py-3 text-right font-semibold">{formatCurrency(row.revenue, false)}</td>
+                <td className="px-4 py-3 text-right font-semibold">{formatMoneyFromUsd(row.revenue, currency, usdKrw, false)}</td>
                 <td className="px-4 py-3 text-right">{formatNumber(row.units, false)}</td>
                 <td className="px-4 py-3 text-right">{row.avgPrice === null ? "-" : `$${row.avgPrice.toFixed(2)}`}</td>
                 <td className="px-4 py-3 text-right">{formatNumber(row.avgRank, false)}</td>

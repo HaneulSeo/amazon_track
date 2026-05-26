@@ -13,14 +13,16 @@ import {
   YAxis
 } from "recharts";
 import type { Product, ProductTrend } from "@/lib/types";
-import { formatCurrency, formatNumber, formatPercent, shortProductName, trendTone } from "@/lib/format";
+import { type DisplayCurrency, formatMoneyFromUsd, formatNumber, formatPercent, shortProductName, trendTone } from "@/lib/format";
 
 type ProductDetailProps = {
   products: Product[];
   trends: ProductTrend[];
+  currency: DisplayCurrency;
+  usdKrw: number;
 };
 
-export function ProductDetail({ products, trends }: ProductDetailProps) {
+export function ProductDetail({ products, trends, currency, usdKrw }: ProductDetailProps) {
   const [productId, setProductId] = useState(products[0]?.productId ?? "");
   const selected = products.find((product) => product.productId === productId) ?? products[0];
 
@@ -49,7 +51,7 @@ export function ProductDetail({ products, trends }: ProductDetailProps) {
           </select>
         </label>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <MiniMetric icon={BadgeDollarSign} label="Latest revenue" value={formatCurrency(selected.latestRevenue)} />
+          <MiniMetric icon={BadgeDollarSign} label="Latest revenue" value={formatMoneyFromUsd(selected.latestRevenue, currency, usdKrw)} />
           <MiniMetric icon={PackageSearch} label="Units" value={formatNumber(selected.latestUnits)} />
           <MiniMetric icon={Activity} label="3M growth" value={formatPercent(selected.recent3Growth)} tone={trendTone(selected.recent3Growth)} />
           <MiniMetric icon={Star} label="Rating" value={selected.latestRating?.toFixed(1) ?? "-"} />
@@ -61,7 +63,7 @@ export function ProductDetail({ products, trends }: ProductDetailProps) {
           data={data}
           title="Revenue and unit sales"
           lines={[
-            { key: "revenue", name: "Revenue", color: "#3182f6", axis: "left", formatter: formatCurrency },
+            { key: "revenue", name: "Revenue", color: "#3182f6", axis: "left", formatter: (value) => formatMoneyFromUsd(value, currency, usdKrw) },
             { key: "units", name: "Units", color: "#00a661", axis: "right", formatter: formatNumber }
           ]}
         />

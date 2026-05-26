@@ -13,10 +13,12 @@ import {
   YAxis
 } from "recharts";
 import type { BrandTrend } from "@/lib/types";
-import { formatCurrency, formatNumber } from "@/lib/format";
+import { type DisplayCurrency, formatMoneyFromUsd, formatNumber } from "@/lib/format";
 
 type BrandTrendChartProps = {
   data: BrandTrend[];
+  currency: DisplayCurrency;
+  usdKrw: number;
 };
 
 function tooltipStyle() {
@@ -27,7 +29,7 @@ function tooltipStyle() {
   };
 }
 
-export function BrandTrendChart({ data }: BrandTrendChartProps) {
+export function BrandTrendChart({ data, currency, usdKrw }: BrandTrendChartProps) {
   return (
     <div className="grid gap-5 xl:grid-cols-2">
       <div className="min-h-[320px] rounded-lg bg-toss-wash p-4">
@@ -42,8 +44,8 @@ export function BrandTrendChart({ data }: BrandTrendChartProps) {
             </defs>
             <CartesianGrid stroke="#e5e8eb" vertical={false} />
             <XAxis dataKey="month" tickLine={false} axisLine={false} minTickGap={24} />
-            <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatCurrency(Number(value))} width={72} />
-            <Tooltip formatter={(value) => formatCurrency(Number(value), false)} contentStyle={tooltipStyle()} />
+            <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatMoneyFromUsd(Number(value), currency, usdKrw)} width={72} />
+            <Tooltip formatter={(value) => formatMoneyFromUsd(Number(value), currency, usdKrw, false)} contentStyle={tooltipStyle()} />
             <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#3182f6" strokeWidth={3} fill="url(#revenueGradient)" />
           </AreaChart>
         </ResponsiveContainer>
