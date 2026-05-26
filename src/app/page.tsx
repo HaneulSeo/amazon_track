@@ -9,11 +9,13 @@ import {
   CircleDollarSign,
   Database,
   Factory,
+  Home,
   LayoutDashboard,
   LineChart,
   Package,
   Search,
   Sparkles,
+  Store,
   TrendingDown,
   TrendingUp
 } from "lucide-react";
@@ -35,6 +37,9 @@ import {
 } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
+type Workspace = "home" | "amazon";
+type DetailTab = "overview" | "products" | "benchmark" | "data";
+
 type Company = {
   id: string;
   name: string;
@@ -44,24 +49,29 @@ type Company = {
   status: "Live" | "Coming soon";
 };
 
-type DetailTab = "overview" | "products" | "benchmark" | "data";
+type Industry = {
+  id: string;
+  name: string;
+  icon: typeof Sparkles;
+  description: string;
+};
 
 const companies: Company[] = [
   {
     id: "mighty-patch",
     name: "Mighty Patch",
-    industry: "Beauty",
+    industry: "beauty",
     category: "Acne Care",
     description: "Amazon / Jungle Scout 기반 패치 카테고리 추적",
     status: "Live"
   }
 ];
 
-const industries = [
-  { id: "beauty", name: "Beauty", count: 1, icon: Sparkles },
-  { id: "supplements", name: "Supplements", count: 0, icon: Package },
-  { id: "food", name: "Food & Grocery", count: 0, icon: Factory },
-  { id: "home", name: "Home", count: 0, icon: Building2 }
+const industries: Industry[] = [
+  { id: "beauty", name: "Beauty", icon: Sparkles, description: "스킨케어, 패치, 퍼스널 케어 브랜드" },
+  { id: "supplements", name: "Supplements", icon: Package, description: "영양제, 웰니스, 기능성 제품" },
+  { id: "food", name: "Food & Grocery", icon: Factory, description: "식품, 음료, 그로서리 브랜드" },
+  { id: "home", name: "Home", icon: Building2, description: "생활용품, 홈케어, 가정용 제품" }
 ];
 
 const tabs: Array<{ id: DetailTab; label: string; icon: typeof LineChart }> = [
@@ -71,9 +81,10 @@ const tabs: Array<{ id: DetailTab; label: string; icon: typeof LineChart }> = [
   { id: "data", label: "Data", icon: Database }
 ];
 
-export default function Home() {
+export default function App() {
+  const [workspace, setWorkspace] = useState<Workspace>("home");
+  const [activeIndustry, setActiveIndustry] = useState<string | null>(null);
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
-  const [activeIndustry, setActiveIndustry] = useState("beauty");
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
   const [currency, setCurrency] = useState<DisplayCurrency>("USD");
   const [usdKrw, setUsdKrw] = useState(1350);
@@ -86,13 +97,10 @@ export default function Home() {
         if (typeof data.usdKrw === "number") setUsdKrw(data.usdKrw);
         if (data.asOf) setFxAsOf(data.asOf);
       })
-      .catch(() => {
-        setFxAsOf("Fallback rate");
-      });
+      .catch(() => setFxAsOf("Fallback rate"));
   }, []);
 
   const selected = companies.find((company) => company.id === selectedCompany) ?? null;
-  const visibleCompanies = companies.filter((company) => company.industry.toLowerCase() === activeIndustry);
 
   const summaryCards = useMemo(
     () => [
@@ -126,84 +134,119 @@ export default function Home() {
     [currency, usdKrw]
   );
 
+  const industryRows = industries.map((industry) => {
+    const industryCompanies = companies.filter((company) => company.industry === industry.id);
+    const hasLiveData = industry.id === "beauty";
+
+    return {
+      ...industry,
+      companyCount: industryCompanies.length,
+      productCount: hasLiveData ? summaryData.productCount : 0,
+      latestRevenue: hasLiveData ? summaryData.latestRevenue : null,
+      averageRevenue: hasLiveData && industryCompanies.length ? summaryData.latestRevenue / industryCompanies.length : null,
+      recent3Growth: hasLiveData ? summaryData.recent3Growth : null,
+      latestUnits: hasLiveData ? summaryData.latestUnits : null,
+      status: hasLiveData ? "Live" : "Coming soon"
+    };
+  });
+
+  if (workspace === "home") {
+    return (
+      <Shell currency={currency} fxAsOf={fxAsOf} setCurrency={setCurrency} usdKrw={usdKrw}>
+        <MainDashboard
+          currency={currency}
+          industryRows={industryRows}
+          onOpenAmazon={() => {
+            setWorkspace("amazon");
+            setActiveIndustry(null);
+            setSelectedCompany(null);
+          }}
+          usdKrw={usdKrw}
+        />
+      </Shell>
+    );
+  }
+
+  return (
+    <Shell
+      currency={currency}
+      fxAsOf={fxAsOf}
+      setCurrency={setCurrency}
+      usdKrw={usdKrw}
+      sidebar={
+        <AmazonSidebar
+          activeIndustry={activeIndustry}
+          onBackHome={() => {
+            setWorkspace("home");
+            setActiveIndustry(null);
+            setSelectedCompany(null);
+          }}
+          onSelectIndustry={(industryId) => {
+            setActiveIndustry(industryId);
+            setSelectedCompany(null);
+          }}
+          onShowAll={() => {
+            setActiveIndustry(null);
+            setSelectedCompany(null);
+          }}
+        />
+      }
+    >
+      {selected ? (
+        <CompanyWorkspace
+          activeTab={activeTab}
+          company={selected}
+          currency={currency}
+          onBack={() => setSelectedCompany(null)}
+          setActiveTab={setActiveTab}
+          summaryCards={summaryCards}
+          usdKrw={usdKrw}
+        />
+      ) : activeIndustry ? (
+        <IndustryWorkspace
+          activeIndustry={activeIndustry}
+          currency={currency}
+          onOpenCompany={(companyId) => {
+            setSelectedCompany(companyId);
+            setActiveTab("overview");
+          }}
+          summaryCards={summaryCards}
+          usdKrw={usdKrw}
+        />
+      ) : (
+        <AllIndustriesWorkspace
+          currency={currency}
+          industryRows={industryRows}
+          onSelectIndustry={setActiveIndustry}
+          usdKrw={usdKrw}
+        />
+      )}
+    </Shell>
+  );
+}
+
+function Shell({
+  children,
+  currency,
+  fxAsOf,
+  setCurrency,
+  sidebar,
+  usdKrw
+}: {
+  children: React.ReactNode;
+  currency: DisplayCurrency;
+  fxAsOf: string | null;
+  setCurrency: (currency: DisplayCurrency) => void;
+  sidebar?: React.ReactNode;
+  usdKrw: number;
+}) {
   return (
     <main className="min-h-screen bg-[#f4f6fa] text-toss-ink">
       <div className="flex min-h-screen">
-        <aside className="hidden w-72 shrink-0 border-r border-[#dde2ea] bg-white px-5 py-6 lg:block">
-          <div className="flex items-center gap-3">
-            <div className="grid h-11 w-11 place-items-center rounded-lg bg-toss-blue text-white">
-              <LineChart size={22} />
-            </div>
-            <div>
-              <p className="text-lg font-extrabold">Market Lens</p>
-              <p className="text-xs font-semibold text-toss-gray">Amazon tracker console</p>
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <p className="mb-3 px-3 text-xs font-bold uppercase text-toss-gray">Industries</p>
-            <div className="space-y-1">
-              {industries.map((industry) => {
-                const IndustryIcon = industry.icon;
-                return (
-                  <button
-                    key={industry.id}
-                    className={`flex w-full items-center justify-between rounded-md px-3 py-3 text-left text-sm font-bold transition ${
-                      activeIndustry === industry.id ? "bg-toss-blue text-white shadow-soft" : "text-toss-gray hover:bg-[#f1f4f8] hover:text-toss-ink"
-                    }`}
-                    type="button"
-                    onClick={() => {
-                      setActiveIndustry(industry.id);
-                      setSelectedCompany(null);
-                    }}
-                  >
-                    <span className="flex items-center gap-3">
-                      <IndustryIcon size={18} />
-                      {industry.name}
-                    </span>
-                    <span>{industry.count}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="mt-8 rounded-lg bg-[#f7f9fc] p-4">
-            <p className="text-sm font-bold">Data status</p>
-            <p className="mt-2 text-sm leading-6 text-toss-gray">
-              {summaryData.sourceFileCount} CSV files · {summaryData.productCount} products · {summaryData.monthCount} months
-            </p>
-          </div>
-        </aside>
-
+        {sidebar}
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar currency={currency} setCurrency={setCurrency} usdKrw={usdKrw} fxAsOf={fxAsOf} />
-
-          <div className="mx-auto w-full max-w-[1480px] px-4 py-5 sm:px-6 lg:px-8">
-            {selected ? (
-              <CompanyWorkspace
-                activeTab={activeTab}
-                company={selected}
-                currency={currency}
-                onBack={() => setSelectedCompany(null)}
-                setActiveTab={setActiveTab}
-                summaryCards={summaryCards}
-                usdKrw={usdKrw}
-              />
-            ) : (
-              <IndustryWorkspace
-                activeIndustry={activeIndustry}
-                currency={currency}
-                onOpenCompany={(companyId) => {
-                  setSelectedCompany(companyId);
-                  setActiveTab("overview");
-                }}
-                summaryCards={summaryCards}
-                usdKrw={usdKrw}
-                visibleCompanies={visibleCompanies}
-              />
-            )}
-          </div>
+          <div className="mx-auto w-full max-w-[1480px] px-4 py-5 sm:px-6 lg:px-8">{children}</div>
         </div>
       </div>
     </main>
@@ -225,12 +268,12 @@ function TopBar({
     <header className="sticky top-0 z-20 border-b border-[#dde2ea] bg-white/90 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-[1480px] flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-md bg-toss-blue text-white lg:hidden">
+          <div className="grid h-10 w-10 place-items-center rounded-md bg-toss-blue text-white">
             <LineChart size={21} />
           </div>
           <div>
-            <p className="text-sm font-bold text-toss-gray">Industry Intelligence</p>
-            <h1 className="text-xl font-extrabold sm:text-2xl">Amazon Revenue Tracker</h1>
+            <p className="text-sm font-bold text-toss-gray">Market Lens</p>
+            <h1 className="text-xl font-extrabold sm:text-2xl">Revenue Intelligence Dashboard</h1>
           </div>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -238,7 +281,7 @@ function TopBar({
             <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-toss-gray" size={17} />
             <input
               className="h-10 w-full rounded-md border-0 bg-[#f4f6fa] pl-9 pr-4 text-sm outline-none ring-1 ring-[#dde2ea] focus:ring-2 focus:ring-toss-blue sm:w-72"
-              placeholder="Search company or ASIN"
+              placeholder="Search dashboard, industry, company"
             />
           </div>
           <div className="flex items-center rounded-md bg-[#f4f6fa] p-1 ring-1 ring-[#dde2ea]">
@@ -261,89 +304,339 @@ function TopBar({
   );
 }
 
-function IndustryWorkspace({
-  activeIndustry,
+function MainDashboard({
   currency,
-  onOpenCompany,
-  summaryCards,
-  usdKrw,
-  visibleCompanies
+  industryRows,
+  onOpenAmazon,
+  usdKrw
 }: {
-  activeIndustry: string;
   currency: DisplayCurrency;
-  onOpenCompany: (companyId: string) => void;
-  summaryCards: Array<{ label: string; value: string; helper?: string; delta?: number | null; icon: typeof CircleDollarSign }>;
+  industryRows: Array<ReturnType<typeof buildIndustryRow>>;
+  onOpenAmazon: () => void;
   usdKrw: number;
-  visibleCompanies: Company[];
 }) {
-  const industryName = industries.find((industry) => industry.id === activeIndustry)?.name ?? "Industry";
+  const liveIndustryCount = industryRows.filter((row) => row.status === "Live").length;
+
+  return (
+    <div className="space-y-5">
+      <section className="rounded-lg bg-white p-6 shadow-soft ring-1 ring-[#dde2ea] sm:p-7">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <p className="text-sm font-bold text-toss-blue">Main Dashboard</p>
+            <h2 className="mt-1 text-4xl font-extrabold sm:text-5xl">Market Lens</h2>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-gray">
+              여러 산업군과 데이터 소스를 한 곳에서 관리하는 상위 대시보드입니다. 각 분석 모듈은 별도 섹션으로 들어가서 볼 수 있습니다.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <TinyStat label="Modules" value="1" />
+            <TinyStat label="Industries" value={String(liveIndustryCount)} />
+            <TinyStat label="Companies" value={String(companies.length)} />
+            <TinyStat label="Latest tracked" value={formatMoneyFromUsd(summaryData.latestRevenue, currency, usdKrw)} />
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+        <button
+          className="group rounded-lg bg-white p-5 text-left shadow-soft ring-1 ring-[#dde2ea] transition hover:-translate-y-0.5 hover:ring-toss-blue"
+          type="button"
+          onClick={onOpenAmazon}
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="grid h-12 w-12 place-items-center rounded-lg bg-toss-blue text-white">
+              <Store size={23} />
+            </div>
+            <ChevronRight className="text-toss-gray transition group-hover:translate-x-1 group-hover:text-toss-blue" />
+          </div>
+          <p className="mt-6 text-sm font-bold text-toss-blue">Data Module</p>
+          <h3 className="mt-1 text-2xl font-extrabold">Amazon Tracker</h3>
+          <p className="mt-3 text-sm font-medium leading-6 text-toss-gray">
+            Amazon / Jungle Scout CSV 기반으로 산업군, 기업, ASIN 단위 매출 추이를 분석합니다.
+          </p>
+          <div className="mt-5 grid grid-cols-3 gap-3">
+            <TinyStat label="Industries" value={String(liveIndustryCount)} />
+            <TinyStat label="Products" value={String(summaryData.productCount)} />
+            <TinyStat label="3M Growth" value={formatPercent(summaryData.recent3Growth)} tone={trendTone(summaryData.recent3Growth)} />
+          </div>
+        </button>
+
+        <div className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-toss-blue">Portfolio Snapshot</p>
+              <h3 className="mt-1 text-xl font-extrabold">Tracked industry movement</h3>
+            </div>
+            <span className="rounded-md bg-[#eef5ff] px-3 py-1 text-xs font-bold text-toss-blue">Overview</span>
+          </div>
+          <IndustrySummaryList industryRows={industryRows} currency={currency} usdKrw={usdKrw} />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function AmazonSidebar({
+  activeIndustry,
+  onBackHome,
+  onSelectIndustry,
+  onShowAll
+}: {
+  activeIndustry: string | null;
+  onBackHome: () => void;
+  onSelectIndustry: (industryId: string) => void;
+  onShowAll: () => void;
+}) {
+  return (
+    <aside className="hidden w-72 shrink-0 border-r border-[#dde2ea] bg-white px-5 py-6 lg:block">
+      <div className="flex items-center gap-3">
+        <div className="grid h-11 w-11 place-items-center rounded-lg bg-toss-blue text-white">
+          <Store size={22} />
+        </div>
+        <div>
+          <p className="text-lg font-extrabold">Amazon Tracker</p>
+          <p className="text-xs font-semibold text-toss-gray">Industry console</p>
+        </div>
+      </div>
+
+      <button className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-toss-gray hover:text-toss-blue" type="button" onClick={onBackHome}>
+        <Home size={16} />
+        Main dashboard
+      </button>
+
+      <div className="mt-7">
+        <p className="mb-3 px-3 text-xs font-bold uppercase text-toss-gray">Amazon sections</p>
+        <div className="space-y-1">
+          <button
+            className={`flex w-full items-center justify-between rounded-md px-3 py-3 text-left text-sm font-bold transition ${
+              activeIndustry === null ? "bg-toss-blue text-white shadow-soft" : "text-toss-gray hover:bg-[#f1f4f8] hover:text-toss-ink"
+            }`}
+            type="button"
+            onClick={onShowAll}
+          >
+            <span className="flex items-center gap-3">
+              <LayoutDashboard size={18} />
+              All Industries
+            </span>
+            <span>{industries.length}</span>
+          </button>
+          {industries.map((industry) => {
+            const IndustryIcon = industry.icon;
+            const count = companies.filter((company) => company.industry === industry.id).length;
+            return (
+              <button
+                key={industry.id}
+                className={`flex w-full items-center justify-between rounded-md px-3 py-3 text-left text-sm font-bold transition ${
+                  activeIndustry === industry.id ? "bg-toss-blue text-white shadow-soft" : "text-toss-gray hover:bg-[#f1f4f8] hover:text-toss-ink"
+                }`}
+                type="button"
+                onClick={() => onSelectIndustry(industry.id)}
+              >
+                <span className="flex items-center gap-3">
+                  <IndustryIcon size={18} />
+                  {industry.name}
+                </span>
+                <span>{count}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-8 rounded-lg bg-[#f7f9fc] p-4">
+        <p className="text-sm font-bold">Data status</p>
+        <p className="mt-2 text-sm leading-6 text-toss-gray">
+          {summaryData.sourceFileCount} CSV files · {summaryData.productCount} products · {summaryData.monthCount} months
+        </p>
+      </div>
+    </aside>
+  );
+}
+
+function buildIndustryRow(industry: Industry) {
+  const industryCompanies = companies.filter((company) => company.industry === industry.id);
+  const hasLiveData = industry.id === "beauty";
+  return {
+    ...industry,
+    companyCount: industryCompanies.length,
+    productCount: hasLiveData ? summaryData.productCount : 0,
+    latestRevenue: hasLiveData ? summaryData.latestRevenue : null,
+    averageRevenue: hasLiveData && industryCompanies.length ? summaryData.latestRevenue / industryCompanies.length : null,
+    recent3Growth: hasLiveData ? summaryData.recent3Growth : null,
+    latestUnits: hasLiveData ? summaryData.latestUnits : null,
+    status: hasLiveData ? "Live" : "Coming soon"
+  };
+}
+
+function AllIndustriesWorkspace({
+  currency,
+  industryRows,
+  onSelectIndustry,
+  usdKrw
+}: {
+  currency: DisplayCurrency;
+  industryRows: Array<ReturnType<typeof buildIndustryRow>>;
+  onSelectIndustry: (industryId: string) => void;
+  usdKrw: number;
+}) {
+  const liveRows = industryRows.filter((row) => row.status === "Live");
 
   return (
     <div className="space-y-5">
       <section className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea] sm:p-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <p className="text-sm font-bold text-toss-blue">{industryName}</p>
-            <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">Company Overview</h2>
+            <p className="text-sm font-bold text-toss-blue">Amazon Tracker</p>
+            <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">Industry Overview</h2>
             <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-gray">
-              산업군별 기업을 먼저 훑고, 필요한 기업을 선택해 제품·분기·원천 데이터까지 들어가는 구조입니다.
+              트래킹 중인 전체 산업군의 평균 매출, 성장률, 제품 수를 먼저 확인하고 산업군별 상세 화면으로 들어갑니다.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <TinyStat label="Live companies" value={String(visibleCompanies.length)} />
-            <TinyStat label="Latest tracked" value={formatMoneyFromUsd(summaryData.latestRevenue, currency, usdKrw)} />
-            <TinyStat label="3M growth" value={formatPercent(summaryData.recent3Growth)} tone={trendTone(summaryData.recent3Growth)} />
-            <TinyStat label="Products" value={String(summaryData.productCount)} />
+            <TinyStat label="Tracked industries" value={String(liveRows.length)} />
+            <TinyStat label="Companies" value={String(companies.length)} />
+            <TinyStat label="Avg latest" value={formatMoneyFromUsd(summaryData.latestRevenue / Math.max(liveRows.length, 1), currency, usdKrw)} />
+            <TinyStat label="Avg 3M" value={formatPercent(summaryData.recent3Growth)} tone={trendTone(summaryData.recent3Growth)} />
           </div>
         </div>
       </section>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {summaryCards.map((card) => (
-          <KpiCard key={card.label} {...card} />
-        ))}
+        {industryRows.map((industry) => {
+          const IndustryIcon = industry.icon;
+          return (
+            <button
+              key={industry.id}
+              className="group rounded-lg bg-white p-5 text-left shadow-soft ring-1 ring-[#dde2ea] transition hover:-translate-y-0.5 hover:ring-toss-blue"
+              type="button"
+              onClick={() => onSelectIndustry(industry.id)}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <span className="grid h-10 w-10 place-items-center rounded-md bg-[#eef5ff] text-toss-blue">
+                  <IndustryIcon size={20} />
+                </span>
+                <span className={`rounded px-2 py-1 text-xs font-bold ${industry.status === "Live" ? "bg-emerald-50 text-emerald-600" : "bg-[#f1f4f8] text-toss-gray"}`}>
+                  {industry.status}
+                </span>
+              </div>
+              <h3 className="mt-5 text-xl font-extrabold">{industry.name}</h3>
+              <p className="mt-2 min-h-10 text-sm font-medium leading-5 text-toss-gray">{industry.description}</p>
+              <div className="mt-5 space-y-2 text-sm">
+                <MetricRow label="Avg revenue" value={formatMoneyFromUsd(industry.averageRevenue, currency, usdKrw)} />
+                <MetricRow label="3M growth" value={formatPercent(industry.recent3Growth)} tone={trendTone(industry.recent3Growth)} />
+                <MetricRow label="Companies" value={String(industry.companyCount)} />
+              </div>
+              <div className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-toss-blue">
+                Open industry
+                <ChevronRight className="transition group-hover:translate-x-1" size={17} />
+              </div>
+            </button>
+          );
+        })}
       </div>
+
+      <SectionCard eyebrow="Average Movement" title="Tracked industry trend">
+        <BrandTrendChart data={monthlyBrandTrend} currency={currency} usdKrw={usdKrw} />
+      </SectionCard>
+    </div>
+  );
+}
+
+function IndustryWorkspace({
+  activeIndustry,
+  currency,
+  onOpenCompany,
+  summaryCards,
+  usdKrw
+}: {
+  activeIndustry: string;
+  currency: DisplayCurrency;
+  onOpenCompany: (companyId: string) => void;
+  summaryCards: Array<{ label: string; value: string; helper?: string; delta?: number | null; icon: typeof CircleDollarSign }>;
+  usdKrw: number;
+}) {
+  const industry = industries.find((item) => item.id === activeIndustry) ?? industries[0];
+  const visibleCompanies = companies.filter((company) => company.industry === activeIndustry);
+  const isLive = activeIndustry === "beauty";
+
+  return (
+    <div className="space-y-5">
+      <section className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea] sm:p-6">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <p className="text-sm font-bold text-toss-blue">Amazon Tracker / {industry.name}</p>
+            <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">Industry Company Overview</h2>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-gray">
+              {industry.description}. 산업군 안의 기업별 추적 현황과 평균 동향을 보고, 기업을 선택해 상세 분석으로 들어갑니다.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <TinyStat label="Live companies" value={String(visibleCompanies.length)} />
+            <TinyStat label="Avg tracked" value={isLive ? formatMoneyFromUsd(summaryData.latestRevenue / Math.max(visibleCompanies.length, 1), currency, usdKrw) : "-"} />
+            <TinyStat label="Avg 3M" value={isLive ? formatPercent(summaryData.recent3Growth) : "-"} tone={isLive ? trendTone(summaryData.recent3Growth) : "text-toss-gray"} />
+            <TinyStat label="Products" value={isLive ? String(summaryData.productCount) : "0"} />
+          </div>
+        </div>
+      </section>
+
+      {isLive ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {summaryCards.map((card) => (
+            <KpiCard key={card.label} {...card} />
+          ))}
+        </div>
+      ) : null}
 
       <section className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
         <div className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-bold text-toss-blue">Companies</p>
-              <h3 className="mt-1 text-xl font-extrabold">{industryName} portfolio</h3>
+              <h3 className="mt-1 text-xl font-extrabold">{industry.name} portfolio</h3>
             </div>
-            <span className="rounded-md bg-[#eef5ff] px-3 py-1 text-xs font-bold text-toss-blue">Live</span>
+            <span className="rounded-md bg-[#eef5ff] px-3 py-1 text-xs font-bold text-toss-blue">{visibleCompanies.length} companies</span>
           </div>
           <div className="space-y-3">
-            {visibleCompanies.map((company) => (
-              <button
-                key={company.id}
-                className="group flex w-full items-center justify-between rounded-lg bg-[#f7f9fc] p-4 text-left ring-1 ring-transparent transition hover:bg-white hover:ring-toss-blue"
-                type="button"
-                onClick={() => onOpenCompany(company.id)}
-              >
-                <div className="min-w-0">
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="rounded bg-white px-2 py-1 text-xs font-bold text-toss-blue ring-1 ring-[#dde2ea]">{company.category}</span>
-                    <span className="rounded bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-600">{company.status}</span>
+            {visibleCompanies.length ? (
+              visibleCompanies.map((company) => (
+                <button
+                  key={company.id}
+                  className="group flex w-full items-center justify-between rounded-lg bg-[#f7f9fc] p-4 text-left ring-1 ring-transparent transition hover:bg-white hover:ring-toss-blue"
+                  type="button"
+                  onClick={() => onOpenCompany(company.id)}
+                >
+                  <div className="min-w-0">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="rounded bg-white px-2 py-1 text-xs font-bold text-toss-blue ring-1 ring-[#dde2ea]">{company.category}</span>
+                      <span className="rounded bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-600">{company.status}</span>
+                    </div>
+                    <p className="text-lg font-extrabold">{company.name}</p>
+                    <p className="mt-1 text-sm font-medium text-toss-gray">{company.description}</p>
                   </div>
-                  <p className="text-lg font-extrabold">{company.name}</p>
-                  <p className="mt-1 text-sm font-medium text-toss-gray">{company.description}</p>
-                </div>
-                <ChevronRight className="shrink-0 text-toss-gray transition group-hover:translate-x-1 group-hover:text-toss-blue" size={20} />
-              </button>
-            ))}
+                  <ChevronRight className="shrink-0 text-toss-gray transition group-hover:translate-x-1 group-hover:text-toss-blue" size={20} />
+                </button>
+              ))
+            ) : (
+              <div className="rounded-lg bg-[#f7f9fc] p-5 text-sm font-semibold text-toss-gray">아직 이 산업군에 연결된 기업 데이터가 없습니다.</div>
+            )}
           </div>
         </div>
 
         <div className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-toss-blue">Trend Preview</p>
-              <h3 className="mt-1 text-xl font-extrabold">Beauty revenue trajectory</h3>
+              <p className="text-sm font-bold text-toss-blue">Average Trend</p>
+              <h3 className="mt-1 text-xl font-extrabold">{industry.name} movement</h3>
             </div>
-            <p className="text-xs font-bold text-toss-gray">{summaryData.firstMonth} - {summaryData.latestMonth}</p>
+            <p className="text-xs font-bold text-toss-gray">{isLive ? `${summaryData.firstMonth} - ${summaryData.latestMonth}` : "No data"}</p>
           </div>
-          <BrandTrendChart data={monthlyBrandTrend} currency={currency} usdKrw={usdKrw} />
+          {isLive ? (
+            <BrandTrendChart data={monthlyBrandTrend} currency={currency} usdKrw={usdKrw} />
+          ) : (
+            <div className="grid min-h-[320px] place-items-center rounded-lg bg-[#f7f9fc] text-sm font-semibold text-toss-gray">
+              CSV가 추가되면 산업 평균 동향이 여기에 표시됩니다.
+            </div>
+          )}
         </div>
       </section>
     </div>
@@ -367,16 +660,18 @@ function CompanyWorkspace({
   summaryCards: Array<{ label: string; value: string; helper?: string; delta?: number | null; icon: typeof CircleDollarSign }>;
   usdKrw: number;
 }) {
+  const industry = industries.find((item) => item.id === company.industry);
+
   return (
     <div className="space-y-5">
       <section className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea] sm:p-6">
         <button className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-toss-gray hover:text-toss-blue" type="button" onClick={onBack}>
           <ArrowLeft size={17} />
-          Back to Beauty
+          Back to {industry?.name ?? "Industry"}
         </button>
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <p className="text-sm font-bold text-toss-blue">Beauty / {company.category}</p>
+            <p className="text-sm font-bold text-toss-blue">{industry?.name ?? "Industry"} / {company.category}</p>
             <h2 className="mt-1 text-4xl font-extrabold sm:text-5xl">{company.name}</h2>
             <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-gray">{company.description}</p>
           </div>
@@ -506,6 +801,50 @@ function TinyStat({ label, value, tone = "text-toss-ink" }: { label: string; val
     <div className="rounded-lg bg-[#f7f9fc] px-4 py-3 ring-1 ring-[#dde2ea]">
       <p className="text-xs font-bold uppercase text-toss-gray">{label}</p>
       <p className={`mt-1 text-lg font-extrabold ${tone}`}>{value}</p>
+    </div>
+  );
+}
+
+function MetricRow({ label, value, tone = "text-toss-ink" }: { label: string; value: string; tone?: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="font-semibold text-toss-gray">{label}</span>
+      <span className={`font-extrabold ${tone}`}>{value}</span>
+    </div>
+  );
+}
+
+function IndustrySummaryList({
+  currency,
+  industryRows,
+  usdKrw
+}: {
+  currency: DisplayCurrency;
+  industryRows: Array<ReturnType<typeof buildIndustryRow>>;
+  usdKrw: number;
+}) {
+  return (
+    <div className="space-y-3">
+      {industryRows.map((industry) => {
+        const IndustryIcon = industry.icon;
+        return (
+          <div key={industry.id} className="flex items-center justify-between gap-4 rounded-lg bg-[#f7f9fc] p-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-white text-toss-blue ring-1 ring-[#dde2ea]">
+                <IndustryIcon size={19} />
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-extrabold">{industry.name}</p>
+                <p className="text-xs font-semibold text-toss-gray">{industry.companyCount} companies · {industry.productCount} products</p>
+              </div>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="text-sm font-extrabold">{formatMoneyFromUsd(industry.averageRevenue, currency, usdKrw)}</p>
+              <p className={`text-xs font-bold ${trendTone(industry.recent3Growth)}`}>{formatPercent(industry.recent3Growth)}</p>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
