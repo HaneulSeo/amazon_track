@@ -444,7 +444,7 @@ const columnAliases: Record<CanonicalColumn, string[]> = {
   brand: ["brand"],
   category: ["category"],
   price: ["price"],
-  monthly_sales: ["monthly sales", "unit sales", "estimated sales", "sales"],
+  monthly_sales: ["monthly sales", "unit sales", "units sold", "estimated sales", "sales"],
   monthly_revenue: ["monthly revenue", "revenue", "estimated revenue"],
   bsr: ["rank", "bsr", "sales rank"],
   reviews: ["reviews", "review count"],
