@@ -154,14 +154,11 @@ export default function App() {
     return (
       <Shell currency={currency} fxAsOf={fxAsOf} setCurrency={setCurrency} usdKrw={usdKrw}>
         <MainDashboard
-          currency={currency}
-          industryRows={industryRows}
           onOpenAmazon={() => {
             setWorkspace("amazon");
             setActiveIndustry(null);
             setSelectedCompany(null);
           }}
-          usdKrw={usdKrw}
         />
       </Shell>
     );
@@ -305,41 +302,15 @@ function TopBar({
 }
 
 function MainDashboard({
-  currency,
-  industryRows,
-  onOpenAmazon,
-  usdKrw
+  onOpenAmazon
 }: {
-  currency: DisplayCurrency;
-  industryRows: Array<ReturnType<typeof buildIndustryRow>>;
   onOpenAmazon: () => void;
-  usdKrw: number;
 }) {
-  const liveIndustryCount = industryRows.filter((row) => row.status === "Live").length;
-
   return (
-    <div className="space-y-5">
-      <section className="rounded-lg bg-white p-6 shadow-soft ring-1 ring-[#dde2ea] sm:p-7">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="text-sm font-bold text-toss-blue">Main Dashboard</p>
-            <h2 className="mt-1 text-4xl font-extrabold sm:text-5xl">Market Lens</h2>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-gray">
-              여러 산업군과 데이터 소스를 한 곳에서 관리하는 상위 대시보드입니다. 각 분석 모듈은 별도 섹션으로 들어가서 볼 수 있습니다.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <TinyStat label="Modules" value="1" />
-            <TinyStat label="Industries" value={String(liveIndustryCount)} />
-            <TinyStat label="Companies" value={String(companies.length)} />
-            <TinyStat label="Latest tracked" value={formatMoneyFromUsd(summaryData.latestRevenue, currency, usdKrw)} />
-          </div>
-        </div>
-      </section>
-
-      <section className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+    <div className="grid min-h-[calc(100vh-120px)] place-items-center">
+      <section className="w-full max-w-xl">
         <button
-          className="group rounded-lg bg-white p-5 text-left shadow-soft ring-1 ring-[#dde2ea] transition hover:-translate-y-0.5 hover:ring-toss-blue"
+          className="group w-full rounded-lg bg-white p-7 text-left shadow-soft ring-1 ring-[#dde2ea] transition hover:-translate-y-0.5 hover:ring-toss-blue sm:p-8"
           type="button"
           onClick={onOpenAmazon}
         >
@@ -349,28 +320,16 @@ function MainDashboard({
             </div>
             <ChevronRight className="text-toss-gray transition group-hover:translate-x-1 group-hover:text-toss-blue" />
           </div>
-          <p className="mt-6 text-sm font-bold text-toss-blue">Data Module</p>
-          <h3 className="mt-1 text-2xl font-extrabold">Amazon Tracker</h3>
+          <p className="mt-8 text-sm font-bold text-toss-blue">Data Module</p>
+          <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">Amazon Tracker</h2>
           <p className="mt-3 text-sm font-medium leading-6 text-toss-gray">
             Amazon / Jungle Scout CSV 기반으로 산업군, 기업, ASIN 단위 매출 추이를 분석합니다.
           </p>
-          <div className="mt-5 grid grid-cols-3 gap-3">
-            <TinyStat label="Industries" value={String(liveIndustryCount)} />
-            <TinyStat label="Products" value={String(summaryData.productCount)} />
-            <TinyStat label="3M Growth" value={formatPercent(summaryData.recent3Growth)} tone={trendTone(summaryData.recent3Growth)} />
+          <div className="mt-7 inline-flex items-center gap-2 text-sm font-extrabold text-toss-blue">
+            Open tracker
+            <ChevronRight className="transition group-hover:translate-x-1" size={17} />
           </div>
         </button>
-
-        <div className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-bold text-toss-blue">Portfolio Snapshot</p>
-              <h3 className="mt-1 text-xl font-extrabold">Tracked industry movement</h3>
-            </div>
-            <span className="rounded-md bg-[#eef5ff] px-3 py-1 text-xs font-bold text-toss-blue">Overview</span>
-          </div>
-          <IndustrySummaryList industryRows={industryRows} currency={currency} usdKrw={usdKrw} />
-        </div>
       </section>
     </div>
   );
