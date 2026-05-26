@@ -269,8 +269,8 @@ function TopBar({
             <LineChart size={21} />
           </div>
           <div>
-            <p className="text-sm font-bold text-toss-gray">Market Lens</p>
-            <h1 className="text-xl font-extrabold sm:text-2xl">Revenue Intelligence Dashboard</h1>
+            <p className="text-sm font-bold text-toss-gray">Dashboard</p>
+            <h1 className="text-xl font-extrabold sm:text-2xl">Revenue Tracker</h1>
           </div>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -278,7 +278,7 @@ function TopBar({
             <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-toss-gray" size={17} />
             <input
               className="h-10 w-full rounded-md border-0 bg-[#f4f6fa] pl-9 pr-4 text-sm outline-none ring-1 ring-[#dde2ea] focus:ring-2 focus:ring-toss-blue sm:w-72"
-              placeholder="Search dashboard, industry, company"
+              placeholder="Search"
             />
           </div>
           <div className="flex items-center rounded-md bg-[#f4f6fa] p-1 ring-1 ring-[#dde2ea]">

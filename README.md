@@ -1,6 +1,6 @@
 # Mighty Patch Revenue Tracker
 
-Amazon / Jungle Scout CSV exports are transformed into a Vercel-ready market intelligence dashboard. The main dashboard keeps analysis modules separate; Amazon Tracker is one module inside it. Inside Amazon Tracker, users first see all tracked industries, then open an industry to view company summaries, then open a company such as Mighty Patch for detailed revenue, product, benchmark, and raw-data analysis.
+Amazon / Jungle Scout CSV exports are transformed into a Vercel-ready tracker dashboard. The main screen is intentionally minimal and shows Amazon Tracker as the entry module. Inside Amazon Tracker, users first see all tracked industries, then open an industry to view company summaries, then open a company such as Mighty Patch for detailed revenue, product, benchmark, and raw-data analysis.
 
 ## Data Location
 
@@ -71,7 +71,7 @@ Generated files:
 
 ## App Structure
 
-- Main dashboard: shows high-level modules and keeps Amazon Tracker as one section.
+- Main dashboard: shows only the Amazon Tracker entry module.
 - Amazon Tracker overview: shows all tracked industries and average movement before selecting a sector.
 - Industry pages: show company summaries inside sectors such as Beauty, Supplements, Food & Grocery, and Home.
 - Company cards: Mighty Patch currently lives under Beauty and opens a dedicated company workspace.
