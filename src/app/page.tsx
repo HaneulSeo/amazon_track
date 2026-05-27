@@ -31,7 +31,6 @@ import {
   getCompanyMonthly,
   getCompanyProductFamilies,
   getCompanySources,
-  getCompanyTradeMonthly,
   getCompanyTradeCountryMonthly,
   getIndustry,
   industries,
@@ -41,7 +40,7 @@ import {
   regionalExposure,
   toBrandTrend
 } from "@/lib/dashboard-data";
-import { type DisplayCurrency, formatMoneyFromKrw, formatMoneyFromUsd, formatNumber, formatPercent, shortProductName, trendTone } from "@/lib/format";
+import { type DisplayCurrency, formatMoneyFromKrw, formatMoneyFromUsd, formatNumber, formatPercent, productLabel, trendTone } from "@/lib/format";
 import type { LucideIcon } from "lucide-react";
 import type { DashboardCompany, DashboardIndustry } from "@/lib/types";
 
@@ -726,57 +725,9 @@ function ProductsTab({
   const familyRows = getCompanyProductFamilies(company.company)
     .slice()
     .sort((a, b) => (b.total_revenue ?? 0) - (a.total_revenue ?? 0));
-  const isSamyang = company.company === "samyang";
-  const familyMonths = [...new Set(familyRows.map((row) => row.month))].sort();
-  const latestFamilyMonth = familyMonths.at(-1) ?? company.latest_month ?? null;
-  const familySummary = isSamyang && latestFamilyMonth
-    ? [
-        "Buldak ramen",
-        "Buldak sauce / bundle"
-      ].map((family) => {
-        const rows = familyRows.filter((row) => row.product_family === family && row.month === latestFamilyMonth);
-        const row = rows[0] ?? null;
-        return {
-          family,
-          revenue: row?.total_revenue ?? null,
-          units: row?.total_units ?? null,
-          share: row?.revenue_share_in_company ?? null,
-          mom: row?.mom_revenue_growth ?? null,
-          rolling3m: row?.rolling_3m_revenue ?? null,
-          hasData: Boolean(row)
-        };
-      })
-    : [];
 
   return (
     <div className="space-y-5">
-      {isSamyang ? (
-        <SectionCard eyebrow="Product Line Split" title="Ramen vs sauce / bundle">
-          <div className="space-y-4">
-            <p className="text-sm leading-6 text-toss-gray">
-              Amazon US는 미국 Buldak 수요 proxy로 보고, 라면류와 소스·번들류를 분리해서 수출 데이터와 같은 축에서 비교합니다.
-            </p>
-            <div className="grid gap-3 md:grid-cols-2">
-              {familySummary.map((item) => (
-                <div key={item.family} className="rounded-lg bg-toss-wash p-4">
-                  <p className="text-xs font-bold uppercase text-toss-gray">{item.family}</p>
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    <MiniCard
-                      label="Latest revenue"
-                      value={formatMoneyFromUsd(item.revenue, currency, usdKrw, false)}
-                      helper={item.hasData ? (latestFamilyMonth ?? "-") : "no current Amazon ASINs"}
-                    />
-                    <MiniCard label="Revenue share" value={item.share === null ? "-" : `${item.share.toFixed(1)}%`} helper="company mix" />
-                    <MiniCard label="Rolling 3M" value={formatMoneyFromUsd(item.rolling3m, currency, usdKrw, false)} helper="trend window" />
-                    <MiniCard label="MoM" value={formatPercent(item.mom)} helper="latest month" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </SectionCard>
-      ) : null}
-
       <SectionCard eyebrow="Product Family Analysis" title="Family mix">
         {familyRows.length ? (
           <div className="overflow-auto rounded-lg ring-1 ring-toss-line">
@@ -831,7 +782,7 @@ function ProductsTab({
                   <tr key={`${row.asin}-${row.month}`} className="hover:bg-toss-wash/70">
                     <td className="px-4 py-3 font-bold">{index + 1}</td>
                     <td className="px-4 py-3 text-toss-gray">{row.asin}</td>
-                    <td className="px-4 py-3">{shortProductName(row.product_name, row.asin)}</td>
+                    <td className="px-4 py-3">{productLabel(row.product_name, row.asin)}</td>
                     <td className="px-4 py-3">{row.product_family}</td>
                     <td className="px-4 py-3 text-right font-semibold">{formatMoneyFromUsd(row.revenue, currency, usdKrw, false)}</td>
                     <td className="px-4 py-3 text-right">{formatNumber(row.units, false)}</td>
@@ -862,9 +813,7 @@ function BenchmarkTab({
   const exposure = regionalExposure.find((row) => row.company === company.company);
   const coverage = getCompanyCoverage(company.company);
   const quarterlyRows = getCompanyQuarterlyComparison(company.company);
-  const tradeRows = getCompanyTradeMonthly(company.company);
   const countryRows = getCompanyTradeCountryMonthly(company.company);
-  const isSamyang = company.company === "samyang";
   const countryQuarterRows = [...new Set(countryRows.map((row) => row.quarter))]
     .sort((a, b) => a.localeCompare(b))
     .slice(-8)
@@ -879,40 +828,9 @@ function BenchmarkTab({
       };
     });
   const latestCountryQuarter = countryQuarterRows.at(-1) ?? null;
-  const lineBridgeRows = isSamyang
-    ? ["ramen", "sauce"].map((line) => {
-        const totalRows = tradeRows.filter((row) => row.product_line === line && row.country_scope === "total");
-        const latestMonth = totalRows.map((row) => row.month).sort().at(-1) ?? null;
-        const findValue = (country: string) => tradeRows.find((row) => row.product_line === line && row.country_scope === country && row.month === latestMonth) ?? null;
-        const total = latestMonth ? findValue("total") : null;
-        const us = latestMonth ? findValue("us") : null;
-        const cn = latestMonth ? findValue("cn") : null;
-        return {
-          line,
-          latestMonth,
-          total: total?.export_value_krw ?? null,
-          us: us?.export_value_krw ?? null,
-          cn: cn?.export_value_krw ?? null,
-          weight: total?.export_weight_kg ?? null
-        };
-      })
-    : [];
 
   return (
     <div className="space-y-5">
-      {isSamyang ? (
-        <SectionCard eyebrow="Reading Guide" title="Amazon, DART, and TRASS bridge">
-          <div className="grid gap-3 lg:grid-cols-3">
-            <MiniCard label="Amazon US" value="Buldak proxy" helper="U.S. demand signal" />
-            <MiniCard label="DART" value="Company scale" helper="total revenue bridge" />
-            <MiniCard label="TRASS" value="Country export flow" helper="total / US / CN split" />
-          </div>
-          <p className="mt-4 text-sm leading-6 text-toss-gray">
-            미국 Amazon은 Buldak 라면 수요만 보여주고, 전체 매출은 DART와 TRASS 수출 흐름을 같이 봐야 합니다. 중국 데이터가 붙으면 CN 축을 같은 표준으로 이어서 비교할 수 있습니다.
-          </p>
-        </SectionCard>
-      ) : null}
-
       <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
         <SectionCard eyebrow="Regional Exposure" title="Revenue mix assumption">
           {exposure ? (
@@ -946,7 +864,7 @@ function BenchmarkTab({
         </SectionCard>
       </div>
 
-      <SectionCard eyebrow="Quarterly Comparison" title={isSamyang ? "DART vs Amazon US vs TRASS bridge" : "DART vs Amazon US"}>
+      <SectionCard eyebrow="Quarterly Comparison" title="DART vs Amazon US">
         {quarterlyRows.length ? (
           <QuarterlyComparison rows={quarterlyRows} baseQuarter={quarterlyRows.find((row) => row.externalRevenueEokKrw !== null && row.trackedRevenueUsd !== null)?.quarter ?? null} currency={currency} usdKrw={usdKrw} />
         ) : (
@@ -954,42 +872,7 @@ function BenchmarkTab({
         )}
       </SectionCard>
 
-      {isSamyang ? (
-        <SectionCard eyebrow="Product Line Bridge" title="Ramen vs sauce export line">
-          {lineBridgeRows.length ? (
-            <div className="overflow-auto rounded-lg ring-1 ring-toss-line">
-              <table className="min-w-[860px] w-full bg-white text-left text-sm">
-                <thead className="bg-toss-wash text-xs uppercase text-toss-gray">
-                  <tr>
-                    <th className="px-4 py-3">Line</th>
-                    <th className="px-4 py-3">Latest month</th>
-                    <th className="px-4 py-3 text-right">Total KRW</th>
-                    <th className="px-4 py-3 text-right">US KRW</th>
-                    <th className="px-4 py-3 text-right">CN KRW</th>
-                    <th className="px-4 py-3 text-right">Weight</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-toss-line">
-                  {lineBridgeRows.map((row) => (
-                    <tr key={row.line} className="hover:bg-toss-wash/70">
-                      <td className="px-4 py-3 font-semibold">{row.line === "ramen" ? "Buldak ramen" : "Buldak sauce"}</td>
-                      <td className="px-4 py-3 text-toss-gray">{row.latestMonth ?? "-"}</td>
-                      <td className="px-4 py-3 text-right font-semibold">{formatMoneyFromKrw(row.total, currency, usdKrw, false)}</td>
-                      <td className="px-4 py-3 text-right">{formatMoneyFromKrw(row.us, currency, usdKrw, false)}</td>
-                      <td className="px-4 py-3 text-right">{formatMoneyFromKrw(row.cn, currency, usdKrw, false)}</td>
-                      <td className="px-4 py-3 text-right">{formatNumber(row.weight, false)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <EmptyState message="Samyang line bridge 데이터를 아직 읽을 수 없습니다." />
-          )}
-        </SectionCard>
-      ) : null}
-
-      <SectionCard eyebrow="Country Trend" title={isSamyang ? "TRASS export trend by country" : "Export trend by country"}>
+      <SectionCard eyebrow="Country Trend" title="Export trend by country">
         {countryQuarterRows.length ? (
           <div className="space-y-4">
             {latestCountryQuarter ? (

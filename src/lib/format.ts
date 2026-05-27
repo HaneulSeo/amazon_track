@@ -69,6 +69,15 @@ export function trendTone(value: number | null | undefined): string {
 }
 
 export function shortProductName(name: string, asin: string): string {
-  if (!name || name === `Mighty Patch ${asin}`) return asin;
+  const normalized = (name ?? "").trim();
+  if (!normalized) return "품명 미확인";
+  if (/^ASIN\s+/i.test(normalized)) return "품명 미확인";
+  if (normalized === asin) return "품명 미확인";
+  if (normalized === `Mighty Patch ${asin}`) return "품명 미확인";
+  if (/^unknown product$/i.test(normalized)) return "품명 미확인";
   return name.length > 46 ? `${name.slice(0, 43)}...` : name;
+}
+
+export function productLabel(name: string, asin: string): string {
+  return `${shortProductName(name, asin)} / ${asin}`;
 }

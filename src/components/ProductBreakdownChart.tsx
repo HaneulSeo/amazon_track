@@ -2,7 +2,7 @@
 
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { Product, ProductTrend } from "@/lib/types";
-import { type DisplayCurrency, formatMoneyFromUsd, shortProductName } from "@/lib/format";
+import { type DisplayCurrency, formatMoneyFromUsd, productLabel } from "@/lib/format";
 
 type ProductBreakdownChartProps = {
   products: Product[];
@@ -17,7 +17,7 @@ const colors = ["#3182f6", "#00a661", "#f59f00", "#e64980", "#7048e8", "#12b886"
 export function ProductBreakdownChart({ products, trends, latestMonth, currency, usdKrw }: ProductBreakdownChartProps) {
   const topProducts = products.slice(0, 8);
   const topIds = new Set(topProducts.map((product) => product.productId));
-  const labels = new Map(topProducts.map((product) => [product.productId, shortProductName(product.productName, product.asin)]));
+  const labels = new Map(topProducts.map((product) => [product.productId, productLabel(product.productName, product.asin)]));
   const months = [...new Set(trends.map((trend) => trend.month))].sort();
 
   const stackedData = months.map((month) => {
@@ -38,7 +38,7 @@ export function ProductBreakdownChart({ products, trends, latestMonth, currency,
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 12)
     .map((row) => ({
-      name: shortProductName(row.productName, row.asin),
+      name: productLabel(row.productName, row.asin),
       revenue: row.revenue,
       share: row.revenueShare
     }));

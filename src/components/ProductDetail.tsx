@@ -13,7 +13,7 @@ import {
   YAxis
 } from "recharts";
 import type { Product, ProductTrend } from "@/lib/types";
-import { type DisplayCurrency, formatMoneyFromUsd, formatNumber, formatPercent, shortProductName, trendTone } from "@/lib/format";
+import { type DisplayCurrency, formatMoneyFromUsd, formatNumber, formatPercent, productLabel, trendTone } from "@/lib/format";
 
 type ProductDetailProps = {
   products: Product[];
@@ -45,7 +45,7 @@ export function ProductDetail({ products, trends, currency, usdKrw }: ProductDet
           >
             {products.map((product) => (
               <option key={product.productId} value={product.productId}>
-                {shortProductName(product.productName, product.asin)} · {product.asin}
+                {productLabel(product.productName, product.asin)}
               </option>
             ))}
           </select>

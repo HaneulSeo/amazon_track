@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Download, Search } from "lucide-react";
 import type { ProductTrend } from "@/lib/types";
-import { type DisplayCurrency, formatMoneyFromUsd, formatNumber } from "@/lib/format";
+import { type DisplayCurrency, formatMoneyFromUsd, formatNumber, productLabel } from "@/lib/format";
 
 type ProductTableProps = {
   rows: ProductTrend[];
@@ -91,7 +91,7 @@ export function ProductTable({ rows, currency, usdKrw }: ProductTableProps) {
             <tr>
               <th className="px-4 py-3">Month</th>
               <th className="px-4 py-3">ASIN</th>
-              <th className="px-4 py-3">Product</th>
+              <th className="px-4 py-3">Product / ASIN</th>
               <th className="px-4 py-3 text-right">Revenue</th>
               <th className="px-4 py-3 text-right">Units</th>
               <th className="px-4 py-3 text-right">Price</th>
@@ -105,7 +105,7 @@ export function ProductTable({ rows, currency, usdKrw }: ProductTableProps) {
               <tr key={`${row.productId}-${row.month}`} className="hover:bg-toss-wash/70">
                 <td className="px-4 py-3 font-semibold">{row.month}</td>
                 <td className="px-4 py-3 text-toss-gray">{row.asin}</td>
-                <td className="px-4 py-3">{row.productName}</td>
+                <td className="px-4 py-3">{productLabel(row.productName, row.asin)}</td>
                 <td className="px-4 py-3 text-right font-semibold">{formatMoneyFromUsd(row.revenue, currency, usdKrw, false)}</td>
                 <td className="px-4 py-3 text-right">{formatNumber(row.units, false)}</td>
                 <td className="px-4 py-3 text-right">{row.avgPrice === null ? "-" : `$${row.avgPrice.toFixed(2)}`}</td>
