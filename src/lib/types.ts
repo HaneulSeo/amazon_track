@@ -220,6 +220,25 @@ export type FamilyMonthlyLike = {
   data_quality_warnings: string[];
 };
 
+export type CompanyMonthlyRow = {
+  company: string;
+  month: string;
+  total_revenue: number | null;
+  total_units: number | null;
+  asin_count: number;
+  product_count: number;
+  family_count: number;
+  avg_price: number | null;
+  avg_bsr: number | null;
+  reviews: number | null;
+  review_change: number | null;
+  mom_revenue_growth: number | null;
+  yoy_revenue_growth: number | null;
+  rolling_3m_revenue: number | null;
+  rolling_6m_revenue: number | null;
+  data_quality_warnings: string[];
+};
+
 export type SourceGap = {
   company: string;
   source_name: string;
@@ -286,6 +305,19 @@ export type DartQuarterlyRevenueRow = {
   is_derived: boolean;
 };
 
+export type StockMonthlyRow = {
+  company: string;
+  company_label: string;
+  stock_ticker: string;
+  date: string;
+  month: string;
+  close: number | null;
+  adj_close: number | null;
+  volume: number | null;
+  month_return: number | null;
+  index_100: number | null;
+};
+
 export type DashboardData = {
   generated_at: string;
   summary: Record<string, unknown>;
@@ -334,6 +366,7 @@ export type DashboardData = {
   tradeCountryMonthly: CountryTradeMonthlyRow[];
   dartQuarterlyRevenue: DartQuarterlyRevenueRow[];
   quarterlyComparison: QuarterlyComparison[];
+  companyStockMonthly: StockMonthlyRow[];
   tables: {
     amazon_us_monthly: MonthlyProductLike[];
     company_monthly_proxy: Array<{
@@ -377,5 +410,6 @@ export type DashboardData = {
     trass_country_monthly?: CountryTradeMonthlyRow[];
     dart_quarterly_revenue?: DartQuarterlyRevenueRow[];
     quarterly_comparison?: QuarterlyComparison[];
+    company_stock_monthly?: StockMonthlyRow[];
   };
 };

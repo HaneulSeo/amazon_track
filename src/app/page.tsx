@@ -21,11 +21,13 @@ import {
 import { BrandTrendChart } from "@/components/BrandTrendChart";
 import { QuarterlyComparison } from "@/components/QuarterlyComparison";
 import { KpiCard } from "@/components/KpiCard";
+import { RevenueStockComparisonChart } from "@/components/RevenueStockComparisonChart";
 import { SectionCard } from "@/components/SectionCard";
 import {
   companies,
   companyCoverageScore,
   getCompany,
+  getCompanyStockMonthly,
   getCompanyQuarterlyComparison,
   getCompanyCoverage,
   getCompanyMonthly,
@@ -812,8 +814,10 @@ function BenchmarkTab({
 }) {
   const exposure = regionalExposure.find((row) => row.company === company.company);
   const coverage = getCompanyCoverage(company.company);
+  const companyMonthly = getCompanyMonthly(company.company);
   const quarterlyRows = getCompanyQuarterlyComparison(company.company);
   const countryRows = getCompanyTradeCountryMonthly(company.company);
+  const stockRows = getCompanyStockMonthly(company.company);
   const countryQuarterRows = [...new Set(countryRows.map((row) => row.quarter))]
     .sort((a, b) => a.localeCompare(b))
     .slice(-8)
@@ -869,6 +873,20 @@ function BenchmarkTab({
           <QuarterlyComparison rows={quarterlyRows} baseQuarter={quarterlyRows.find((row) => row.externalRevenueEokKrw !== null && row.trackedRevenueUsd !== null)?.quarter ?? null} currency={currency} usdKrw={usdKrw} />
         ) : (
           <EmptyState message="DART 분기 비교 데이터가 아직 없습니다." />
+        )}
+      </SectionCard>
+
+      <SectionCard eyebrow="Stock Comparison" title="Revenue vs stock trend">
+        {stockRows.length && companyMonthly.length ? (
+          <RevenueStockComparisonChart
+            companyLabel={company.label}
+            revenueRows={companyMonthly}
+            stockRows={stockRows}
+            currency={currency}
+            usdKrw={usdKrw}
+          />
+        ) : (
+          <EmptyState message="주가 추이 또는 매출 추이가 아직 충분하지 않습니다." />
         )}
       </SectionCard>
 

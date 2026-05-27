@@ -10,6 +10,7 @@ import type {
   MonthlyProductLike,
   QuarterlyComparison,
   SourceGap,
+  StockMonthlyRow,
   TradeQuarterlyRow
 } from "./types";
 
@@ -29,6 +30,7 @@ export const tradeQuarterly = dashboardData.tradeQuarterly;
 export const tradeCountryMonthly = dashboardData.tradeCountryMonthly;
 export const dartQuarterlyRevenue = dashboardData.dartQuarterlyRevenue;
 export const quarterlyComparison = dashboardData.quarterlyComparison;
+export const companyStockMonthly = dashboardData.companyStockMonthly;
 export const sourceGapMap = dashboardData.tables.source_gap_map;
 export const companyCoverageScore = dashboardData.tables.company_coverage_score;
 export const companyMonthlyProxy = dashboardData.tables.company_monthly_proxy;
@@ -79,6 +81,10 @@ export function getCompanyTradeMonthly(companyId: string) {
 
 export function getCompanyDartQuarterly(companyId: string): DartQuarterlyRevenueRow[] {
   return dartQuarterlyRevenue.filter((row) => row.company === companyId);
+}
+
+export function getCompanyStockMonthly(companyId: string): StockMonthlyRow[] {
+  return companyStockMonthly.filter((row) => row.company === companyId);
 }
 
 export function toBrandTrend(rows: Array<{

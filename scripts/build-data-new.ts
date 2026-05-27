@@ -28,6 +28,8 @@ type RawFileMeta = {
 };
 
 type DailyRecord = RawFileMeta & {
+  brand: string;
+  category: string;
   product_name: string;
   product_family: string;
   family_confidence: "high" | "medium" | "low";
@@ -48,6 +50,8 @@ type MonthlyProductRow = {
   company: Company;
   source_folder: string;
   asin: string;
+  brand: string;
+  category: string;
   product_name: string;
   product_family: string;
   family_confidence: "high" | "medium" | "low";
@@ -90,6 +94,15 @@ type CompanyMonthlyRow = {
   rolling_3m_revenue: number | null;
   rolling_6m_revenue: number | null;
   data_quality_warnings: string[];
+};
+
+type ProductCatalogEntry = {
+  company: Company;
+  asin: string;
+  product_name: string;
+  brand: string;
+  category: string;
+  source_file: string;
 };
 
 type FamilyMonthlyRow = {
@@ -151,6 +164,19 @@ type CountryTradeMonthlyRow = {
   export_value_usd: number | null;
   export_value_krw: number | null;
   export_weight_kg: number | null;
+};
+
+type StockMonthlyRow = {
+  company: Company;
+  company_label: string;
+  stock_ticker: string;
+  date: string;
+  month: string;
+  close: number | null;
+  adj_close: number | null;
+  volume: number | null;
+  month_return: number | null;
+  index_100: number | null;
 };
 
 type DartQuarterlyRevenueRow = {
@@ -264,6 +290,7 @@ type ExistingDashboardJson = {
   regionalExposure?: unknown[];
   missingDataChecklist?: unknown[];
   methodologyNotes?: unknown[];
+  companyStockMonthly?: StockMonthlyRow[];
   tables?: {
     amazon_us_monthly?: MonthlyProductRow[];
     company_monthly_proxy?: CompanyMonthlyRow[];
@@ -275,6 +302,7 @@ type ExistingDashboardJson = {
     trass_country_monthly?: CountryTradeMonthlyRow[];
     dart_quarterly_revenue?: DartQuarterlyRevenueRow[];
     quarterly_comparison?: QuarterlyComparisonRow[];
+    company_stock_monthly?: StockMonthlyRow[];
   };
 };
 
@@ -284,6 +312,7 @@ const processedRoot = path.join(root, "data", "processed");
 const publicDataRoot = path.join(root, "public", "data");
 const exposureConfigPath = path.join(root, "data", "config", "company_exposure.yml");
 const productFamilyRulesPath = path.join(root, "data", "config", "product_family_rules.yml");
+const productCatalogPath = path.join(root, "data", "config", "product_catalog.csv");
 const companyIndustryMeta: Record<Company, CompanyIndustryMeta> = {
   coway: {
     id: "home-appliance-rental",
@@ -798,6 +827,59 @@ function loadProductFamilyRules(): ProductFamilyRules {
 
 const productFamilyRules = loadProductFamilyRules();
 
+function loadProductCatalog(): Map<string, ProductCatalogEntry> {
+  const rows = readCsvIfExists<ProductCatalogEntry>(productCatalogPath);
+  const map = new Map<string, ProductCatalogEntry>();
+  for (const row of rows) {
+    const company = row.company as Company;
+    if (company !== "coway" && company !== "samyang" && company !== "tnl") continue;
+    const asin = normalizeText(row.asin).toUpperCase();
+    if (!asin) continue;
+    map.set(`${company}__${asin}`, {
+      company,
+      asin,
+      product_name: normalizeText(row.product_name),
+      brand: normalizeText(row.brand),
+      category: normalizeText(row.category),
+      source_file: normalizeText(row.source_file)
+    });
+  }
+  return map;
+}
+
+const productCatalog = loadProductCatalog();
+
+function loadProcessedStockData(): StockMonthlyRow[] {
+  const stockPath = path.join(processedRoot, "company_stock_monthly.csv");
+  if (!fs.existsSync(stockPath)) {
+    const scriptPath = path.join(root, "scripts", "fetch_company_stock_data.py");
+    const result = spawnSync("python3", [scriptPath], {
+      cwd: root,
+      stdio: "inherit"
+    });
+    if (result.status !== 0) {
+      const existing = loadExistingDashboardData();
+      if (existing?.tables?.company_stock_monthly) return existing.tables.company_stock_monthly;
+      return [];
+    }
+  }
+
+  return readCsvIfExists<StockMonthlyRow>(stockPath).map((row) => ({
+    company: row.company as Company,
+    company_label: normalizeText(row.company_label),
+    stock_ticker: normalizeText(row.stock_ticker),
+    date: normalizeText(row.date),
+    month: normalizeText(row.month),
+    close: parseNumber(row.close),
+    adj_close: parseNumber(row.adj_close),
+    volume: parseNumber(row.volume),
+    month_return: parseNumber(row.month_return),
+    index_100: parseNumber(row.index_100)
+  }));
+}
+
+const companyStockMonthly = loadProcessedStockData();
+
 function loadExistingDashboardData(): ExistingDashboardJson | null {
   const existingPath = path.join(publicDataRoot, "dashboard_data.json");
   if (!fs.existsSync(existingPath)) return null;
@@ -914,17 +996,21 @@ function inferProductFamily(company: Company, productName: string, asin: string)
     return { family: "Other", confidence: "low" };
   }
   if (company === "samyang") {
-    const asinKey = asin.toUpperCase();
-    const sauceBundleAsins = new Set(productFamilyRules.samyang.sauce_bundle_asins.map((item) => item.toUpperCase()));
-    if (sauceBundleAsins.has(asinKey)) return { family: "Buldak sauce / bundle", confidence: "high" };
-    if (/sauce|topokki|dumplings|chips|snack|frozen|bundle|variety pack|day \+ night|xl duo/.test(normalized)) {
-      return { family: "Buldak sauce / bundle", confidence: "high" };
-    }
-    const defaultLine = productFamilyRules.samyang.default_line.toLowerCase();
-    if (defaultLine === "ramen" && /carbonara|cream carbonara|quattro cheese|original|2x spicy|habanero lime|jjajang|yakisoba|buldak/.test(normalized)) {
-      return { family: "Buldak ramen", confidence: "medium" };
-    }
-    return { family: defaultLine === "ramen" ? "Buldak ramen" : defaultLine, confidence: "medium" };
+    const isSauce = /sauce|mayonnaise/.test(normalized);
+    const isSnack = /tteokbokki|chips|dumpling|dumplings|snack|frozen|rice cake/.test(normalized);
+    const isCarbonara = /carbonara|carbo|cream|cheese/.test(normalized) && /buldak|hot chicken|spicy chicken/.test(normalized);
+    const isCoreRamen =
+      /original|2x spicy|habanero lime|jjajang|yakisoba|swicy/.test(normalized) ||
+      (/buldak|hot chicken|fire chicken|spicy chicken|ramen|noodle/.test(normalized) && !isCarbonara && !isSauce && !isSnack);
+    const isOtherSamyang = /tangle|mep|linguine|pasta|alfredo|clam|cilantro|beef|bulgogi/.test(normalized);
+
+    if (isSauce) return { family: "Buldak sauce", confidence: "high" };
+    if (isSnack) return { family: "Buldak snack/frozen/other", confidence: "high" };
+    if (isCarbonara) return { family: "Buldak carbonara family", confidence: "high" };
+    if (isCoreRamen) return { family: "Buldak core ramen", confidence: "medium" };
+    if (isOtherSamyang) return { family: "Other Samyang", confidence: "medium" };
+    if (productFamilyRules.samyang.default_line.toLowerCase() === "ramen") return { family: "Buldak core ramen", confidence: "low" };
+    return { family: "Other Samyang", confidence: "low" };
   }
   if (/original|invisible|surface/.test(normalized)) return { family: "Mighty Patch core", confidence: "high" };
   if (/nose|chin|forehead|face|body/.test(normalized)) return { family: "Mighty Patch face/body extensions", confidence: "high" };
@@ -1011,6 +1097,7 @@ function normalizeFileRows(fileMeta: { company: Company; source_folder: string; 
 
   const output: DailyRecord[] = [];
   for (const [index, row] of rows.entries()) {
+    const catalogEntry = productCatalog.get(`${fileMeta.company}__${asin}`);
     const rawDate = columnMap.date ? row[columnMap.date] : undefined;
     const date = parseDateLike(rawDate) ?? parseDateLike(fileDateHint);
     const month = parseMonth(date);
@@ -1020,7 +1107,7 @@ function normalizeFileRows(fileMeta: { company: Company; source_folder: string; 
     const derivedRevenue = price !== null && monthlySales !== null ? price * monthlySales : null;
     const monthlyRevenue = explicitRevenue ?? derivedRevenue;
     const revenueSource: DailyRecord["revenue_source"] = explicitRevenue !== null ? "explicit" : derivedRevenue !== null ? "derived" : "missing";
-    const productName = `ASIN ${asin || fileMeta.file_name.replace(/\.csv$/i, "")}`;
+    const productName = catalogEntry?.product_name ?? `품명 미확인`;
     const family = inferProductFamily(fileMeta.company, productName, asin);
 
     const warnings: string[] = [];
@@ -1043,6 +1130,8 @@ function normalizeFileRows(fileMeta: { company: Company; source_folder: string; 
       file_path: fileMeta.file_path,
       asin: asin || fileMeta.file_name.replace(/\.csv$/i, ""),
       report_generated_at: reportGeneratedAt,
+      brand: catalogEntry?.brand ?? normalizeText(metadata["brand"] ?? ""),
+      category: catalogEntry?.category ?? normalizeText(metadata["category"] ?? ""),
       product_name: productName,
       product_family: family.family,
       family_confidence: family.confidence,
@@ -1333,6 +1422,8 @@ function buildProductMonthlyRows(records: DailyRecord[]): MonthlyProductRow[] {
       company,
       source_folder: sourceMeta.source_folder,
       asin,
+      brand: sourceMeta.brand,
+      category: sourceMeta.category,
       product_name: productName,
       product_family: productFamily,
       family_confidence: familyConfidence,
@@ -1817,6 +1908,7 @@ function writeOutputsFromExistingDashboard(existing: ExistingDashboardJson) {
   if (tables.trass_country_monthly) fs.writeFileSync(path.join(processedRoot, "trass_country_monthly.csv"), writeCsv(toCsvRows(tables.trass_country_monthly)));
   if (tables.dart_quarterly_revenue) fs.writeFileSync(path.join(processedRoot, "dart_quarterly_revenue.csv"), writeCsv(toCsvRows(tables.dart_quarterly_revenue)));
   if (tables.quarterly_comparison) fs.writeFileSync(path.join(processedRoot, "quarterly_comparison.csv"), writeCsv(toCsvRows(tables.quarterly_comparison)));
+  if (tables.company_stock_monthly) fs.writeFileSync(path.join(processedRoot, "company_stock_monthly.csv"), writeCsv(toCsvRows(tables.company_stock_monthly)));
 
   const refreshed = {
     ...existing,
@@ -1836,6 +1928,7 @@ function writeOutputsFromExistingDashboard(existing: ExistingDashboardJson) {
   if (tables.trass_country_monthly) console.log(`wrote data/processed/trass_country_monthly.csv (${tables.trass_country_monthly.length} rows)`);
   if (tables.dart_quarterly_revenue) console.log(`wrote data/processed/dart_quarterly_revenue.csv (${tables.dart_quarterly_revenue.length} rows)`);
   if (tables.quarterly_comparison) console.log(`wrote data/processed/quarterly_comparison.csv (${tables.quarterly_comparison.length} rows)`);
+  if (tables.company_stock_monthly) console.log(`wrote data/processed/company_stock_monthly.csv (${tables.company_stock_monthly.length} rows)`);
   console.log(`wrote public/data/dashboard_data.json`);
 }
 
@@ -1939,6 +2032,7 @@ function main() {
     trade_country_monthly_row_count: processedTrade.trassCountryMonthly.length,
     dart_quarterly_row_count: processedTrade.dartQuarterlyRevenue.length,
     quarterly_comparison_row_count: quarterlyComparison.length,
+    stock_monthly_row_count: companyStockMonthly.length,
     company_coverage: coverageOutput,
     date_range: {
       min: dailyRecords.map((row) => row.date).filter(Boolean).sort()[0] ?? null,
@@ -1966,6 +2060,7 @@ function main() {
     tradeCountryMonthly: processedTrade.trassCountryMonthly,
     dartQuarterlyRevenue: processedTrade.dartQuarterlyRevenue,
     quarterlyComparison,
+    companyStockMonthly,
     tables: {
       amazon_us_monthly: productMonthly,
       company_monthly_proxy: companyMonthly,
@@ -1976,7 +2071,8 @@ function main() {
       trass_trade_quarterly: processedTrade.trassTradeQuarterly,
       trass_country_monthly: processedTrade.trassCountryMonthly,
       dart_quarterly_revenue: processedTrade.dartQuarterlyRevenue,
-      quarterly_comparison: quarterlyComparison
+      quarterly_comparison: quarterlyComparison,
+      company_stock_monthly: companyStockMonthly
     }
   };
 
@@ -1993,6 +2089,7 @@ function main() {
   fs.writeFileSync(path.join(processedRoot, "trass_country_monthly.csv"), writeCsv(toCsvRows(processedTrade.trassCountryMonthly)));
   fs.writeFileSync(path.join(processedRoot, "dart_quarterly_revenue.csv"), writeCsv(toCsvRows(processedTrade.dartQuarterlyRevenue)));
   fs.writeFileSync(path.join(processedRoot, "quarterly_comparison.csv"), writeCsv(toCsvRows(quarterlyComparison)));
+  fs.writeFileSync(path.join(processedRoot, "company_stock_monthly.csv"), writeCsv(toCsvRows(companyStockMonthly)));
   fs.writeFileSync(path.join(publicDataRoot, "dashboard_data.json"), JSON.stringify(jsonPayload, null, 2));
 
   console.log(`wrote data/processed/amazon_us_monthly.csv (${productMonthly.length} rows)`);
@@ -2005,6 +2102,7 @@ function main() {
   console.log(`wrote data/processed/trass_country_monthly.csv (${processedTrade.trassCountryMonthly.length} rows)`);
   console.log(`wrote data/processed/dart_quarterly_revenue.csv (${processedTrade.dartQuarterlyRevenue.length} rows)`);
   console.log(`wrote data/processed/quarterly_comparison.csv (${quarterlyComparison.length} rows)`);
+  console.log(`wrote data/processed/company_stock_monthly.csv (${companyStockMonthly.length} rows)`);
   console.log(`wrote public/data/dashboard_data.json`);
 }
 
