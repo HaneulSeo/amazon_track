@@ -78,6 +78,8 @@ export function shortProductName(name: string, asin: string): string {
   return name.length > 46 ? `${name.slice(0, 43)}...` : name;
 }
 
-export function productLabel(name: string, asin: string): string {
-  return `${shortProductName(name, asin)} / ${asin}`;
+export function productLabel(name: string, family: string): string {
+  const cleaned = (family ?? "").trim();
+  const suffix = /^[A-Z0-9]{10}$/i.test(cleaned) ? cleaned.toUpperCase() : cleaned;
+  return `${shortProductName(name, "")} / ${suffix}`;
 }

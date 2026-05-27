@@ -785,7 +785,10 @@ function ProductsTab({
                   <tr key={`${row.asin}-${row.month}`} className="hover:bg-toss-wash/70">
                     <td className="px-4 py-3 font-bold">{index + 1}</td>
                     <td className="px-4 py-3 text-toss-gray">{row.asin}</td>
-                    <td className="px-4 py-3">{productLabel(row.product_name, row.asin)}</td>
+                    <td className="px-4 py-3">
+                      <div className="font-semibold leading-5">{productLabel(row.product_name, row.product_family)}</div>
+                      <div className="mt-1 text-xs font-medium text-toss-gray">{row.asin}</div>
+                    </td>
                     <td className="px-4 py-3">{row.product_family}</td>
                     <td className="px-4 py-3 text-right font-semibold">{formatMoneyFromUsd(row.revenue, currency, usdKrw, false)}</td>
                     <td className="px-4 py-3 text-right">{formatNumber(row.units, false)}</td>

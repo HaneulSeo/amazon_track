@@ -1,6 +1,6 @@
 "use client";
 
-import { Area, AreaChart, CartesianGrid, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 type DualIndexPoint = {
   period: string;
@@ -62,21 +62,15 @@ export function DualIndexTrendChart({
       </div>
       <div className="min-h-[300px] rounded-lg bg-toss-wash p-4">
         <ResponsiveContainer width="100%" height={260}>
-          <AreaChart data={chartData} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
-            <defs>
-              <linearGradient id="leftLineFill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="5%" stopColor="#3182f6" stopOpacity={0.24} />
-                <stop offset="95%" stopColor="#3182f6" stopOpacity={0.02} />
-              </linearGradient>
-            </defs>
+          <LineChart data={chartData} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="#e5e8eb" vertical={false} />
             <XAxis dataKey="period" tickLine={false} axisLine={false} minTickGap={24} />
             <YAxis tickLine={false} axisLine={false} width={48} />
             <Tooltip contentStyle={tooltipStyle()} />
             <Legend />
-            <Area type="monotone" dataKey="leftIndex" name={leftLabel} stroke="#3182f6" strokeWidth={3} fill="url(#leftLineFill)" />
-            <Line type="monotone" dataKey="rightIndex" name={rightLabel} stroke="#00a661" strokeWidth={3} dot={false} />
-          </AreaChart>
+            <Line type="monotone" dataKey="leftIndex" name={leftLabel} stroke="#3182f6" strokeWidth={3.5} dot={{ r: 2 }} activeDot={{ r: 4 }} />
+            <Line type="monotone" dataKey="rightIndex" name={rightLabel} stroke="#00a661" strokeWidth={3.5} strokeDasharray="6 4" dot={{ r: 2 }} activeDot={{ r: 4 }} />
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </div>
