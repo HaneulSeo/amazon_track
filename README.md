@@ -12,7 +12,13 @@ data/raw/amazon_us/samyang/*.csv
 data/raw/amazon_us/tnl/*.csv
 ```
 
-The build pipeline reads every CSV under `data/raw/amazon_us` and standardizes them by company, ASIN, and month. No login automation, web crawling, or account access automation is used.
+The build pipeline reads every CSV under `data/raw/amazon_us` and standardizes them by company, ASIN, and month. It also consumes processed DART / TRASS trade outputs when present. No login automation, web crawling, or account access automation is used.
+
+If you need to regenerate the DART and TRASS-derived files from the manual xlsx sources, set `DART_API_KEY` and run:
+
+```bash
+python3 scripts/extract_external_trade_data.py
+```
 
 ## Supported Columns
 
@@ -70,6 +76,11 @@ Generated files:
 - `data/processed/product_family_monthly.csv`
 - `data/processed/company_coverage_score.csv`
 - `data/processed/source_gap_map.csv`
+- `data/processed/trass_trade_monthly.csv`
+- `data/processed/trass_trade_quarterly.csv`
+- `data/processed/trass_country_monthly.csv`
+- `data/processed/dart_quarterly_revenue.csv`
+- `data/processed/quarterly_comparison.csv`
 - `public/data/dashboard_data.json`
 
 ## App Structure
@@ -96,8 +107,9 @@ To update the dashboard after changing CSVs, replace files in `data/raw`, run `n
 
 - Jungle Scout values are estimates, not audited actual revenue.
 - This is not total Amazon revenue; it only reflects the tracked ASINs in `data/raw`.
-- The quarterly benchmark is KRW 100M revenue from an external table. The dashboard compares it with tracked Amazon USD estimates using normalized trend indices because currency and business scope differ.
+- The quarterly benchmark now compares DART revenue in KRW against tracked Amazon US estimates, while TRASS country data is shown separately as export-momentum context.
 - FX conversion uses a current USD/KRW API response when available and falls back to a static rate if the API is unavailable.
 - If products are missing, brand-level revenue will be underestimated.
 - Currency conversion, Amazon fees, returns, wholesale revenue, ad spend, and margin are not included.
 - Product names are only as complete as the CSV export. If a CSV contains only ASIN metadata, the dashboard labels the product by ASIN.
+- `DART_API_KEY` must never be committed; keep it in your local shell or Vercel environment variables only.

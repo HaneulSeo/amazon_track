@@ -78,6 +78,7 @@ export type Summary = {
 };
 
 export type QuarterlyComparison = {
+  company: string;
   quarter: string;
   externalRevenueEokKrw: number;
   externalYoY: number | null;
@@ -229,6 +230,62 @@ export type SourceGap = {
   why_it_matters: string;
 };
 
+export type TradeMonthlyRow = {
+  company: string;
+  company_label: string;
+  product_line: string;
+  country_scope: string;
+  source_file: string;
+  source_descriptor: string;
+  month: string;
+  quarter: string;
+  export_value_usd: number | null;
+  export_value_krw: number | null;
+  export_weight_kg: number | null;
+  domestic_company_count: number | null;
+  foreign_counterparty_count: number | null;
+};
+
+export type TradeQuarterlyRow = {
+  company: string;
+  company_label: string;
+  product_line: string;
+  country_scope: string;
+  quarter: string;
+  export_value_usd: number | null;
+  export_value_krw: number | null;
+  export_weight_kg: number | null;
+  domestic_company_count: number | null;
+  foreign_counterparty_count: number | null;
+};
+
+export type CountryTradeMonthlyRow = {
+  company: string;
+  company_label: string;
+  country_scope: string;
+  month: string;
+  quarter: string;
+  export_value_usd: number | null;
+  export_value_krw: number | null;
+  export_weight_kg: number | null;
+};
+
+export type DartQuarterlyRevenueRow = {
+  company: string;
+  company_label: string;
+  corp_code: string;
+  stock_code: string;
+  year: number;
+  quarter: string;
+  period_type: "quarter" | "derived_q4";
+  report_code: string;
+  rcept_no: string;
+  source_url: string;
+  revenue_krw: number | null;
+  cumulative_revenue_krw: number | null;
+  is_derived: boolean;
+};
+
 export type DashboardData = {
   generated_at: string;
   summary: Record<string, unknown>;
@@ -272,6 +329,11 @@ export type DashboardData = {
     items: SourceGap[];
   }>;
   methodologyNotes: string[];
+  tradeMonthly: TradeMonthlyRow[];
+  tradeQuarterly: TradeQuarterlyRow[];
+  tradeCountryMonthly: CountryTradeMonthlyRow[];
+  dartQuarterlyRevenue: DartQuarterlyRevenueRow[];
+  quarterlyComparison: QuarterlyComparison[];
   tables: {
     amazon_us_monthly: MonthlyProductLike[];
     company_monthly_proxy: Array<{
@@ -310,5 +372,10 @@ export type DashboardData = {
       data_confidence: "high" | "medium" | "low";
     }>;
     source_gap_map: SourceGap[];
+    trass_trade_monthly?: TradeMonthlyRow[];
+    trass_trade_quarterly?: TradeQuarterlyRow[];
+    trass_country_monthly?: CountryTradeMonthlyRow[];
+    dart_quarterly_revenue?: DartQuarterlyRevenueRow[];
+    quarterly_comparison?: QuarterlyComparison[];
   };
 };

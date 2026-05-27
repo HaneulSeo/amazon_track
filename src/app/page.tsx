@@ -19,16 +19,19 @@ import {
   TrendingUp
 } from "lucide-react";
 import { BrandTrendChart } from "@/components/BrandTrendChart";
+import { QuarterlyComparison } from "@/components/QuarterlyComparison";
 import { KpiCard } from "@/components/KpiCard";
 import { SectionCard } from "@/components/SectionCard";
 import {
   companies,
   companyCoverageScore,
   getCompany,
+  getCompanyQuarterlyComparison,
   getCompanyCoverage,
   getCompanyMonthly,
   getCompanyProductFamilies,
   getCompanySources,
+  getCompanyTradeCountryMonthly,
   getIndustry,
   industries,
   methodologyNotes,
@@ -37,7 +40,7 @@ import {
   regionalExposure,
   toBrandTrend
 } from "@/lib/dashboard-data";
-import { type DisplayCurrency, formatMoneyFromUsd, formatNumber, formatPercent, shortProductName, trendTone } from "@/lib/format";
+import { type DisplayCurrency, formatMoneyFromKrw, formatMoneyFromUsd, formatNumber, formatPercent, shortProductName, trendTone } from "@/lib/format";
 import type { LucideIcon } from "lucide-react";
 import type { DashboardCompany, DashboardIndustry } from "@/lib/types";
 
@@ -654,7 +657,7 @@ function CompanyWorkspace({
 
       {activeTab === "overview" ? <OverviewTab company={company} companyMonthly={companyMonthly} currency={currency} usdKrw={usdKrw} hasTrend={hasTrend} /> : null}
       {activeTab === "products" ? <ProductsTab company={company} currency={currency} usdKrw={usdKrw} /> : null}
-      {activeTab === "benchmark" ? <BenchmarkTab company={company} /> : null}
+      {activeTab === "benchmark" ? <BenchmarkTab company={company} currency={currency} usdKrw={usdKrw} /> : null}
       {activeTab === "data" ? <DataTab company={company} /> : null}
     </div>
   );
@@ -798,40 +801,104 @@ function ProductsTab({
   );
 }
 
-function BenchmarkTab({ company }: { company: DashboardCompany }) {
+function BenchmarkTab({
+  company,
+  currency,
+  usdKrw
+}: {
+  company: DashboardCompany;
+  currency: DisplayCurrency;
+  usdKrw: number;
+}) {
   const exposure = regionalExposure.find((row) => row.company === company.company);
   const coverage = getCompanyCoverage(company.company);
+  const quarterlyRows = getCompanyQuarterlyComparison(company.company);
+  const countryRows = getCompanyTradeCountryMonthly(company.company);
+  const countryQuarterRows = [...new Set(countryRows.map((row) => row.quarter))]
+    .sort((a, b) => a.localeCompare(b))
+    .slice(-8)
+    .map((quarter) => {
+      const group = countryRows.filter((row) => row.quarter === quarter);
+      return {
+        quarter,
+        total: group.filter((row) => row.country_scope === "total").reduce((sum, row) => sum + (row.export_value_krw ?? 0), 0),
+        us: group.filter((row) => row.country_scope === "us").reduce((sum, row) => sum + (row.export_value_krw ?? 0), 0),
+        cn: group.filter((row) => row.country_scope === "cn").reduce((sum, row) => sum + (row.export_value_krw ?? 0), 0),
+        weight: group.reduce((sum, row) => sum + (row.export_weight_kg ?? 0), 0)
+      };
+    });
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
-      <SectionCard eyebrow="Regional Exposure" title="Revenue mix assumption">
-        {exposure ? (
-          <div className="space-y-4">
-            <p className="text-sm leading-6 text-toss-gray">{exposure.interpretation}</p>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {exposure.regions.map((region) => (
-                <MiniCard key={region.region} label={region.region} value={`${(region.share * 100).toFixed(0)}%`} helper="revenue exposure" />
-              ))}
+    <div className="space-y-5">
+      <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
+        <SectionCard eyebrow="Regional Exposure" title="Revenue mix assumption">
+          {exposure ? (
+            <div className="space-y-4">
+              <p className="text-sm leading-6 text-toss-gray">{exposure.interpretation}</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {exposure.regions.map((region) => (
+                  <MiniCard key={region.region} label={region.region} value={`${(region.share * 100).toFixed(0)}%`} helper="revenue exposure" />
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <EmptyState message="지역 비중 데이터가 아직 없습니다." />
+          )}
+        </SectionCard>
+
+        <SectionCard eyebrow="Explanation Power" title="Coverage score">
+          {coverage ? (
+            <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <MiniCard label="Amazon quality" value={coverage.amazon_data_quality_score.toFixed(1)} helper="CSV completeness" />
+                <MiniCard label="Forecasting usefulness" value={coverage.forecasting_usefulness_score.toFixed(1)} helper="proxy strength" />
+                <MiniCard label="Missing data" value={coverage.missing_data_score.toFixed(1)} helper="gap size" />
+                <MiniCard label="Next priority" value={coverage.next_data_priority_score.toFixed(1)} helper="priority score" />
+              </div>
+              <p className="text-sm leading-6 text-toss-gray">{coverage.interpretation}</p>
+            </div>
+          ) : (
+            <EmptyState message="커버리지 점수가 아직 없습니다." />
+          )}
+        </SectionCard>
+      </div>
+
+      <SectionCard eyebrow="Quarterly Comparison" title="DART vs Amazon US">
+        {quarterlyRows.length ? (
+          <QuarterlyComparison rows={quarterlyRows} baseQuarter={quarterlyRows.find((row) => row.externalRevenueEokKrw !== null && row.trackedRevenueUsd !== null)?.quarter ?? null} currency={currency} usdKrw={usdKrw} />
         ) : (
-          <EmptyState message="지역 비중 데이터가 아직 없습니다." />
+          <EmptyState message="DART 분기 비교 데이터가 아직 없습니다." />
         )}
       </SectionCard>
 
-      <SectionCard eyebrow="Explanation Power" title="Coverage score">
-        {coverage ? (
-          <div className="space-y-4">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <MiniCard label="Amazon quality" value={coverage.amazon_data_quality_score.toFixed(1)} helper="CSV completeness" />
-              <MiniCard label="Forecasting usefulness" value={coverage.forecasting_usefulness_score.toFixed(1)} helper="proxy strength" />
-              <MiniCard label="Missing data" value={coverage.missing_data_score.toFixed(1)} helper="gap size" />
-              <MiniCard label="Next priority" value={coverage.next_data_priority_score.toFixed(1)} helper="priority score" />
-            </div>
-            <p className="text-sm leading-6 text-toss-gray">{coverage.interpretation}</p>
+      <SectionCard eyebrow="Country Trend" title="TRASS export trend by country">
+        {countryQuarterRows.length ? (
+          <div className="overflow-auto rounded-lg ring-1 ring-toss-line">
+            <table className="min-w-[860px] w-full bg-white text-left text-sm">
+              <thead className="bg-toss-wash text-xs uppercase text-toss-gray">
+                <tr>
+                  <th className="px-4 py-3">Quarter</th>
+                  <th className="px-4 py-3 text-right">Total KRW</th>
+                  <th className="px-4 py-3 text-right">US KRW</th>
+                  <th className="px-4 py-3 text-right">CN KRW</th>
+                  <th className="px-4 py-3 text-right">Weight</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-toss-line">
+                {countryQuarterRows.map((row) => (
+                  <tr key={row.quarter} className="hover:bg-toss-wash/70">
+                    <td className="px-4 py-3 font-semibold">{row.quarter}</td>
+                    <td className="px-4 py-3 text-right font-semibold">{formatMoneyFromKrw(row.total, currency, usdKrw, false)}</td>
+                    <td className="px-4 py-3 text-right">{formatMoneyFromKrw(row.us, currency, usdKrw, false)}</td>
+                    <td className="px-4 py-3 text-right">{formatMoneyFromKrw(row.cn, currency, usdKrw, false)}</td>
+                    <td className="px-4 py-3 text-right">{formatNumber(row.weight, false)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
-          <EmptyState message="커버리지 점수가 아직 없습니다." />
+          <EmptyState message="국가별 TRASS 추이 데이터가 아직 없습니다." />
         )}
       </SectionCard>
     </div>

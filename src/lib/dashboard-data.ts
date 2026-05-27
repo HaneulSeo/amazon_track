@@ -1,12 +1,16 @@
 import dashboardJson from "../../public/data/dashboard_data.json";
 import type {
   BrandTrend,
+  CountryTradeMonthlyRow,
   DashboardCompany,
   DashboardData,
   DashboardIndustry,
+  DartQuarterlyRevenueRow,
   FamilyMonthlyLike,
   MonthlyProductLike,
-  SourceGap
+  QuarterlyComparison,
+  SourceGap,
+  TradeQuarterlyRow
 } from "./types";
 
 export const dashboardData = dashboardJson as unknown as DashboardData;
@@ -20,6 +24,11 @@ export const products = dashboardData.products;
 export const regionalExposure = dashboardData.regionalExposure;
 export const missingDataChecklist = dashboardData.missingDataChecklist;
 export const methodologyNotes = dashboardData.methodologyNotes;
+export const tradeMonthly = dashboardData.tradeMonthly;
+export const tradeQuarterly = dashboardData.tradeQuarterly;
+export const tradeCountryMonthly = dashboardData.tradeCountryMonthly;
+export const dartQuarterlyRevenue = dashboardData.dartQuarterlyRevenue;
+export const quarterlyComparison = dashboardData.quarterlyComparison;
 export const sourceGapMap = dashboardData.tables.source_gap_map;
 export const companyCoverageScore = dashboardData.tables.company_coverage_score;
 export const companyMonthlyProxy = dashboardData.tables.company_monthly_proxy;
@@ -50,6 +59,22 @@ export function getCompanySources(companyId: string): SourceGap[] {
 
 export function getCompanyMonthly(companyId: string) {
   return companyMonthlyProxy.filter((row) => row.company === companyId);
+}
+
+export function getCompanyQuarterlyComparison(companyId: string): QuarterlyComparison[] {
+  return quarterlyComparison.filter((row) => row.company === companyId);
+}
+
+export function getCompanyTradeCountryMonthly(companyId: string): CountryTradeMonthlyRow[] {
+  return tradeCountryMonthly.filter((row) => row.company === companyId);
+}
+
+export function getCompanyTradeQuarterly(companyId: string): TradeQuarterlyRow[] {
+  return tradeQuarterly.filter((row) => row.company === companyId);
+}
+
+export function getCompanyDartQuarterly(companyId: string): DartQuarterlyRevenueRow[] {
+  return dartQuarterlyRevenue.filter((row) => row.company === companyId);
 }
 
 export function toBrandTrend(rows: Array<{

@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { parse } from "csv-parse/sync";
 
@@ -112,6 +113,81 @@ type FamilyMonthlyRow = {
   data_quality_warnings: string[];
 };
 
+type TradeMonthlyRow = {
+  company: Company;
+  company_label: string;
+  product_line: string;
+  country_scope: string;
+  source_file: string;
+  source_descriptor: string;
+  month: string;
+  quarter: string;
+  export_value_usd: number | null;
+  export_value_krw: number | null;
+  export_weight_kg: number | null;
+  domestic_company_count: number | null;
+  foreign_counterparty_count: number | null;
+};
+
+type TradeQuarterlyRow = {
+  company: Company;
+  company_label: string;
+  product_line: string;
+  country_scope: string;
+  quarter: string;
+  export_value_usd: number | null;
+  export_value_krw: number | null;
+  export_weight_kg: number | null;
+  domestic_company_count: number | null;
+  foreign_counterparty_count: number | null;
+};
+
+type CountryTradeMonthlyRow = {
+  company: Company;
+  company_label: string;
+  country_scope: string;
+  month: string;
+  quarter: string;
+  export_value_usd: number | null;
+  export_value_krw: number | null;
+  export_weight_kg: number | null;
+};
+
+type DartQuarterlyRevenueRow = {
+  company: Company;
+  company_label: string;
+  corp_code: string;
+  stock_code: string;
+  year: number;
+  quarter: string;
+  period_type: "quarter" | "derived_q4";
+  report_code: string;
+  rcept_no: string;
+  source_url: string;
+  revenue_krw: number | null;
+  cumulative_revenue_krw: number | null;
+  is_derived: boolean;
+};
+
+type QuarterlyComparisonRow = {
+  company: Company;
+  quarter: string;
+  externalRevenueEokKrw: number | null;
+  externalYoY: number | null;
+  externalQoQ: number | null;
+  comment: string;
+  trackedRevenueUsd: number | null;
+  trackedUnits: number | null;
+  trackedProductCount: number | null;
+  trackedYoY: number | null;
+  trackedQoQ: number | null;
+  monthsPresent: number;
+  isCompleteQuarter: boolean;
+  externalIndex: number | null;
+  trackedIndex: number | null;
+  indexGap: number | null;
+};
+
 type CoverageScoreRow = {
   company: Company;
   raw_file_count: number;
@@ -187,6 +263,11 @@ type ExistingDashboardJson = {
     product_family_monthly?: FamilyMonthlyRow[];
     company_coverage_score?: CoverageScoreRow[];
     source_gap_map?: SourceGapRow[];
+    trass_trade_monthly?: TradeMonthlyRow[];
+    trass_trade_quarterly?: TradeQuarterlyRow[];
+    trass_country_monthly?: CountryTradeMonthlyRow[];
+    dart_quarterly_revenue?: DartQuarterlyRevenueRow[];
+    quarterly_comparison?: QuarterlyComparisonRow[];
   };
 };
 
@@ -647,6 +728,87 @@ function loadExistingDashboardData(): ExistingDashboardJson | null {
   return JSON.parse(fs.readFileSync(existingPath, "utf8")) as ExistingDashboardJson;
 }
 
+function readCsvIfExists<T extends Record<string, unknown>>(filePath: string): T[] {
+  if (!fs.existsSync(filePath)) return [];
+  const text = fs.readFileSync(filePath, "utf8");
+  if (!text.trim()) return [];
+  return parse(text, {
+    columns: true,
+    skip_empty_lines: true,
+    trim: true,
+    relax_column_count: true
+  }) as T[];
+}
+
+function parseBoolLike(value: unknown): boolean {
+  const text = normalizeText(value).toLowerCase();
+  return ["1", "true", "yes", "y"].includes(text);
+}
+
+function loadProcessedTradeData() {
+  const trassTradeMonthly = readCsvIfExists<TradeMonthlyRow>(path.join(processedRoot, "trass_trade_monthly.csv")).map((row) => ({
+    ...row,
+    export_value_usd: parseNumber(row.export_value_usd),
+    export_value_krw: parseNumber(row.export_value_krw),
+    export_weight_kg: parseNumber(row.export_weight_kg),
+    domestic_company_count: parseNumber(row.domestic_company_count),
+    foreign_counterparty_count: parseNumber(row.foreign_counterparty_count)
+  }));
+  const trassTradeQuarterly = readCsvIfExists<TradeQuarterlyRow>(path.join(processedRoot, "trass_trade_quarterly.csv")).map((row) => ({
+    ...row,
+    export_value_usd: parseNumber(row.export_value_usd),
+    export_value_krw: parseNumber(row.export_value_krw),
+    export_weight_kg: parseNumber(row.export_weight_kg),
+    domestic_company_count: parseNumber(row.domestic_company_count),
+    foreign_counterparty_count: parseNumber(row.foreign_counterparty_count)
+  }));
+  const trassCountryMonthly = readCsvIfExists<CountryTradeMonthlyRow>(path.join(processedRoot, "trass_country_monthly.csv")).map((row) => ({
+    ...row,
+    export_value_usd: parseNumber(row.export_value_usd),
+    export_value_krw: parseNumber(row.export_value_krw),
+    export_weight_kg: parseNumber(row.export_weight_kg)
+  }));
+  const dartQuarterlyRevenue = readCsvIfExists<DartQuarterlyRevenueRow>(path.join(processedRoot, "dart_quarterly_revenue.csv")).map((row) => ({
+    ...row,
+    year: Number(row.year),
+    revenue_krw: parseNumber(row.revenue_krw),
+    cumulative_revenue_krw: parseNumber(row.cumulative_revenue_krw),
+    is_derived: parseBoolLike(row.is_derived)
+  }));
+
+  return {
+    trassTradeMonthly,
+    trassTradeQuarterly,
+    trassCountryMonthly,
+    dartQuarterlyRevenue
+  };
+}
+
+function ensureProcessedTradeData(): ReturnType<typeof loadProcessedTradeData> {
+  const loaded = loadProcessedTradeData();
+  if (loaded.trassTradeMonthly.length && loaded.trassTradeQuarterly.length && loaded.trassCountryMonthly.length && loaded.dartQuarterlyRevenue.length) {
+    return loaded;
+  }
+
+  const manualRoot = path.join(root, "data", "raw", "manual");
+  const hasManualXlsx = fs.existsSync(manualRoot) && fs.readdirSync(manualRoot).some((file) => file.toLowerCase().endsWith(".xlsx"));
+  const dartApiKey = normalizeText(process.env.DART_API_KEY);
+  if (hasManualXlsx && dartApiKey) {
+    const scriptPath = path.join(root, "scripts", "extract_external_trade_data.py");
+    const result = spawnSync("python3", [scriptPath], {
+      cwd: root,
+      env: { ...process.env, DART_API_KEY: dartApiKey },
+      stdio: "inherit"
+    });
+    if (result.status !== 0) {
+      throw new Error(`Failed to regenerate external trade data via ${scriptPath}`);
+    }
+    return loadProcessedTradeData();
+  }
+
+  return loaded;
+}
+
 function readRawFiles(): Array<{ company: Company; source_folder: string; file_name: string; file_path: string }> {
   const folderMap: Record<string, Company> = { coway: "coway", cuckoo: "coway", samyang: "samyang", tnl: "tnl" };
   const items: Array<{ company: Company; source_folder: string; file_name: string; file_path: string }> = [];
@@ -842,7 +1004,12 @@ function makeSeries<T extends { month: string; revenue: number | null; reviews: 
   });
 }
 
-function computeCompanyQuality(company: Company, files: DailyRecord[], monthlyRows: MonthlyProductRow[]): CoverageScoreRow {
+function computeCompanyQuality(
+  company: Company,
+  files: DailyRecord[],
+  monthlyRows: MonthlyProductRow[],
+  availability: { dartQuarterly: boolean; trassTrade: boolean; trassCountry: boolean }
+): CoverageScoreRow {
   const config = exposureConfig[company];
   const gapConfig = companyGapConfigs[company];
   const companyFiles = files.filter((row) => row.company === company);
@@ -889,6 +1056,7 @@ function computeCompanyQuality(company: Company, files: DailyRecord[], monthlyRo
   const revenueExposureScore = round(Math.min(100, config.amazon_us_direct_coverage_of_total.base * 1000)) ?? 0;
   const channelGapScore = gapConfig.channelGapScore;
   const regionGapScore = gapConfig.regionGapScore;
+  const sourceStrengthBonus = (availability.dartQuarterly ? 8 : 0) + (availability.trassTrade ? 10 : 0) + (availability.trassCountry ? 4 : 0);
   const forecastingUsefulnessScore = round(
     Math.max(
       0,
@@ -898,7 +1066,8 @@ function computeCompanyQuality(company: Company, files: DailyRecord[], monthlyRo
           0.25 * revenueExposureScore +
           0.2 * (100 - channelGapScore) +
           0.2 * (100 - regionGapScore) +
-          gapConfig.bias
+          gapConfig.bias +
+          sourceStrengthBonus
       )
     )
   ) ?? 0;
@@ -1203,7 +1372,8 @@ function buildDashboardData(summary: Record<string, unknown>) {
 
 function inferSourceType(text: string): SourceGapRow["source_type"] {
   const lower = text.toLowerCase();
-  if (/(dart|sec edgar|keepa|hs 300510|hs 300590|hs 330499|hs 190230)/.test(lower)) return "api";
+  if (/(hs 300510|hs 300590|hs 330499|hs 190230|trass|관세청|kita)/.test(lower)) return "trade";
+  if (/(dart|sec edgar|keepa)/.test(lower)) return "api";
   if (/(walmart|costco|kroger|target|instacart|amazon jp|rakuten|qoo10|yahoo shopping|tesco|carrefour|woolworths|shopee|lazada|tiktok shop|tiktok|tmall|jd|douyin|pinduoduo|xiaohongshu|bestbuy|homedepot|cvs|walgreens|ulta|iherb)/.test(lower))
     return "retailer";
   if (/(google trends|baidu index)/.test(lower)) return "social";
@@ -1219,7 +1389,12 @@ function inferCurrentStatus(text: string): SourceGapRow["current_status"] {
   return "manual_required";
 }
 
-function buildSourceGapMap(): SourceGapRow[] {
+function normalizeQuarterSortKey(quarter: string): number {
+  const match = quarter.match(/^(\d{4})-Q([1-4])$/);
+  return match ? Number(match[1]) * 10 + Number(match[2]) : 999999;
+}
+
+function buildSourceGapMap(availability: Record<Company, { dartQuarterly: boolean; trassTrade: boolean }>): SourceGapRow[] {
   const rows: SourceGapRow[] = [];
   for (const company of ["coway", "samyang", "tnl"] as Company[]) {
     rows.push({
@@ -1234,12 +1409,17 @@ function buildSourceGapMap(): SourceGapRow[] {
 
     const checklist = exposureConfig[company].next_data_to_collect;
     checklist.forEach((item, index) => {
+      const lower = item.toLowerCase();
+      let currentStatus = inferCurrentStatus(item);
+      if (/(dart|sec edgar)/.test(lower) && availability[company]?.dartQuarterly) currentStatus = "available";
+      if (/(hs 190230|hs 300510|hs 300590|hs 330499|trass)/.test(lower) && availability[company]?.trassTrade) currentStatus = "available";
+      if (/(raw csv|amazon us)/.test(lower)) currentStatus = "available";
       rows.push({
         company,
         source_name: item,
         source_type: inferSourceType(item),
         priority: Math.min(index + 1, 5),
-        current_status: inferCurrentStatus(item),
+        current_status: currentStatus,
         description: item,
         why_it_matters: item
       });
@@ -1428,13 +1608,117 @@ function buildMethodologyNotes() {
     "Amazon US CSV is used as a directional proxy, not an absolute revenue estimator.",
     "Coway needs Korea / Malaysia / Southeast Asia channel data to explain the consolidated business.",
     "Samyang needs US retail, China platform, and HS 190230 export data to separate demand from distribution effects.",
-    "T&L needs CHD filings, Keepa, non-Amazon retail, trade data, and B/L signals because sell-through can lag sell-in by 1-4 quarters."
+    "T&L needs CHD filings, Keepa, non-Amazon retail, trade data, and B/L signals because sell-through can lag sell-in by 1-4 quarters.",
+    "DART quarterly revenue is the scale benchmark; TRASS monthly and quarterly export data are channel proxies that help separate demand from distribution and inventory timing."
   ];
+}
+
+function quarterFromMonth(month: string): string {
+  const match = month.match(/^(\d{4})-(\d{2})$/);
+  if (!match) return month;
+  const year = Number(match[1]);
+  const monthNumber = Number(match[2]);
+  const quarter = Math.floor((monthNumber - 1) / 3) + 1;
+  return `${year}-Q${quarter}`;
+}
+
+function makeQuarterSeries(rows: Array<{ quarter: string; revenue: number | null }>) {
+  const sorted = [...rows].sort((a, b) => normalizeQuarterSortKey(a.quarter) - normalizeQuarterSortKey(b.quarter));
+  return sorted.map((row, index) => {
+    const current = row.revenue;
+    const previous = index > 0 ? sorted[index - 1].revenue : null;
+    const yoy = index >= 4 ? sorted[index - 4].revenue : null;
+    return {
+      quarter: row.quarter,
+      revenue: current,
+      mom: growth(current, previous),
+      yoy: growth(current, yoy)
+    };
+  });
+}
+
+function buildQuarterlyComparison(
+  company: Company,
+  companyRows: CompanyMonthlyRow[],
+  productRows: MonthlyProductRow[],
+  dartRows: DartQuarterlyRevenueRow[]
+): QuarterlyComparisonRow[] {
+  const amazonQuarterBuckets = new Map<string, { revenue: number; units: number; productCount: Set<string>; months: Set<string> }>();
+  for (const row of companyRows) {
+    const quarter = quarterFromMonth(row.month);
+    const bucket = amazonQuarterBuckets.get(quarter) ?? { revenue: 0, units: 0, productCount: new Set<string>(), months: new Set<string>() };
+    bucket.revenue += row.total_revenue ?? 0;
+    bucket.units += row.total_units ?? 0;
+    bucket.productCount.add(`${row.company}__${row.month}`);
+    bucket.months.add(row.month);
+    amazonQuarterBuckets.set(quarter, bucket);
+  }
+
+  const dartQuarterRows = dartRows.filter((row) => row.company === company);
+  const dartByQuarter = new Map(dartQuarterRows.map((row) => [row.quarter, row]));
+  const productQuarterBuckets = new Map<string, Set<string>>();
+  for (const row of productRows.filter((row) => row.company === company)) {
+    const quarter = quarterFromMonth(row.month);
+    productQuarterBuckets.set(quarter, new Set([...(productQuarterBuckets.get(quarter) ?? []), row.asin]));
+  }
+  const amazonQuarterSeries = makeQuarterSeries(
+    [...amazonQuarterBuckets.entries()].map(([quarter, bucket]) => ({ quarter, revenue: bucket.revenue }))
+  );
+  const dartQuarterSeries = makeQuarterSeries(
+    dartQuarterRows.map((row) => ({ quarter: row.quarter, revenue: row.revenue_krw }))
+  );
+  const allQuarters = new Set<string>([...amazonQuarterBuckets.keys(), ...dartByQuarter.keys()]);
+  const orderedQuarters = [...allQuarters].sort((a, b) => normalizeQuarterSortKey(a) - normalizeQuarterSortKey(b));
+
+  const amazonIndexBase = amazonQuarterSeries.find((row) => row.revenue !== null)?.revenue ?? null;
+  const dartIndexBase = dartQuarterSeries.find((row) => row.revenue !== null)?.revenue ?? null;
+
+  return orderedQuarters.map((quarter) => {
+    const amazonBucket = amazonQuarterBuckets.get(quarter);
+    const dartRow = dartByQuarter.get(quarter);
+    const amazonSeriesRow = amazonQuarterSeries.find((row) => row.quarter === quarter);
+    const dartSeriesRow = dartQuarterSeries.find((row) => row.quarter === quarter);
+    const amazonRevenueUsd = amazonBucket ? amazonBucket.revenue : null;
+    const dartRevenueEokKrw = dartRow?.revenue_krw === null || dartRow?.revenue_krw === undefined ? null : dartRow.revenue_krw / 100_000_000;
+    const amazonIndex = amazonIndexBase && amazonRevenueUsd !== null ? round((amazonRevenueUsd / amazonIndexBase) * 100, 1) : null;
+    const dartIndex = dartIndexBase && dartRow?.revenue_krw !== null && dartRow?.revenue_krw !== undefined ? round((dartRow.revenue_krw / dartIndexBase) * 100, 1) : null;
+    const comment =
+      company === "coway"
+        ? "Amazon US tracks only a small slice of Airmega demand; compare against DART scale and regional mix."
+        : company === "samyang"
+          ? "Use DART for company scale and TRASS for export momentum; Amazon US is mainly a U.S. Buldak proxy."
+          : "Use DART for company scale and TRASS for sell-through direction; Amazon US is directional only.";
+
+    return {
+      company,
+      quarter,
+      externalRevenueEokKrw: dartRevenueEokKrw,
+      externalYoY: dartSeriesRow?.yoy ?? null,
+      externalQoQ: dartSeriesRow?.mom ?? null,
+      comment,
+      trackedRevenueUsd: amazonRevenueUsd,
+      trackedUnits: amazonBucket ? amazonBucket.units : null,
+      trackedProductCount: productQuarterBuckets.get(quarter)?.size ?? null,
+      trackedYoY: amazonSeriesRow?.yoy ?? null,
+      trackedQoQ: amazonSeriesRow?.mom ?? null,
+      monthsPresent: amazonBucket ? amazonBucket.months.size : 0,
+      isCompleteQuarter: amazonBucket ? amazonBucket.months.size >= 3 : false,
+      externalIndex: dartIndex,
+      trackedIndex: amazonIndex,
+      indexGap: dartIndex !== null && amazonIndex !== null ? round(dartIndex - amazonIndex, 1) : null
+    };
+  });
 }
 
 function writeOutputsFromExistingDashboard(existing: ExistingDashboardJson) {
   const tables = existing.tables;
-  if (!tables?.amazon_us_monthly || !tables.company_monthly_proxy || !tables.product_family_monthly || !tables.company_coverage_score || !tables.source_gap_map) {
+  if (
+    !tables?.amazon_us_monthly ||
+    !tables.company_monthly_proxy ||
+    !tables.product_family_monthly ||
+    !tables.company_coverage_score ||
+    !tables.source_gap_map
+  ) {
     throw new Error("Existing dashboard_data.json is missing required tables for fallback build");
   }
 
@@ -1446,6 +1730,11 @@ function writeOutputsFromExistingDashboard(existing: ExistingDashboardJson) {
   fs.writeFileSync(path.join(processedRoot, "product_family_monthly.csv"), writeCsv(toCsvRows(tables.product_family_monthly)));
   fs.writeFileSync(path.join(processedRoot, "company_coverage_score.csv"), writeCsv(toCsvRows(tables.company_coverage_score)));
   fs.writeFileSync(path.join(processedRoot, "source_gap_map.csv"), writeCsv(toCsvRows(tables.source_gap_map)));
+  if (tables.trass_trade_monthly) fs.writeFileSync(path.join(processedRoot, "trass_trade_monthly.csv"), writeCsv(toCsvRows(tables.trass_trade_monthly)));
+  if (tables.trass_trade_quarterly) fs.writeFileSync(path.join(processedRoot, "trass_trade_quarterly.csv"), writeCsv(toCsvRows(tables.trass_trade_quarterly)));
+  if (tables.trass_country_monthly) fs.writeFileSync(path.join(processedRoot, "trass_country_monthly.csv"), writeCsv(toCsvRows(tables.trass_country_monthly)));
+  if (tables.dart_quarterly_revenue) fs.writeFileSync(path.join(processedRoot, "dart_quarterly_revenue.csv"), writeCsv(toCsvRows(tables.dart_quarterly_revenue)));
+  if (tables.quarterly_comparison) fs.writeFileSync(path.join(processedRoot, "quarterly_comparison.csv"), writeCsv(toCsvRows(tables.quarterly_comparison)));
 
   const refreshed = {
     ...existing,
@@ -1460,6 +1749,11 @@ function writeOutputsFromExistingDashboard(existing: ExistingDashboardJson) {
   console.log(`wrote data/processed/product_family_monthly.csv (${tables.product_family_monthly.length} rows)`);
   console.log(`wrote data/processed/company_coverage_score.csv (${tables.company_coverage_score.length} rows)`);
   console.log(`wrote data/processed/source_gap_map.csv (${tables.source_gap_map.length} rows)`);
+  if (tables.trass_trade_monthly) console.log(`wrote data/processed/trass_trade_monthly.csv (${tables.trass_trade_monthly.length} rows)`);
+  if (tables.trass_trade_quarterly) console.log(`wrote data/processed/trass_trade_quarterly.csv (${tables.trass_trade_quarterly.length} rows)`);
+  if (tables.trass_country_monthly) console.log(`wrote data/processed/trass_country_monthly.csv (${tables.trass_country_monthly.length} rows)`);
+  if (tables.dart_quarterly_revenue) console.log(`wrote data/processed/dart_quarterly_revenue.csv (${tables.dart_quarterly_revenue.length} rows)`);
+  if (tables.quarterly_comparison) console.log(`wrote data/processed/quarterly_comparison.csv (${tables.quarterly_comparison.length} rows)`);
   console.log(`wrote public/data/dashboard_data.json`);
 }
 
@@ -1475,6 +1769,25 @@ function main() {
   const dailyRecords = rawFiles.flatMap((file) => normalizeFileRows(file));
   const productMonthly = finalizeRevenueShare(addProductLevelGrowth(buildProductMonthlyRows(dailyRecords)));
   const companyMonthly = ["coway", "samyang", "tnl"].flatMap((company) => computeCompanyMetric(company as Company, productMonthly.filter((row) => row.company === company)));
+  const processedTrade = ensureProcessedTradeData();
+
+  const dataAvailability: Record<Company, { dartQuarterly: boolean; trassTrade: boolean; trassCountry: boolean }> = {
+    coway: {
+      dartQuarterly: processedTrade.dartQuarterlyRevenue.some((row) => row.company === "coway"),
+      trassTrade: processedTrade.trassTradeQuarterly.some((row) => row.company === "coway"),
+      trassCountry: processedTrade.trassCountryMonthly.some((row) => row.company === "coway" && row.country_scope !== "total")
+    },
+    samyang: {
+      dartQuarterly: processedTrade.dartQuarterlyRevenue.some((row) => row.company === "samyang"),
+      trassTrade: processedTrade.trassTradeQuarterly.some((row) => row.company === "samyang"),
+      trassCountry: processedTrade.trassCountryMonthly.some((row) => row.company === "samyang" && row.country_scope !== "total")
+    },
+    tnl: {
+      dartQuarterly: processedTrade.dartQuarterlyRevenue.some((row) => row.company === "tnl"),
+      trassTrade: processedTrade.trassTradeQuarterly.some((row) => row.company === "tnl"),
+      trassCountry: processedTrade.trassCountryMonthly.some((row) => row.company === "tnl" && row.country_scope !== "total")
+    }
+  };
 
   const companyRevenueByMonth = new Map<string, number>();
   for (const row of companyMonthly) {
@@ -1485,7 +1798,7 @@ function main() {
     computeFamilyMetric(company as Company, productMonthly.filter((row) => row.company === company), companyRevenueByMonth)
   );
   const coverageScores = ["coway", "samyang", "tnl"].map((company) =>
-    computeCompanyQuality(company as Company, dailyRecords, productMonthly)
+    computeCompanyQuality(company as Company, dailyRecords, productMonthly, dataAvailability[company as Company])
   );
 
   const companyMonthCount = new Map<Company, Set<string>>();
@@ -1513,7 +1826,7 @@ function main() {
     month_count: companyMonthCount.get(row.company)?.size ?? 0
   }));
 
-  const sourceGapMap = buildSourceGapMap();
+  const sourceGapMap = buildSourceGapMap(dataAvailability);
   const overview = buildOverview(rawFiles, productMonthly, companyMonthly, coverageOutput);
   const industries = buildIndustries(companyMonthly, coverageOutput, exposureConfig);
   const companies = buildCompanies(companyMonthly, productMonthly, familyMonthly, coverageOutput, exposureConfig);
@@ -1521,6 +1834,14 @@ function main() {
   const regionalExposure = buildRegionalExposure(exposureConfig);
   const missingDataChecklist = buildMissingDataChecklist(sourceGapMap);
   const methodologyNotes = buildMethodologyNotes();
+  const quarterlyComparison = (["coway", "samyang", "tnl"] as Company[]).flatMap((company) =>
+    buildQuarterlyComparison(
+      company,
+      companyMonthly.filter((row) => row.company === company),
+      productMonthly.filter((row) => row.company === company),
+      processedTrade.dartQuarterlyRevenue
+    )
+  );
 
   const allSummary = {
     company_count: 3,
@@ -1531,12 +1852,18 @@ function main() {
     product_family_row_count: familyMonthly.length,
     unique_asin_count: new Set(productMonthly.map((row) => row.asin)).size,
     month_count: new Set(productMonthly.map((row) => row.month)).size,
+    trade_monthly_row_count: processedTrade.trassTradeMonthly.length,
+    trade_quarterly_row_count: processedTrade.trassTradeQuarterly.length,
+    trade_country_monthly_row_count: processedTrade.trassCountryMonthly.length,
+    dart_quarterly_row_count: processedTrade.dartQuarterlyRevenue.length,
+    quarterly_comparison_row_count: quarterlyComparison.length,
     company_coverage: coverageOutput,
     date_range: {
       min: dailyRecords.map((row) => row.date).filter(Boolean).sort()[0] ?? null,
       max: dailyRecords.map((row) => row.date).filter(Boolean).sort().at(-1) ?? null
     },
-    overview
+    overview,
+    quarterly_benchmark_base_quarter: quarterlyComparison.find((row) => row.trackedRevenueUsd !== null && row.externalRevenueEokKrw !== null)?.quarter ?? null
   };
 
   const jsonPayload = {
@@ -1552,12 +1879,22 @@ function main() {
     regionalExposure,
     missingDataChecklist,
     methodologyNotes,
+    tradeMonthly: processedTrade.trassTradeMonthly,
+    tradeQuarterly: processedTrade.trassTradeQuarterly,
+    tradeCountryMonthly: processedTrade.trassCountryMonthly,
+    dartQuarterlyRevenue: processedTrade.dartQuarterlyRevenue,
+    quarterlyComparison,
     tables: {
       amazon_us_monthly: productMonthly,
       company_monthly_proxy: companyMonthly,
       product_family_monthly: familyMonthly,
       company_coverage_score: coverageOutput,
-      source_gap_map: sourceGapMap
+      source_gap_map: sourceGapMap,
+      trass_trade_monthly: processedTrade.trassTradeMonthly,
+      trass_trade_quarterly: processedTrade.trassTradeQuarterly,
+      trass_country_monthly: processedTrade.trassCountryMonthly,
+      dart_quarterly_revenue: processedTrade.dartQuarterlyRevenue,
+      quarterly_comparison: quarterlyComparison
     }
   };
 
@@ -1569,6 +1906,11 @@ function main() {
   fs.writeFileSync(path.join(processedRoot, "product_family_monthly.csv"), writeCsv(toCsvRows(familyMonthly)));
   fs.writeFileSync(path.join(processedRoot, "company_coverage_score.csv"), writeCsv(toCsvRows(coverageOutput)));
   fs.writeFileSync(path.join(processedRoot, "source_gap_map.csv"), writeCsv(toCsvRows(sourceGapMap)));
+  fs.writeFileSync(path.join(processedRoot, "trass_trade_monthly.csv"), writeCsv(toCsvRows(processedTrade.trassTradeMonthly)));
+  fs.writeFileSync(path.join(processedRoot, "trass_trade_quarterly.csv"), writeCsv(toCsvRows(processedTrade.trassTradeQuarterly)));
+  fs.writeFileSync(path.join(processedRoot, "trass_country_monthly.csv"), writeCsv(toCsvRows(processedTrade.trassCountryMonthly)));
+  fs.writeFileSync(path.join(processedRoot, "dart_quarterly_revenue.csv"), writeCsv(toCsvRows(processedTrade.dartQuarterlyRevenue)));
+  fs.writeFileSync(path.join(processedRoot, "quarterly_comparison.csv"), writeCsv(toCsvRows(quarterlyComparison)));
   fs.writeFileSync(path.join(publicDataRoot, "dashboard_data.json"), JSON.stringify(jsonPayload, null, 2));
 
   console.log(`wrote data/processed/amazon_us_monthly.csv (${productMonthly.length} rows)`);
@@ -1576,6 +1918,11 @@ function main() {
   console.log(`wrote data/processed/product_family_monthly.csv (${familyMonthly.length} rows)`);
   console.log(`wrote data/processed/company_coverage_score.csv (${coverageOutput.length} rows)`);
   console.log(`wrote data/processed/source_gap_map.csv (${sourceGapMap.length} rows)`);
+  console.log(`wrote data/processed/trass_trade_monthly.csv (${processedTrade.trassTradeMonthly.length} rows)`);
+  console.log(`wrote data/processed/trass_trade_quarterly.csv (${processedTrade.trassTradeQuarterly.length} rows)`);
+  console.log(`wrote data/processed/trass_country_monthly.csv (${processedTrade.trassCountryMonthly.length} rows)`);
+  console.log(`wrote data/processed/dart_quarterly_revenue.csv (${processedTrade.dartQuarterlyRevenue.length} rows)`);
+  console.log(`wrote data/processed/quarterly_comparison.csv (${quarterlyComparison.length} rows)`);
   console.log(`wrote public/data/dashboard_data.json`);
 }
 
