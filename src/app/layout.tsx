@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Company Revenue Intelligence",
-  description: "DART, TRASS, Amazon, and market signal dashboard for company revenue tracking"
+  title: "Amazon Revenue Tracker",
+  description: "Industry and company-level Amazon revenue intelligence dashboard"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

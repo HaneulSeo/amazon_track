@@ -36,8 +36,8 @@ export function SalesTab({
                   <tr key={row.quarter} className="hover:bg-toss-wash/70">
                     <td className="px-4 py-3 font-semibold">{row.quarter}</td>
                     <td className="px-4 py-3 text-right font-semibold">{formatMoneyFromKrw(row.revenue_krw, currency, usdKrw, false)}</td>
-                    <td className="px-4 py-3 text-right text-toss-gray">{formatQuarterChange(visibleRows, row.quarter, "yoy")}</td>
-                    <td className="px-4 py-3 text-right text-toss-gray">{formatQuarterChange(visibleRows, row.quarter, "qoq")}</td>
+                    <td className="px-4 py-3 text-right text-toss-gray">No data</td>
+                    <td className="px-4 py-3 text-right text-toss-gray">No data</td>
                     <td className="px-4 py-3">
                       <a className="text-toss-blue hover:underline" href={row.source_url} target="_blank" rel="noreferrer">
                         DART
@@ -54,25 +54,4 @@ export function SalesTab({
       </SectionCard>
     </div>
   );
-}
-
-function formatQuarterChange(
-  rows: Array<{ quarter: string; revenue_krw: number | null }>,
-  currentQuarter: string,
-  kind: "yoy" | "qoq"
-) {
-  const targetQuarter = shiftQuarter(currentQuarter, kind === "yoy" ? -4 : -1);
-  const current = rows.find((row) => row.quarter === currentQuarter)?.revenue_krw ?? null;
-  const target = rows.find((row) => row.quarter === targetQuarter)?.revenue_krw ?? null;
-  if (current === null || target === null || !target) return "No data";
-  const change = ((current - target) / target) * 100;
-  return `${change > 0 ? "+" : ""}${change.toFixed(1)}%`;
-}
-
-function shiftQuarter(quarter: string, delta: number) {
-  const [yearPart, quarterPart] = quarter.split("-Q");
-  const total = Number(yearPart) * 4 + (Number(quarterPart) - 1) + delta;
-  const year = Math.floor(total / 4);
-  const q = (total % 4) + 1;
-  return `${year}-Q${q}`;
 }
