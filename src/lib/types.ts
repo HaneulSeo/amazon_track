@@ -96,6 +96,35 @@ export type QuarterlyComparison = {
   indexGap: number | null;
 };
 
+export type CorrelationConfidence = "high" | "medium" | "low" | "not_enough_data";
+
+export type CorrelationResult = {
+  company: string;
+  target_source: "dart";
+  target_metric: "revenue_krw";
+  indicator_source: "amazon" | "trass" | "stock" | "reviews";
+  indicator_metric: string;
+  lag_quarters: number;
+  period_type: "quarterly_to_quarterly";
+  sample_size: number;
+  pearson_corr: number | null;
+  spearman_corr: number | null;
+  r_squared: number | null;
+  confidence: CorrelationConfidence;
+  interpretation: string;
+};
+
+export type SourceStatus = {
+  company: string;
+  source: "amazon" | "trass" | "dart" | "stock" | "manual";
+  latest_period: string | null;
+  available: boolean;
+  row_count: number;
+  value_label: string | null;
+  confidence: "high" | "medium" | "low";
+  warning: string | null;
+};
+
 export type DashboardOverview = {
   tracked_company_count: number;
   tracked_industry_count: number;
@@ -367,6 +396,8 @@ export type DashboardData = {
   dartQuarterlyRevenue: DartQuarterlyRevenueRow[];
   quarterlyComparison: QuarterlyComparison[];
   companyStockMonthly: StockMonthlyRow[];
+  correlationResults?: CorrelationResult[];
+  sourceStatuses?: SourceStatus[];
   tables: {
     amazon_us_monthly: MonthlyProductLike[];
     company_monthly_proxy: Array<{
