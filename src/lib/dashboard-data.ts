@@ -73,6 +73,10 @@ export function getCompanyTradeQuarterly(companyId: string): TradeQuarterlyRow[]
   return tradeQuarterly.filter((row) => row.company === companyId);
 }
 
+export function getCompanyTradeMonthly(companyId: string) {
+  return tradeMonthly.filter((row) => row.company === companyId);
+}
+
 export function getCompanyDartQuarterly(companyId: string): DartQuarterlyRevenueRow[] {
   return dartQuarterlyRevenue.filter((row) => row.company === companyId);
 }

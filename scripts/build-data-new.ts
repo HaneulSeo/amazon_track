@@ -237,6 +237,13 @@ type CompanyExposureFileConfig = {
   next_data_to_collect: string[];
 };
 
+type ProductFamilyRules = {
+  samyang: {
+    default_line: string;
+    sauce_bundle_asins: string[];
+  };
+};
+
 type CompanyIndustryMeta = {
   id: string;
   name: string;
@@ -276,6 +283,7 @@ const rawRoot = path.join(root, "data", "raw", "amazon_us");
 const processedRoot = path.join(root, "data", "processed");
 const publicDataRoot = path.join(root, "public", "data");
 const exposureConfigPath = path.join(root, "data", "config", "company_exposure.yml");
+const productFamilyRulesPath = path.join(root, "data", "config", "product_family_rules.yml");
 const companyIndustryMeta: Record<Company, CompanyIndustryMeta> = {
   coway: {
     id: "home-appliance-rental",
@@ -722,6 +730,74 @@ function loadExposureConfig(): Record<Company, CompanyExposureFileConfig> {
 
 const exposureConfig = loadExposureConfig();
 
+function parseProductFamilyRulesYaml(content: string): ProductFamilyRules {
+  const lines = content.split(/\r?\n/);
+  const rules: ProductFamilyRules = {
+    samyang: {
+      default_line: "ramen",
+      sauce_bundle_asins: []
+    }
+  };
+  let currentCompany: keyof ProductFamilyRules | null = null;
+  let currentSection: string | null = null;
+
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/\t/g, "  ");
+    if (!line.trim() || line.trim().startsWith("#")) continue;
+    const indent = line.match(/^ */)?.[0].length ?? 0;
+    const trimmed = line.trim();
+
+    if (indent === 0 && trimmed.endsWith(":")) {
+      const key = trimmed.slice(0, -1) as keyof ProductFamilyRules;
+      if (key === "samyang") {
+        currentCompany = key;
+        currentSection = null;
+      }
+      continue;
+    }
+
+    if (!currentCompany) continue;
+    if (indent === 2 && trimmed.includes(":")) {
+      const [key, ...rest] = trimmed.split(":");
+      const value = rest.join(":").trim().replace(/^"(.*)"$/, "$1");
+      if (key.trim() === "default_line") {
+        rules.samyang.default_line = value || rules.samyang.default_line;
+        currentSection = null;
+      } else if (key.trim() === "sauce_bundle_asins") {
+        currentSection = "sauce_bundle_asins";
+        if (value && value !== "[]") {
+          for (const item of value.replace(/^\[/, "").replace(/\]$/, "").split(",")) {
+            const asin = item.trim().replace(/^"(.*)"$/, "$1").toUpperCase();
+            if (asin) rules.samyang.sauce_bundle_asins.push(asin);
+          }
+        }
+      }
+      continue;
+    }
+
+    if (indent === 4 && currentCompany === "samyang" && currentSection === "sauce_bundle_asins" && trimmed.startsWith("- ")) {
+      const asin = trimmed.slice(2).trim().toUpperCase();
+      if (asin) rules.samyang.sauce_bundle_asins.push(asin);
+    }
+  }
+
+  return rules;
+}
+
+function loadProductFamilyRules(): ProductFamilyRules {
+  if (!fs.existsSync(productFamilyRulesPath)) {
+    return {
+      samyang: {
+        default_line: "ramen",
+        sauce_bundle_asins: []
+      }
+    };
+  }
+  return parseProductFamilyRulesYaml(fs.readFileSync(productFamilyRulesPath, "utf8"));
+}
+
+const productFamilyRules = loadProductFamilyRules();
+
 function loadExistingDashboardData(): ExistingDashboardJson | null {
   const existingPath = path.join(publicDataRoot, "dashboard_data.json");
   if (!fs.existsSync(existingPath)) return null;
@@ -838,11 +914,17 @@ function inferProductFamily(company: Company, productName: string, asin: string)
     return { family: "Other", confidence: "low" };
   }
   if (company === "samyang") {
-    if (/carbonara|cream carbonara|quattro cheese/.test(normalized)) return { family: "Buldak carbonara family", confidence: "high" };
-    if (/sauce/.test(normalized)) return { family: "Buldak sauce", confidence: "high" };
-    if (/topokki|dumplings|chips|snack|frozen/.test(normalized)) return { family: "Buldak snack/frozen/other", confidence: "high" };
-    if (/original|2x spicy|habanero lime|jjajang|yakisoba|buldak/.test(normalized)) return { family: "Buldak core ramen", confidence: "high" };
-    return { family: "Other Samyang", confidence: "low" };
+    const asinKey = asin.toUpperCase();
+    const sauceBundleAsins = new Set(productFamilyRules.samyang.sauce_bundle_asins.map((item) => item.toUpperCase()));
+    if (sauceBundleAsins.has(asinKey)) return { family: "Buldak sauce / bundle", confidence: "high" };
+    if (/sauce|topokki|dumplings|chips|snack|frozen|bundle|variety pack|day \+ night|xl duo/.test(normalized)) {
+      return { family: "Buldak sauce / bundle", confidence: "high" };
+    }
+    const defaultLine = productFamilyRules.samyang.default_line.toLowerCase();
+    if (defaultLine === "ramen" && /carbonara|cream carbonara|quattro cheese|original|2x spicy|habanero lime|jjajang|yakisoba|buldak/.test(normalized)) {
+      return { family: "Buldak ramen", confidence: "medium" };
+    }
+    return { family: defaultLine === "ramen" ? "Buldak ramen" : defaultLine, confidence: "medium" };
   }
   if (/original|invisible|surface/.test(normalized)) return { family: "Mighty Patch core", confidence: "high" };
   if (/nose|chin|forehead|face|body/.test(normalized)) return { family: "Mighty Patch face/body extensions", confidence: "high" };
