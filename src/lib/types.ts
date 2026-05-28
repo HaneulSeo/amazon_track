@@ -96,6 +96,23 @@ export type QuarterlyComparison = {
   indexGap: number | null;
 };
 
+export type ComparisonSeriesOption = {
+  id: string;
+  label: string;
+  source: "dart" | "amazon" | "trass" | "stock";
+  unit: "krw" | "usd" | "units" | "index" | "price";
+  available: boolean;
+};
+
+export type ComparisonPoint = {
+  period: string;
+  dartRevenue?: number | null;
+  amazonRevenue?: number | null;
+  amazonUnits?: number | null;
+  trassExport?: number | null;
+  stockPrice?: number | null;
+};
+
 export type DashboardOverview = {
   tracked_company_count: number;
   tracked_industry_count: number;

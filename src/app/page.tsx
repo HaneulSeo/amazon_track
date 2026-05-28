@@ -19,33 +19,45 @@ import {
   TrendingUp
 } from "lucide-react";
 import { BrandTrendChart } from "@/components/BrandTrendChart";
-import { DualIndexTrendChart } from "@/components/DualIndexTrendChart";
-import { QuarterlyComparison } from "@/components/QuarterlyComparison";
 import { KpiCard } from "@/components/KpiCard";
 import { SectionCard } from "@/components/SectionCard";
+import { BenchmarkSummary } from "@/components/benchmark/BenchmarkSummary";
+import { BenchmarkDataTable } from "@/components/benchmark/BenchmarkDataTable";
+import { ComparisonExplorer } from "@/components/benchmark/ComparisonExplorer";
+import { ProductFamilyToggle } from "@/components/products/ProductFamilyToggle";
 import {
   companies,
   companyCoverageScore,
   getCompany,
   getCompanyDartQuarterly,
-  getCompanyQuarterlyComparison,
   getCompanyCoverage,
   getCompanyMonthly,
-  getCompanyProductFamilies,
+  getCompanyProducts,
   getCompanySources,
   getCompanyTradeMonthly,
+  getCompanyTradeQuarterly,
   getCompanyStockMonthly,
   getIndustry,
   industries,
   methodologyNotes,
   missingDataChecklist,
   overview,
-  regionalExposure,
+  quarterlyComparison,
   toBrandTrend
 } from "@/lib/dashboard-data";
 import { type DisplayCurrency, formatMoneyFromKrw, formatMoneyFromUsd, formatNumber, formatPercent, productLabel, trendTone } from "@/lib/format";
 import type { LucideIcon } from "lucide-react";
-import type { DashboardCompany, DashboardIndustry } from "@/lib/types";
+import type {
+  ComparisonPoint,
+  ComparisonSeriesOption,
+  CompanyMonthlyRow,
+  DashboardCompany,
+  DashboardIndustry,
+  MonthlyProductLike,
+  TradeMonthlyRow,
+  TradeQuarterlyRow,
+  StockMonthlyRow
+} from "@/lib/types";
 
 type Workspace = "home" | "amazon";
 type DetailTab = "overview" | "products" | "benchmark" | "data";
@@ -588,6 +600,10 @@ function CompanyWorkspace({
 }) {
   const industry = getIndustry(company.industry_id);
   const companyMonthly = getCompanyMonthly(company.company);
+  const dartRows = getCompanyDartQuarterly(company.company);
+  const stockRows = getCompanyStockMonthly(company.company);
+  const latestDart = dartRows.slice().sort((a, b) => a.quarter.localeCompare(b.quarter)).at(-1) ?? null;
+  const latestStock = stockRows.slice().sort((a, b) => a.month.localeCompare(b.month)).at(-1) ?? null;
   const hasTrend = companyMonthly.some((row) => row.total_revenue !== null || row.total_units !== null || row.avg_price !== null);
 
   return (
@@ -605,11 +621,16 @@ function CompanyWorkspace({
             <h2 className="mt-1 text-4xl font-extrabold sm:text-5xl">{company.label}</h2>
             <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-gray">{company.interpretation}</p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <TinyStat label="Latest month" value={company.latest_month ?? "-"} />
-            <TinyStat label="ASINs" value={String(company.asin_count)} />
-            <TinyStat label="Coverage" value={company.coverage_score === null ? "-" : `${company.coverage_score.toFixed(1)}`} tone={trendTone(company.coverage_score)} />
-            <TinyStat label="Gap" value={company.missing_data_score === null ? "-" : `${company.missing_data_score.toFixed(1)}`} />
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+            <TinyStat label="Latest Amazon month" value={company.latest_month ?? "No data"} />
+            <TinyStat label="Latest Amazon revenue" value={formatMoneyFromUsd(company.latest_revenue, currency, usdKrw)} />
+            <TinyStat label="Latest Amazon units" value={formatNumber(company.latest_units)} />
+            <TinyStat label="Latest DART quarter" value={latestDart?.quarter ?? "No data"} />
+            <TinyStat
+              label="Latest DART revenue"
+              value={latestDart?.revenue_krw === null || latestDart?.revenue_krw === undefined ? "No data" : formatMoneyFromKrw(latestDart.revenue_krw, currency, usdKrw)}
+            />
+            <TinyStat label="Latest stock close" value={latestStock ? formatNumber(latestStock.adj_close ?? latestStock.close) : "No data"} helper={latestStock?.month ?? "No data"} />
           </div>
         </div>
       </section>
@@ -623,20 +644,6 @@ function CompanyWorkspace({
           icon={CircleDollarSign}
         />
         <KpiCard label="Latest units" value={formatNumber(company.latest_units)} helper={`${company.product_count} tracked products`} delta={null} icon={Package} />
-        <KpiCard
-          label="Coverage score"
-          value={company.coverage_score === null ? "-" : company.coverage_score.toFixed(1)}
-          helper="forecasting usefulness"
-          delta={null}
-          icon={TrendingUp}
-        />
-        <KpiCard
-          label="Missing data"
-          value={company.next_data_priority_score === null ? "-" : company.next_data_priority_score.toFixed(1)}
-          helper="next priority"
-          delta={null}
-          icon={Database}
-        />
       </div>
 
       <nav className="flex gap-2 overflow-auto rounded-lg bg-white p-2 shadow-soft ring-1 ring-[#dde2ea]">
@@ -659,7 +666,7 @@ function CompanyWorkspace({
       </nav>
 
       {activeTab === "overview" ? <OverviewTab company={company} companyMonthly={companyMonthly} currency={currency} usdKrw={usdKrw} hasTrend={hasTrend} /> : null}
-      {activeTab === "products" ? <ProductsTab company={company} currency={currency} usdKrw={usdKrw} /> : null}
+      {activeTab === "products" ? <ProductsTab key={company.company} company={company} currency={currency} usdKrw={usdKrw} /> : null}
       {activeTab === "benchmark" ? <BenchmarkTab company={company} currency={currency} usdKrw={usdKrw} /> : null}
       {activeTab === "data" ? <DataTab company={company} /> : null}
     </div>
@@ -698,10 +705,23 @@ function OverviewTab({
         <div className="space-y-4">
           <p className="text-sm leading-6 text-toss-gray">{company.interpretation}</p>
           <div className="grid gap-3 sm:grid-cols-2">
-            <MiniCard label="Direct coverage" value={`${Math.round(company.amazon_us_direct_coverage_of_total.base * 100)}%`} helper="base assumption" />
-            <MiniCard label="Coverage confidence" value={company.coverage_score === null ? "-" : `${company.coverage_score.toFixed(1)}`} helper="forecasting usefulness" />
-            <MiniCard label="Next data priority" value={company.next_data_priority_score === null ? "-" : `${company.next_data_priority_score.toFixed(1)}`} helper="gap urgency" />
+            <MiniCard label="Amazon proxy role" value={company.amazon_us_direct_coverage_of_total.base >= 0.05 ? "Useful signal" : "Reference signal"} helper="proxy strength" />
             <MiniCard label="Tracked families" value={String(company.family_count)} helper={`${company.asin_count} ASINs`} />
+          </div>
+          <div className="rounded-lg bg-[#f7f9fc] p-4 text-sm leading-6 text-toss-gray">
+            {company.latest_month ? (
+              <p>
+                Latest Amazon month is <span className="font-bold text-toss-ink">{company.latest_month}</span> and latest revenue is{" "}
+                <span className="font-bold text-toss-ink">{formatMoneyFromUsd(company.latest_revenue, currency, usdKrw)}</span>.
+              </p>
+            ) : (
+              <p>Amazon monthly proxy data is not available yet.</p>
+            )}
+            {companyMonthly.length ? (
+              <p className="mt-2">
+                Latest DART quarter and stock trend are reviewed in Benchmark. Overview is a short read-through, not a full comparison screen.
+              </p>
+            ) : null}
           </div>
         </div>
       </SectionCard>
@@ -722,42 +742,72 @@ function ProductsTab({
   currency: DisplayCurrency;
   usdKrw: number;
 }) {
-  const latestMonthRows = company.top_products
-    .slice()
-    .sort((a, b) => (b.revenue ?? 0) - (a.revenue ?? 0) || (b.avg_bsr ?? Number.MAX_SAFE_INTEGER) - (a.avg_bsr ?? Number.MAX_SAFE_INTEGER));
-  const familyRows = getCompanyProductFamilies(company.company)
-    .slice()
-    .sort((a, b) => (b.total_revenue ?? 0) - (a.total_revenue ?? 0));
+  const productRows = getCompanyProducts(company.company);
+  const latestProductRows = buildLatestProductRows(productRows);
+  const familyGroups = buildProductFamilyGroups(company.company, productRows);
+  const [selectedFamily, setSelectedFamily] = useState(familyGroups[0]?.id ?? "all");
+  const visibleRows = familyGroups.find((group) => group.id === selectedFamily)?.rows ?? [];
 
   return (
     <div className="space-y-5">
-      <SectionCard eyebrow="Product Family Analysis" title="Family mix">
-        {familyRows.length ? (
-          <div className="overflow-auto rounded-lg ring-1 ring-toss-line">
-            <table className="min-w-[860px] w-full bg-white text-left text-sm">
-              <thead className="bg-toss-wash text-xs uppercase text-toss-gray">
-                <tr>
-                  <th className="px-4 py-3">Family</th>
-                  <th className="px-4 py-3 text-right">Latest month</th>
-                  <th className="px-4 py-3 text-right">Revenue</th>
-                  <th className="px-4 py-3 text-right">Units</th>
-                  <th className="px-4 py-3 text-right">Share</th>
-                  <th className="px-4 py-3 text-right">MoM</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-toss-line">
-                {familyRows.map((row) => (
-                  <tr key={`${row.product_family}-${row.month}`}>
-                    <td className="px-4 py-3 font-semibold">{row.product_family}</td>
-                    <td className="px-4 py-3 text-right text-toss-gray">{row.month}</td>
-                    <td className="px-4 py-3 text-right font-semibold">{formatMoneyFromUsd(row.total_revenue, currency, usdKrw, false)}</td>
-                    <td className="px-4 py-3 text-right">{formatNumber(row.total_units, false)}</td>
-                    <td className="px-4 py-3 text-right">{row.revenue_share_in_company === null ? "-" : `${row.revenue_share_in_company.toFixed(1)}%`}</td>
-                    <td className={`px-4 py-3 text-right font-semibold ${trendTone(row.mom_revenue_growth)}`}>{formatPercent(row.mom_revenue_growth)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <SectionCard eyebrow="Product Family Analysis" title="Family selector">
+        {familyGroups.length ? (
+          <div className="space-y-4">
+            <ProductFamilyToggle options={familyGroups.map((group) => ({ id: group.id, label: group.label, count: group.rows.length }))} selectedFamily={selectedFamily} onChange={setSelectedFamily} />
+            <div className="rounded-lg bg-[#f7f9fc] p-4 text-sm leading-6 text-toss-gray">
+              {company.company === "samyang" ? (
+                <p>
+                  Samyang은 <span className="font-bold text-toss-ink">Sauce</span>와 <span className="font-bold text-toss-ink">Ramen</span>으로만 묶어 보여줍니다. Sauce는 Buldak sauce만, 나머지는 Ramen으로 봅니다.
+                </p>
+              ) : (
+                <p>
+                  선택한 family의 최신 ASIN만 보여줍니다. family가 많으면 상위 family와 Other만 먼저 노출하고 나머지는 묶습니다.
+                </p>
+              )}
+            </div>
+            {visibleRows.length ? (
+              <div className="overflow-auto rounded-lg ring-1 ring-toss-line">
+                <table className="min-w-[1080px] w-full bg-white text-left text-sm">
+                  <thead className="bg-toss-wash text-xs uppercase text-toss-gray">
+                    <tr>
+                      <th className="px-4 py-3">ASIN</th>
+                      <th className="px-4 py-3">Product name / family</th>
+                      <th className="px-4 py-3 text-right">Latest month</th>
+                      <th className="px-4 py-3 text-right">Revenue</th>
+                      <th className="px-4 py-3 text-right">Units</th>
+                      <th className="px-4 py-3 text-right">BSR</th>
+                      <th className="px-4 py-3 text-right">Reviews</th>
+                      <th className="px-4 py-3">Revenue source</th>
+                      <th className="px-4 py-3">Warnings</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-toss-line">
+                    {visibleRows.map((row) => (
+                      <tr key={`${row.asin}-${row.month}`} className="hover:bg-toss-wash/70">
+                        <td className="px-4 py-3 font-semibold">{row.asin}</td>
+                        <td className="px-4 py-3">
+                          <div className="font-semibold leading-5">{productLabel(row.product_name, row.product_family)}</div>
+                          <div className="mt-1 text-xs font-medium text-toss-gray">{row.product_family}</div>
+                        </td>
+                        <td className="px-4 py-3 text-right text-toss-gray">{row.month}</td>
+                        <td className="px-4 py-3 text-right font-semibold">{formatMoneyFromUsd(row.revenue, currency, usdKrw, false)}</td>
+                        <td className="px-4 py-3 text-right">{formatNumber(row.units, false)}</td>
+                        <td className="px-4 py-3 text-right">{formatNumber(row.avg_bsr, false)}</td>
+                        <td className="px-4 py-3 text-right">{formatNumber(row.reviews, false)}</td>
+                        <td className="px-4 py-3">
+                          <Badge>{row.revenue_source}</Badge>
+                        </td>
+                        <td className="px-4 py-3">
+                          {row.data_quality_warnings.length ? <Badge>{row.data_quality_warnings[0]}</Badge> : <span className="text-xs font-semibold text-toss-gray">-</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <EmptyState message="선택한 family에 표시할 제품이 없습니다." />
+            )}
           </div>
         ) : (
           <EmptyState message="제품군 데이터가 아직 없습니다." />
@@ -765,7 +815,7 @@ function ProductsTab({
       </SectionCard>
 
       <SectionCard eyebrow="Product Ranking" title="Latest month ASIN ranking">
-        {latestMonthRows.length ? (
+        {productRows.length ? (
           <div className="overflow-auto rounded-lg ring-1 ring-toss-line">
             <table className="min-w-[980px] w-full bg-white text-left text-sm">
               <thead className="bg-toss-wash text-xs uppercase text-toss-gray">
@@ -781,7 +831,10 @@ function ProductsTab({
                 </tr>
               </thead>
               <tbody className="divide-y divide-toss-line">
-                {latestMonthRows.map((row, index) => (
+                {latestProductRows
+                  .slice()
+                  .sort((a, b) => (b.revenue ?? 0) - (a.revenue ?? 0) || (b.avg_bsr ?? Number.MAX_SAFE_INTEGER) - (a.avg_bsr ?? Number.MAX_SAFE_INTEGER))
+                  .map((row, index) => (
                   <tr key={`${row.asin}-${row.month}`} className="hover:bg-toss-wash/70">
                     <td className="px-4 py-3 font-bold">{index + 1}</td>
                     <td className="px-4 py-3 text-toss-gray">{row.asin}</td>
@@ -816,248 +869,200 @@ function BenchmarkTab({
   currency: DisplayCurrency;
   usdKrw: number;
 }) {
-  const exposure = regionalExposure.find((row) => row.company === company.company);
-  const coverage = getCompanyCoverage(company.company);
   const companyMonthly = getCompanyMonthly(company.company);
-  const quarterlyRows = getCompanyQuarterlyComparison(company.company);
+  const tradeMonthly = getCompanyTradeMonthly(company.company);
+  const tradeQuarterly = getCompanyTradeQuarterly(company.company);
   const stockRows = getCompanyStockMonthly(company.company);
   const dartRows = getCompanyDartQuarterly(company.company);
-  const stockTrend = buildRevenueStockTrend(companyMonthly, stockRows);
-  const latestDart = dartRows.at(-1) ?? null;
-  const latestAmazon = companyMonthly.at(-1) ?? null;
-  const latestStock = stockRows.at(-1) ?? null;
-  const samyangRamenTrend = company.company === "samyang" ? buildSamyangLineTrend("ramen") : [];
-  const samyangSauceTrend = company.company === "samyang" ? buildSamyangLineTrend("sauce") : [];
-  const samyangRamenSnapshot = company.company === "samyang" ? samyangLineSnapshot("ramen") : null;
-  const samyangSauceSnapshot = company.company === "samyang" ? samyangLineSnapshot("sauce") : null;
-  const samyangBridge = company.company === "samyang" ? buildSamyangCountryBridge() : null;
+  const comparisonRows = buildComparisonRows(company.company, companyMonthly, tradeQuarterly, dartRows, stockRows);
+  const comparisonOptions = buildComparisonOptions(company.company, companyMonthly, tradeQuarterly, dartRows, stockRows);
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-5 xl:grid-cols-[1.05fr_0.95fr]">
-        <SectionCard eyebrow="Regional Exposure" title="Revenue mix assumption">
-          {exposure ? (
-            <div className="space-y-4">
-              <p className="text-sm leading-6 text-toss-gray">{exposure.interpretation}</p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {exposure.regions.map((region) => (
-                  <MiniCard key={region.region} label={region.region} value={`${(region.share * 100).toFixed(0)}%`} helper="revenue exposure" />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <EmptyState message="지역 비중 데이터가 아직 없습니다." />
-          )}
-        </SectionCard>
-
-        <SectionCard eyebrow="Explanation Power" title="Coverage score">
-          {coverage ? (
-            <div className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <MiniCard label="Amazon quality" value={coverage.amazon_data_quality_score.toFixed(1)} helper="CSV completeness" />
-                <MiniCard label="Forecasting usefulness" value={coverage.forecasting_usefulness_score.toFixed(1)} helper="proxy strength" />
-                <MiniCard label="Missing data" value={coverage.missing_data_score.toFixed(1)} helper="gap size" />
-                <MiniCard label="Next priority" value={coverage.next_data_priority_score.toFixed(1)} helper="priority score" />
-              </div>
-              <p className="text-sm leading-6 text-toss-gray">{coverage.interpretation}</p>
-            </div>
-          ) : (
-            <EmptyState message="커버리지 점수가 아직 없습니다." />
-          )}
-        </SectionCard>
-      </div>
-
-      <SectionCard eyebrow="Revenue and Stock" title={`${company.label} trend vs stock`}>
-        <div className="space-y-4">
-          <div className="grid gap-3 md:grid-cols-4">
-            <MiniCard
-              label="Latest month revenue"
-              value={formatMoneyFromUsd(latestAmazon?.total_revenue, currency, usdKrw, false)}
-              helper={latestAmazon?.month ?? "Amazon US"}
-            />
-            <MiniCard
-              label="Latest stock close"
-              value={formatNumber(latestStock?.adj_close ?? latestStock?.close, false)}
-              helper={latestStock?.month ?? "Adj close"}
-            />
-            <MiniCard
-              label="Latest DART quarter"
-              value={latestDart?.quarter ?? "-"}
-              helper={latestDart ? formatMoneyFromKrw(latestDart.revenue_krw, currency, usdKrw, false) : "Company scale"}
-            />
-            <MiniCard
-              label="Coverage"
-              value={coverage ? coverage.forecasting_usefulness_score.toFixed(1) : "-"}
-              helper="proxy strength"
-            />
-          </div>
-          {stockTrend.length ? (
-            <DualIndexTrendChart
-              title="Monthly revenue and stock"
-              note="둘 다 첫 공통 월을 100으로 맞춘 방향성 비교입니다."
-              leftLabel="Revenue"
-              rightLabel="Stock"
-              data={stockTrend}
-            />
-          ) : (
-            <EmptyState message="주가 추이 또는 매출 추이가 아직 충분하지 않습니다." />
-          )}
-        </div>
+      <SectionCard eyebrow="Benchmark Summary" title="DART and stock first">
+        <BenchmarkSummary key={company.company} dartRows={dartRows} stockRows={stockRows} currency={currency} usdKrw={usdKrw} />
       </SectionCard>
 
-      {company.company === "samyang" ? (
-        <SectionCard eyebrow="Amazon vs TRASS" title="Ramen and sauce lines">
-          <div className="space-y-5">
-            <p className="text-sm leading-6 text-toss-gray">
-              Amazon US와 TRASS를 같은 축에 놓고, 최근 공유 월만 보여줍니다. 라면은 Buldak core/carbonara/snack/other를 묶고, 소스는 Buldak sauce만 따로 봅니다. TRASS는 US 수출과 전체/중국 브리지를 함께 봅니다.
-            </p>
-            <div className="grid gap-5 xl:grid-cols-2">
-              <DualIndexTrendChart
-                title="Ramen line"
-                note="Amazon US ramen proxy vs TRASS US ramen exports."
-                leftLabel="Amazon ramen"
-                rightLabel="TRASS US ramen"
-                data={samyangRamenTrend}
-              />
-              <DualIndexTrendChart
-                title="Sauce line"
-                note="Amazon US sauce proxy vs TRASS US sauce exports."
-                leftLabel="Amazon sauce"
-                rightLabel="TRASS US sauce"
-                data={samyangSauceTrend}
-              />
-            </div>
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <MiniCard
-                label="Ramen latest Amazon"
-                value={formatMoneyFromUsd(samyangRamenSnapshot?.amazon, currency, usdKrw, false)}
-                helper={samyangRamenSnapshot?.month ?? "Amazon US"}
-              />
-              <MiniCard
-                label="Ramen latest TRASS"
-                value={formatMoneyFromKrw(samyangRamenSnapshot?.trass, currency, usdKrw, false)}
-                helper={samyangRamenSnapshot?.month ?? "TRASS US"}
-              />
-              <MiniCard
-                label="Sauce latest Amazon"
-                value={formatMoneyFromUsd(samyangSauceSnapshot?.amazon, currency, usdKrw, false)}
-                helper={samyangSauceSnapshot?.month ?? "Amazon US"}
-              />
-              <MiniCard
-                label="Sauce latest TRASS"
-                value={formatMoneyFromKrw(samyangSauceSnapshot?.trass, currency, usdKrw, false)}
-                helper={samyangSauceSnapshot?.month ?? "TRASS US"}
-              />
-            </div>
-            {samyangBridge ? (
-              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                <MiniCard label="Latest TRASS quarter" value={samyangBridge.quarter ?? "-"} helper={samyangBridge.total !== null ? formatMoneyFromKrw(samyangBridge.total, currency, usdKrw, false) : "TRASS total"} />
-                <MiniCard label="US export bridge" value={samyangBridge.us !== null ? formatMoneyFromKrw(samyangBridge.us, currency, usdKrw, false) : "-"} helper="direct Amazon comparison" />
-                <MiniCard label="CN export bridge" value={samyangBridge.cn !== null ? formatMoneyFromKrw(samyangBridge.cn, currency, usdKrw, false) : "-"} helper="future China comparison" />
-                <MiniCard label="Export weight" value={samyangBridge.weight !== null ? formatNumber(samyangBridge.weight, false) : "-"} helper="latest quarter" />
-              </div>
-            ) : null}
-          </div>
-        </SectionCard>
-      ) : null}
+      <SectionCard eyebrow="Comparison Explorer" title="Pick the series to compare">
+        <ComparisonExplorer key={company.company} rows={comparisonRows} options={comparisonOptions} currency={currency} usdKrw={usdKrw} />
+      </SectionCard>
 
-      <SectionCard eyebrow="Quarterly Comparison" title="DART vs Amazon US">
-        {quarterlyRows.length ? (
-          <QuarterlyComparison rows={quarterlyRows} baseQuarter={quarterlyRows.find((row) => row.externalRevenueEokKrw !== null && row.trackedRevenueUsd !== null)?.quarter ?? null} currency={currency} usdKrw={usdKrw} />
-        ) : (
-          <EmptyState message="DART 분기 비교 데이터가 아직 없습니다." />
-        )}
+      <SectionCard eyebrow="Detailed Data" title="Select a dataset to inspect">
+        <BenchmarkDataTable
+          key={company.company}
+          companyLabel={company.label}
+          companyMonthly={companyMonthly}
+          tradeMonthly={tradeMonthly}
+          tradeQuarterly={tradeQuarterly}
+          dartRows={dartRows}
+          stockRows={stockRows}
+          quarterlyComparison={quarterlyComparison.filter((row) => row.company === company.company)}
+          currency={currency}
+          usdKrw={usdKrw}
+        />
       </SectionCard>
     </div>
   );
 }
 
-type LineTrendPoint = {
-  period: string;
-  left: number | null;
-  right: number | null;
+type ProductFamilyGroup = {
+  id: string;
+  label: string;
+  rows: MonthlyProductLike[];
 };
 
-function buildRevenueStockTrend(
-  revenueRows: ReturnType<typeof getCompanyMonthly>,
-  stockRows: ReturnType<typeof getCompanyStockMonthly>
-): LineTrendPoint[] {
-  const stockByMonth = new Map(stockRows.map((row) => [row.month, row]));
-  return revenueRows
-    .filter((row) => stockByMonth.has(row.month))
-    .sort((a, b) => a.month.localeCompare(b.month))
-    .map((row) => {
-      const stockRow = stockByMonth.get(row.month)!;
+type ComparisonRow = ComparisonPoint;
+
+function buildLatestProductRows(rows: MonthlyProductLike[]): MonthlyProductLike[] {
+  const latestByProduct = new Map<string, MonthlyProductLike>();
+  for (const row of rows) {
+    const current = latestByProduct.get(row.asin);
+    if (!current || row.month.localeCompare(current.month) > 0) {
+      latestByProduct.set(row.asin, row);
+    }
+  }
+  return [...latestByProduct.values()];
+}
+
+function buildProductFamilyGroups(company: string, rows: MonthlyProductLike[]): ProductFamilyGroup[] {
+  const latestRows = buildLatestProductRows(rows);
+  const mapped = latestRows.map((row) => ({
+    ...row,
+    family: mapProductFamily(company, row.product_family)
+  }));
+
+  const familyRevenue = new Map<string, number>();
+  for (const row of mapped) {
+    familyRevenue.set(row.family, (familyRevenue.get(row.family) ?? 0) + (row.revenue ?? 0));
+  }
+
+  const familyOrder =
+    company === "samyang"
+      ? ["Ramen", "Sauce"]
+      : [...familyRevenue.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .map(([family]) => family);
+
+  const visibleFamilies =
+    company === "samyang"
+      ? familyOrder
+      : familyOrder.length > 6
+        ? [...familyOrder.slice(0, 5), "Other"]
+        : familyOrder;
+
+  const grouped = visibleFamilies.map((family) => ({
+    id: family,
+    label: family,
+    rows: mapped
+      .filter((row) => (family === "Other" ? !visibleFamilies.slice(0, 5).includes(row.family) : row.family === family))
+      .sort((a, b) => (b.revenue ?? 0) - (a.revenue ?? 0) || b.month.localeCompare(a.month))
+  }));
+
+  return grouped.filter((group) => group.rows.length > 0);
+}
+
+function mapProductFamily(company: string, family: string) {
+  const normalized = (family ?? "").trim() || "Other";
+  if (company === "samyang") {
+    return normalized.toLowerCase() === "buldak sauce" ? "Sauce" : "Ramen";
+  }
+  return normalized;
+}
+
+function buildComparisonRows(
+  _company: string,
+  companyMonthly: CompanyMonthlyRow[],
+  tradeQuarterly: TradeQuarterlyRow[],
+  dartRows: ReturnType<typeof getCompanyDartQuarterly>,
+  stockRows: StockMonthlyRow[]
+): ComparisonRow[] {
+  const quarters = new Set<string>();
+  for (const row of companyMonthly) {
+    const quarter = monthToQuarter(row.month);
+    if (quarter) quarters.add(quarter);
+  }
+  for (const row of tradeQuarterly) quarters.add(row.quarter);
+  for (const row of dartRows) quarters.add(row.quarter);
+  for (const row of stockRows) {
+    const quarter = monthToQuarter(row.month);
+    if (quarter) quarters.add(quarter);
+  }
+
+  return [...quarters]
+    .sort((a, b) => a.localeCompare(b))
+    .slice(-24)
+    .map((period) => {
+      const amazonRows = companyMonthly.filter((row) => monthToQuarter(row.month) === period);
+      const trassQuarterRows = tradeQuarterly.filter((row) => row.quarter === period);
+      const dartRow = dartRows.find((row) => row.quarter === period) ?? null;
+      const stockQuarterRows = stockRows.filter((row) => monthToQuarter(row.month) === period);
+
+      const totalTrassRows = trassQuarterRows.filter((row) => row.country_scope === "total");
+      const trassSourceRows = totalTrassRows.length ? totalTrassRows : trassQuarterRows;
+
+      const latestStockRow = stockQuarterRows.slice().sort((a, b) => a.month.localeCompare(b.month)).at(-1) ?? null;
+
       return {
-        period: row.month,
-        left: row.total_revenue,
-        right: stockRow.adj_close ?? stockRow.close
+        period,
+        dartRevenue: dartRow?.revenue_krw ?? null,
+        amazonRevenue: amazonRows.reduce((sum, row) => sum + (row.total_revenue ?? 0), 0) || null,
+        amazonUnits: amazonRows.reduce((sum, row) => sum + (row.total_units ?? 0), 0) || null,
+        trassExport: trassSourceRows.reduce((sum, row) => sum + (row.export_value_krw ?? 0), 0) || null,
+        stockPrice: latestStockRow ? latestStockRow.adj_close ?? latestStockRow.close : null
       };
     });
 }
 
-function buildSamyangLineTrend(line: "ramen" | "sauce"): LineTrendPoint[] {
-  const amazonFamilyRows = getCompanyProductFamilies("samyang");
-  const tradeRows = getCompanyTradeMonthly("samyang");
-  const amazonByMonth = new Map<string, number>();
-  const tradeByMonth = new Map<string, number>();
-
-  for (const row of amazonFamilyRows) {
-    const isSauce = row.product_family === "Buldak sauce";
-    const isRamen = !isSauce;
-    if ((line === "sauce" && !isSauce) || (line === "ramen" && !isRamen)) continue;
-    amazonByMonth.set(row.month, (amazonByMonth.get(row.month) ?? 0) + (row.total_revenue ?? 0));
-  }
-
-  for (const row of tradeRows) {
-    if (row.product_line !== line || row.country_scope !== "us") continue;
-    tradeByMonth.set(row.month, (tradeByMonth.get(row.month) ?? 0) + (row.export_value_krw ?? 0));
-  }
-
-  const sharedMonths = [...amazonByMonth.keys()].filter((month) => tradeByMonth.has(month)).sort((a, b) => a.localeCompare(b));
-  const visibleMonths = sharedMonths.slice(-24);
-
-  return visibleMonths
-    .sort((a, b) => a.localeCompare(b))
-    .map((period) => ({
-      period,
-      left: amazonByMonth.get(period) ?? null,
-      right: tradeByMonth.get(period) ?? null
-    }));
+function buildComparisonOptions(
+  _company: string,
+  companyMonthly: CompanyMonthlyRow[],
+  tradeQuarterly: TradeQuarterlyRow[],
+  dartRows: ReturnType<typeof getCompanyDartQuarterly>,
+  stockRows: StockMonthlyRow[]
+): ComparisonSeriesOption[] {
+  const comparisonRows = buildComparisonRows(_company, companyMonthly, tradeQuarterly, dartRows, stockRows);
+  return [
+    { id: "dartRevenue", label: "DART quarterly revenue", source: "dart", unit: "krw", available: comparisonRows.some((row) => row.dartRevenue !== null) },
+    { id: "amazonRevenue", label: "Amazon tracked revenue", source: "amazon", unit: "usd", available: comparisonRows.some((row) => row.amazonRevenue !== null) },
+    { id: "amazonUnits", label: "Amazon tracked units", source: "amazon", unit: "units", available: comparisonRows.some((row) => row.amazonUnits !== null) },
+    { id: "trassExport", label: "TRASS export value", source: "trass", unit: "krw", available: comparisonRows.some((row) => row.trassExport !== null) },
+    { id: "stockPrice", label: "Stock price", source: "stock", unit: "price", available: comparisonRows.some((row) => row.stockPrice !== null) }
+  ];
 }
 
-function samyangLineSnapshot(line: "ramen" | "sauce") {
-  const trend = buildSamyangLineTrend(line);
-  const latest = trend.at(-1) ?? null;
-  return {
-    month: latest?.period ?? null,
-    amazon: latest?.left ?? null,
-    trass: latest?.right ?? null
-  };
+function monthToQuarter(month: string) {
+  const match = month.match(/^(\d{4})-(\d{2})/);
+  if (!match) return null;
+  const year = match[1];
+  const monthNumber = Number(match[2]);
+  const quarter = Math.ceil(monthNumber / 3);
+  return `${year}-Q${quarter}`;
 }
 
-function buildSamyangCountryBridge() {
-  const rows = getCompanyTradeMonthly("samyang");
-  const latestQuarter = [...new Set(rows.map((row) => row.quarter))].sort((a, b) => a.localeCompare(b)).at(-1) ?? null;
-  if (!latestQuarter) return null;
-
-  const group = rows.filter((row) => row.quarter === latestQuarter);
-  const total = group.filter((row) => row.country_scope === "total").reduce((sum, row) => sum + (row.export_value_krw ?? 0), 0) || null;
-  const us = group.filter((row) => row.country_scope === "us").reduce((sum, row) => sum + (row.export_value_krw ?? 0), 0) || null;
-  const cn = group.filter((row) => row.country_scope === "cn").reduce((sum, row) => sum + (row.export_value_krw ?? 0), 0) || null;
-  const weight = group.reduce((sum, row) => sum + (row.export_weight_kg ?? 0), 0) || null;
-
-  return { quarter: latestQuarter, total, us, cn, weight };
+function collectRawWarnings(companyMonthly: CompanyMonthlyRow[], productRows: MonthlyProductLike[]) {
+  const warnings = new Set<string>();
+  for (const row of companyMonthly) {
+    for (const warning of row.data_quality_warnings) warnings.add(warning);
+  }
+  for (const row of productRows) {
+    for (const warning of row.data_quality_warnings) warnings.add(warning);
+  }
+  return [...warnings].slice(0, 12);
 }
 
 function DataTab({ company }: { company: DashboardCompany }) {
   const checklist = getCompanySources(company.company);
   const groupedChecklist = missingDataChecklist.find((row) => row.company === company.company)?.items ?? checklist;
+  const coverage = getCompanyCoverage(company.company);
+  const companyMonthly = getCompanyMonthly(company.company);
+  const productRows = getCompanyProducts(company.company);
+  const rawWarnings = collectRawWarnings(companyMonthly, productRows);
 
   return (
     <div className="space-y-5">
-      <SectionCard eyebrow="Missing Data Checklist" title="Next data to collect">
-        <div className="space-y-3">
+      <details className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
+        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">Missing Data Checklist</summary>
+        <div className="mt-4 space-y-3">
           {groupedChecklist.map((item) => (
             <div key={item.source_name} className="rounded-lg bg-[#f7f9fc] p-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -1075,25 +1080,72 @@ function DataTab({ company }: { company: DashboardCompany }) {
             </div>
           ))}
         </div>
-      </SectionCard>
+      </details>
 
-      <SectionCard eyebrow="Methodology" title="What Amazon US can and cannot explain">
-        <div className="space-y-3 text-sm leading-6 text-toss-gray">
+      <details className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
+        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">Source Status</summary>
+        <div className="mt-4 space-y-3">
+          {checklist.map((item) => (
+            <div key={item.source_name} className="flex flex-col gap-2 rounded-lg bg-[#f7f9fc] p-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="font-extrabold">{item.source_name}</p>
+                <p className="mt-1 text-sm leading-6 text-toss-gray">{item.description}</p>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <Badge>{item.current_status}</Badge>
+                <Badge>{item.source_type}</Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      </details>
+
+      <details className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
+        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">Raw Warnings</summary>
+        <div className="mt-4">
+          {rawWarnings.length ? (
+            <div className="flex flex-wrap gap-2">
+              {rawWarnings.map((warning) => (
+                <Badge key={warning}>{warning}</Badge>
+              ))}
+            </div>
+          ) : (
+            <EmptyState message="Raw warning이 없습니다." />
+          )}
+        </div>
+      </details>
+
+      <details className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
+        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">Diagnostics</summary>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <MiniCard label="Amazon data quality" value={coverage ? coverage.amazon_data_quality_score.toFixed(1) : "-"} helper="hidden diagnostic" />
+          <MiniCard label="Revenue exposure" value={coverage ? coverage.revenue_exposure_score.toFixed(1) : "-"} helper="hidden diagnostic" />
+          <MiniCard label="Channel gap" value={coverage ? coverage.channel_gap_score.toFixed(1) : "-"} helper="hidden diagnostic" />
+          <MiniCard label="Region gap" value={coverage ? coverage.region_gap_score.toFixed(1) : "-"} helper="hidden diagnostic" />
+          <MiniCard label="Missing data" value={coverage ? coverage.missing_data_score.toFixed(1) : "-"} helper="hidden diagnostic" />
+          <MiniCard label="Next priority" value={coverage ? coverage.next_data_priority_score.toFixed(1) : "-"} helper="hidden diagnostic" />
+        </div>
+      </details>
+
+      <details className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
+        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">Methodology</summary>
+        <div className="mt-4 space-y-3 text-sm leading-6 text-toss-gray">
           {methodologyNotes.map((note) => (
             <p key={note}>{note}</p>
           ))}
           <p>추정치는 assumption으로만 사용하고, 투자 판단의 최종 근거로 쓰지 않습니다.</p>
         </div>
-      </SectionCard>
+      </details>
     </div>
   );
 }
 
-function TinyStat({ label, value, tone = "text-toss-ink" }: { label: string; value: string; tone?: string }) {
+function TinyStat({ label, value, tone = "text-toss-ink", helper }: { label: string; value: string; tone?: string; helper?: string }) {
   return (
     <div className="rounded-lg bg-[#f7f9fc] px-4 py-3 ring-1 ring-[#dde2ea]">
       <p className="text-xs font-bold uppercase text-toss-gray">{label}</p>
       <p className={`mt-1 text-lg font-extrabold ${tone}`}>{value}</p>
+      {helper ? <p className="mt-1 text-xs font-semibold text-toss-gray">{helper}</p> : null}
     </div>
   );
 }
