@@ -26,11 +26,10 @@ type Props = {
 
 const KIND_LABEL: Record<ModelPair["kind"], string> = {
   "revenue~amazon": "매출 ~ 아마존",
-  "revenue~trass": "매출 ~ TRASS",
-  "amazon~trass": "아마존 ~ TRASS"
+  "revenue~trass": "매출 ~ TRASS"
 };
 
-const KIND_ORDER: ModelPair["kind"][] = ["revenue~amazon", "revenue~trass", "amazon~trass"];
+const KIND_ORDER: ModelPair["kind"][] = ["revenue~amazon", "revenue~trass"];
 
 function qIndex(quarter: string): number | null {
   const match = quarter.match(/^(\d{4})-Q([1-4])$/);

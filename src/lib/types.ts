@@ -128,7 +128,7 @@ export type LagFit = {
 
 export type ModelPair = {
   id: string;
-  kind: "revenue~amazon" | "revenue~trass" | "amazon~trass";
+  kind: "revenue~amazon" | "revenue~trass";
   targetLabel: string;
   predictorLabel: string;
   targetUnit: "krw" | "usd";
@@ -157,6 +157,39 @@ export type RevenueModels = {
   maxLag: number;
   minNForBest: number;
   companies: CompanyModels[];
+};
+
+export type DemandSource = "google_trends" | "baidu_index";
+
+export type DemandPoint = {
+  date: string;
+  value: number | null;
+};
+
+export type DemandSeries = {
+  company: string;
+  source: DemandSource;
+  source_label: string;
+  keyword: string;
+  geo: string;
+  geo_label: string;
+  unit: "trends_index" | "baidu_index";
+  is_sample: boolean;
+  note: string;
+  points: DemandPoint[];
+  latest: number | null;
+  latest_date: string | null;
+  yoy_change: number | null;
+  mom_change: number | null;
+};
+
+export type DemandSignals = {
+  generatedAt: string;
+  fetchedLive: boolean;
+  anySample: boolean;
+  sources: Array<{ id: DemandSource; label: string; auth: string; status: "live" | "sample" }>;
+  series: DemandSeries[];
+  notes: string[];
 };
 
 export type DashboardOverview = {
@@ -431,6 +464,7 @@ export type DashboardData = {
   quarterlyComparison: QuarterlyComparison[];
   companyStockMonthly: StockMonthlyRow[];
   revenueModels: RevenueModels;
+  demandSignals?: DemandSignals;
   tables: {
     amazon_us_monthly: MonthlyProductLike[];
     company_monthly_proxy: Array<{

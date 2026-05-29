@@ -4,7 +4,7 @@
 // revenue, so "사업부" here means the company as a whole). Predictors are the Amazon US
 // proxy and TRASS export values. Amazon and TRASS are never combined in one model
 // because they measure overlapping demand; we only fit pairwise relationships:
-//   revenue ~ amazon, revenue ~ trass(scope), amazon ~ trass(scope).
+//   revenue ~ amazon, revenue ~ trass(scope).
 // Each pair is fitted across recognition lags 0..MAX_LAG quarters, in both levels and
 // year-over-year mode, so the timing that best explains revenue can be read off directly.
 
@@ -51,7 +51,7 @@ export type ModelMode = "levels" | "yoy";
 
 export type ModelPair = {
   id: string;
-  kind: "revenue~amazon" | "revenue~trass" | "amazon~trass";
+  kind: "revenue~amazon" | "revenue~trass";
   targetLabel: string;
   predictorLabel: string;
   targetUnit: ModelUnit;
@@ -426,25 +426,6 @@ export function buildRevenueModels(input: {
             note: null,
             target: dart,
             predictor: trassScopeSeries(trassRows, scope, "krw")
-          })
-        );
-      }
-    }
-
-    if (hasAmazon && hasTrass) {
-      for (const scope of trassScopes) {
-        pairs.push(
-          buildPair({
-            id: `amazon~trass:${scope}`,
-            kind: "amazon~trass",
-            targetLabel: "Amazon US 추정 매출",
-            predictorLabel: `TRASS 수출액 (${SCOPE_LABEL[scope] ?? scope})`,
-            targetUnit: "usd",
-            predictorUnit: "usd",
-            scope,
-            note: "두 proxy의 정합성 점검용 (둘 다 동일 수요를 측정하므로 회귀에 함께 넣지 않습니다).",
-            target: amazon,
-            predictor: trassScopeSeries(trassRows, scope, "usd")
           })
         );
       }

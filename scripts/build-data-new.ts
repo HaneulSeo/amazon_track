@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { parse } from "csv-parse/sync";
 import { buildRevenueModels } from "./revenue-models";
+import { buildDemandSignals } from "./demand-signals";
 
 type Company = "coway" | "samyang" | "tnl";
 type CanonicalColumn =
@@ -1918,7 +1919,8 @@ function writeOutputsFromExistingDashboard(existing: ExistingDashboardJson) {
       dart: tables.dart_quarterly_revenue ?? [],
       amazonMonthly: tables.company_monthly_proxy ?? [],
       trassQuarterly: tables.trass_trade_quarterly ?? []
-    })
+    }),
+    demandSignals: buildDemandSignals()
   };
 
   fs.writeFileSync(path.join(publicDataRoot, "dashboard_data.json"), JSON.stringify(refreshed, null, 2));
@@ -2073,6 +2075,7 @@ function main() {
     quarterlyComparison,
     companyStockMonthly,
     revenueModels,
+    demandSignals: buildDemandSignals(),
     tables: {
       amazon_us_monthly: productMonthly,
       company_monthly_proxy: companyMonthly,

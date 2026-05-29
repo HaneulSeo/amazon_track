@@ -6,6 +6,7 @@ import type {
   DashboardData,
   DashboardIndustry,
   DartQuarterlyRevenueRow,
+  DemandSeries,
   FamilyMonthlyLike,
   MonthlyProductLike,
   QuarterlyComparison,
@@ -35,9 +36,14 @@ export const sourceGapMap = dashboardData.tables.source_gap_map;
 export const companyCoverageScore = dashboardData.tables.company_coverage_score;
 export const companyMonthlyProxy = dashboardData.tables.company_monthly_proxy;
 export const revenueModels = dashboardData.revenueModels;
+export const demandSignals = dashboardData.demandSignals ?? null;
 
 export function getCompanyModels(companyId: string) {
   return revenueModels?.companies.find((entry) => entry.company === companyId) ?? null;
+}
+
+export function getCompanyDemandSeries(companyId: string): DemandSeries[] {
+  return demandSignals?.series.filter((entry) => entry.company === companyId) ?? [];
 }
 
 export function getCompany(companyId: string): DashboardCompany | undefined {

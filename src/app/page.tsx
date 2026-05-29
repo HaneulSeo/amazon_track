@@ -1,19 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
+  ArrowUpRight,
   BarChart3,
   Building2,
   ChevronRight,
   CircleDollarSign,
+  Clock,
   Database,
   Factory,
+  Gauge,
+  Globe,
   Home,
   LayoutDashboard,
+  LayoutGrid,
   LineChart,
   Package,
   Search,
+  ShieldHalf,
   Sigma,
   Sparkles,
   Store,
@@ -27,11 +33,13 @@ import { BenchmarkDataTable } from "@/components/benchmark/BenchmarkDataTable";
 import { ComparisonExplorer } from "@/components/benchmark/ComparisonExplorer";
 import { ProductFamilyToggle } from "@/components/products/ProductFamilyToggle";
 import { RevenueModelExplorer } from "@/components/model/RevenueModelExplorer";
+import { DemandSignalPanel } from "@/components/model/DemandSignalPanel";
 import {
   companies,
   companyCoverageScore,
   getCompany,
   getCompanyDartQuarterly,
+  getCompanyDemandSeries,
   getCompanyModels,
   getCompanyCoverage,
   getCompanyMonthly,
@@ -97,37 +105,6 @@ export default function App() {
   const selected = selectedCompany ? getCompany(selectedCompany) ?? null : null;
   const selectedIndustry = activeIndustry ? getIndustry(activeIndustry) ?? null : null;
 
-  const summaryCards = useMemo(
-    () => [
-      {
-        label: "Tracked companies",
-        value: String(overview.tracked_company_count),
-        helper: `${overview.tracked_industry_count} industries`,
-        icon: Store
-      },
-      {
-        label: "Tracked ASINs",
-        value: formatNumber(overview.total_asin_count),
-        helper: `${overview.raw_file_count} raw CSVs`,
-        icon: Package
-      },
-      {
-        label: "Latest month",
-        value: overview.latest_month ?? "-",
-        helper: formatMoneyFromUsd(overview.latest_revenue, currency, usdKrw),
-        icon: CircleDollarSign
-      },
-      {
-        label: "Avg coverage",
-        value: overview.average_coverage_score === null ? "-" : `${overview.average_coverage_score.toFixed(1)}`,
-        helper: overview.most_needed_company ? `Next: ${overview.most_needed_company.label}` : "Coverage score",
-        delta: null,
-        icon: TrendingUp
-      }
-    ],
-    [currency, usdKrw]
-  );
-
   const industryRows = industries.map((industry) => ({
     ...industry,
     latestRevenueLabel: formatMoneyFromUsd(industry.latest_revenue, currency, usdKrw),
@@ -137,8 +114,9 @@ export default function App() {
   if (workspace === "home") {
     return (
       <Shell currency={currency} fxAsOf={fxAsOf} setCurrency={setCurrency} usdKrw={usdKrw}>
-        <MainDashboard
-          overviewCards={summaryCards}
+        <Launcher
+          currency={currency}
+          usdKrw={usdKrw}
           onOpenAmazon={() => {
             setWorkspace("amazon");
             setActiveIndustry(null);
@@ -155,6 +133,12 @@ export default function App() {
       fxAsOf={fxAsOf}
       setCurrency={setCurrency}
       usdKrw={usdKrw}
+      appName="Amazon Tracker"
+      onHome={() => {
+        setWorkspace("home");
+        setActiveIndustry(null);
+        setSelectedCompany(null);
+      }}
       sidebar={
         <AmazonSidebar
           activeIndustry={activeIndustry}
@@ -211,7 +195,9 @@ function Shell({
   fxAsOf,
   setCurrency,
   sidebar,
-  usdKrw
+  usdKrw,
+  appName,
+  onHome
 }: {
   children: React.ReactNode;
   currency: DisplayCurrency;
@@ -219,14 +205,16 @@ function Shell({
   setCurrency: (currency: DisplayCurrency) => void;
   sidebar?: React.ReactNode;
   usdKrw: number;
+  appName?: string;
+  onHome?: () => void;
 }) {
   return (
-    <main className="min-h-screen bg-[#f4f6fa] text-toss-ink">
+    <main className="min-h-screen text-toss-ink">
       <div className="flex min-h-screen">
         {sidebar}
         <div className="flex min-w-0 flex-1 flex-col">
-          <TopBar currency={currency} setCurrency={setCurrency} usdKrw={usdKrw} fxAsOf={fxAsOf} />
-          <div className="mx-auto w-full max-w-[1480px] px-4 py-5 sm:px-6 lg:px-8">{children}</div>
+          <TopBar currency={currency} setCurrency={setCurrency} usdKrw={usdKrw} fxAsOf={fxAsOf} appName={appName} onHome={onHome} />
+          <div className="mx-auto w-full max-w-[1520px] px-4 py-6 sm:px-6 lg:px-8">{children}</div>
         </div>
       </div>
     </main>
@@ -237,38 +225,52 @@ function TopBar({
   currency,
   setCurrency,
   usdKrw,
-  fxAsOf
+  fxAsOf,
+  appName,
+  onHome
 }: {
   currency: DisplayCurrency;
   setCurrency: (currency: DisplayCurrency) => void;
   usdKrw: number;
   fxAsOf: string | null;
+  appName?: string;
+  onHome?: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-20 border-b border-[#dde2ea] bg-white/90 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
-      <div className="mx-auto flex max-w-[1480px] flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-md bg-toss-blue text-white">
-            <LineChart size={21} />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-toss-gray">Dashboard</p>
-            <h1 className="text-xl font-extrabold sm:text-2xl">Amazon Tracking</h1>
-          </div>
-        </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-toss-gray" size={17} />
+    <header className="sticky top-0 z-30 border-b border-toss-line/80 bg-white/75 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-[1520px] items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <button
+          type="button"
+          onClick={onHome}
+          disabled={!onHome}
+          className="flex items-center gap-2.5 text-left disabled:cursor-default"
+        >
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-[#3182f6] to-[#1b64da] text-white shadow-sm">
+            <LayoutGrid size={18} strokeWidth={2.4} />
+          </span>
+          <span className="flex items-center gap-2">
+            <span className="text-base font-extrabold tracking-tight">Research Console</span>
+            {appName ? (
+              <>
+                <ChevronRight size={15} className="text-toss-gray" />
+                <span className="text-base font-bold text-toss-ink2">{appName}</span>
+              </>
+            ) : null}
+          </span>
+        </button>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="relative hidden md:block">
+            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-toss-gray" size={16} />
             <input
-              className="h-10 w-full rounded-md border-0 bg-[#f4f6fa] pl-9 pr-4 text-sm outline-none ring-1 ring-[#dde2ea] focus:ring-2 focus:ring-toss-blue sm:w-72"
-              placeholder="Search"
+              className="h-9 w-56 rounded-lg border-0 bg-toss-wash2 pl-9 pr-4 text-sm outline-none ring-1 ring-toss-line transition focus:bg-white focus:ring-2 focus:ring-toss-blue lg:w-64"
+              placeholder="검색"
             />
           </div>
-          <div className="flex items-center rounded-md bg-[#f4f6fa] p-1 ring-1 ring-[#dde2ea]">
+          <div className="flex items-center rounded-lg bg-toss-wash2 p-1 ring-1 ring-toss-line">
             {(["USD", "KRW"] as DisplayCurrency[]).map((item) => (
               <button
                 key={item}
-                className={`h-8 rounded px-3 text-sm font-extrabold transition ${currency === item ? "bg-white text-toss-blue shadow-sm" : "text-toss-gray"}`}
+                className={`h-7 rounded-md px-3 text-sm font-extrabold transition ${currency === item ? "bg-white text-toss-blue shadow-sm" : "text-toss-gray hover:text-toss-ink2"}`}
                 type="button"
                 onClick={() => setCurrency(item)}
               >
@@ -276,52 +278,197 @@ function TopBar({
               </button>
             ))}
           </div>
-          <p className="text-xs font-semibold text-toss-gray">USD/KRW {usdKrw.toLocaleString("ko-KR", { maximumFractionDigits: 2 })}</p>
+          <div
+            className="hidden items-center gap-1.5 rounded-lg bg-toss-wash2 px-3 py-2 ring-1 ring-toss-line sm:flex"
+            title={fxAsOf ? `FX updated ${fxAsOf}` : undefined}
+          >
+            <span className="text-xs font-bold text-toss-gray">USD/KRW</span>
+            <span className="tnum text-xs font-extrabold">{usdKrw.toLocaleString("ko-KR", { maximumFractionDigits: 2 })}</span>
+          </div>
         </div>
       </div>
-      {fxAsOf ? <p className="mx-auto mt-1 max-w-[1480px] text-right text-[11px] font-semibold text-toss-gray">FX updated {fxAsOf}</p> : null}
     </header>
   );
 }
 
-function MainDashboard({
-  overviewCards,
+type MiniApp = {
+  id: string;
+  name: string;
+  tagline: string;
+  description: string;
+  icon: LucideIcon;
+  accent: string;
+  status: "live" | "soon";
+};
+
+const MINI_APPS: MiniApp[] = [
+  {
+    id: "amazon",
+    name: "Amazon Tracker",
+    tagline: "해외 수요 선행지표",
+    description: "Amazon US 판매 데이터를 산업·기업·제품군·월 단위로 표준화하고, DART 분기 매출·TRASS 수출과 회귀로 연결합니다.",
+    icon: Store,
+    accent: "from-[#3182f6] to-[#1b64da]",
+    status: "live"
+  },
+  {
+    id: "trade",
+    name: "무역 데이터",
+    tagline: "수출입 통관 흐름",
+    description: "관세청·TRASS 기반 국가별 수출입 물량과 단가를 수집해 수요 동향을 추적합니다.",
+    icon: Globe,
+    accent: "from-[#00a661] to-[#018a52]",
+    status: "soon"
+  },
+  {
+    id: "screener",
+    name: "종목 스크리너",
+    tagline: "중소형주 발굴",
+    description: "재무·수급 조건으로 중소형주를 선별하고 회사별 추적 리스트를 만듭니다.",
+    icon: Gauge,
+    accent: "from-[#7c5cff] to-[#5b3fd6]",
+    status: "soon"
+  },
+  {
+    id: "risk",
+    name: "리스크 엔진",
+    tagline: "시장 국면 신호",
+    description: "저점·고점 양방향 신호와 크래시 동행 밀도로 시장 국면을 점검합니다.",
+    icon: ShieldHalf,
+    accent: "from-[#ff8f00] to-[#f04452]",
+    status: "soon"
+  }
+];
+
+function Launcher({
+  currency,
+  usdKrw,
   onOpenAmazon
 }: {
-  overviewCards: Array<{ label: string; value: string; helper?: string; delta?: number | null; icon: LucideIcon }>;
+  currency: DisplayCurrency;
+  usdKrw: number;
   onOpenAmazon: () => void;
 }) {
+  const heroStats = [
+    { label: "추적 기업", value: String(overview.tracked_company_count), icon: Store },
+    { label: "추적 ASIN", value: formatNumber(overview.total_asin_count), icon: Package },
+    { label: "최신 데이터", value: overview.latest_month ?? "-", icon: CircleDollarSign },
+    { label: "평균 커버리지", value: overview.average_coverage_score === null ? "-" : overview.average_coverage_score.toFixed(1), icon: TrendingUp }
+  ];
+
+  const amazonStats = [
+    { label: "추적 기업", value: String(overview.tracked_company_count) },
+    { label: "최신 월", value: overview.latest_month ?? "-" },
+    { label: "ASIN", value: formatNumber(overview.total_asin_count) },
+    { label: "커버리지", value: overview.average_coverage_score === null ? "-" : overview.average_coverage_score.toFixed(1) }
+  ];
+
   return (
-    <div className="space-y-5">
-      <section className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea] sm:p-6">
-        <button
-          className="group w-full rounded-lg bg-white p-2 text-left transition"
-          type="button"
-          onClick={onOpenAmazon}
-        >
-          <div className="flex items-start justify-between gap-4">
-            <div className="grid h-12 w-12 place-items-center rounded-lg bg-toss-blue text-white">
-              <Store size={23} />
-            </div>
-            <ChevronRight className="text-toss-gray transition group-hover:translate-x-1 group-hover:text-toss-blue" />
-          </div>
-          <p className="mt-8 text-sm font-bold text-toss-blue">Data Module</p>
-          <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">Amazon Tracker</h2>
-          <p className="mt-3 text-sm font-medium leading-6 text-toss-gray">
-            Amazon US CSV를 산업, 기업, 제품군, 월 단위로 표준화해서 선행지표로 봅니다.
-          </p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-            {overviewCards.map((card) => (
-              <KpiCard key={card.label} {...card} />
-            ))}
-          </div>
-          <div className="mt-7 inline-flex items-center gap-2 text-sm font-extrabold text-toss-blue">
-            Open tracker
-            <ChevronRight className="transition group-hover:translate-x-1" size={17} />
-          </div>
-        </button>
+    <div className="space-y-8">
+      <section className="overflow-hidden rounded-xl2 bg-gradient-to-br from-[#10172a] via-[#16233f] to-[#1b3a6b] p-7 text-white shadow-soft sm:p-9">
+        <p className="text-sm font-bold text-white/70">투자 리서치 콘솔</p>
+        <h1 className="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">데이터로 보는 기업 추적</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-white/75">
+          여러 데이터 모듈을 한 곳에서 실행합니다. 아래 아이콘을 눌러 각 프로그램으로 이동하세요.
+        </p>
+        <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {heroStats.map((stat) => {
+            const StatIcon = stat.icon;
+            return (
+              <div key={stat.label} className="rounded-2xl bg-white/10 p-4 ring-1 ring-white/10 backdrop-blur">
+                <div className="flex items-center gap-2 text-white/70">
+                  <StatIcon size={15} />
+                  <span className="text-xs font-bold uppercase tracking-wide">{stat.label}</span>
+                </div>
+                <p className="tnum mt-2 text-2xl font-extrabold">{stat.value}</p>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section>
+        <div className="mb-4 flex items-center gap-2">
+          <LayoutGrid size={16} className="text-toss-gray" />
+          <h2 className="text-xs font-extrabold uppercase tracking-wider text-toss-gray">프로그램</h2>
+        </div>
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {MINI_APPS.map((app) => (
+            <AppTile
+              key={app.id}
+              app={app}
+              stats={app.id === "amazon" ? amazonStats : undefined}
+              onOpen={app.id === "amazon" ? onOpenAmazon : undefined}
+            />
+          ))}
+        </div>
       </section>
     </div>
+  );
+}
+
+function AppTile({
+  app,
+  stats,
+  onOpen
+}: {
+  app: MiniApp;
+  stats?: Array<{ label: string; value: string }>;
+  onOpen?: () => void;
+}) {
+  const Icon = app.icon;
+  const isLive = app.status === "live";
+  return (
+    <button
+      type="button"
+      disabled={!isLive}
+      onClick={isLive ? onOpen : undefined}
+      className={`group relative flex h-full flex-col rounded-xl2 p-6 text-left transition ${
+        isLive
+          ? "cursor-pointer bg-white shadow-card ring-1 ring-toss-line/70 hover:-translate-y-1 hover:shadow-pop hover:ring-toss-blue/40"
+          : "cursor-default border-2 border-dashed border-toss-line bg-white/50"
+      }`}
+    >
+      <div className="flex items-start justify-between">
+        <span
+          className={`grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br text-white shadow-sm ${app.accent} ${isLive ? "" : "opacity-40 grayscale"}`}
+        >
+          <Icon size={26} strokeWidth={2.2} />
+        </span>
+        {isLive ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-pos/10 px-2.5 py-1 text-xs font-bold text-pos">
+            <span className="h-1.5 w-1.5 rounded-full bg-pos" /> 실시간
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-toss-wash2 px-2.5 py-1 text-xs font-bold text-toss-gray">
+            <Clock size={12} /> 준비 중
+          </span>
+        )}
+      </div>
+      <h3 className={`mt-5 text-xl font-extrabold ${isLive ? "text-toss-ink" : "text-toss-gray"}`}>{app.name}</h3>
+      <p className={`mt-1 text-sm font-bold ${isLive ? "text-toss-blue" : "text-toss-gray"}`}>{app.tagline}</p>
+      <p className="mt-2 text-sm leading-6 text-toss-ink2">{app.description}</p>
+      {isLive && stats ? (
+        <div className="mt-5 grid grid-cols-2 gap-2">
+          {stats.map((stat) => (
+            <div key={stat.label} className="rounded-xl bg-toss-wash px-3 py-2.5">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-toss-gray">{stat.label}</p>
+              <p className="tnum mt-0.5 text-base font-extrabold text-toss-ink">{stat.value}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      <div className={`mt-6 inline-flex items-center gap-1.5 text-sm font-extrabold ${isLive ? "text-toss-blue" : "text-toss-gray"}`}>
+        {isLive ? (
+          <>
+            열기
+            <ArrowUpRight size={16} className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </>
+        ) : (
+          "공개 예정"
+        )}
+      </div>
+    </button>
   );
 }
 
@@ -393,7 +540,7 @@ function AmazonSidebar({
 
       <div className="mt-8 rounded-lg bg-[#f7f9fc] p-4">
         <p className="text-sm font-bold">Data status</p>
-        <p className="mt-2 text-sm leading-6 text-toss-gray">
+        <p className="mt-2 text-sm leading-6 text-toss-ink2">
           {overview.raw_file_count} CSV files · {overview.total_asin_count} ASINs · {overview.month_count} months
         </p>
       </div>
@@ -433,7 +580,7 @@ function AllIndustriesWorkspace({
           <div>
             <p className="text-sm font-bold text-toss-blue">Amazon Tracker</p>
             <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">Industry Overview</h2>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-gray">
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-ink2">
               산업별로 Amazon US proxy의 설명력과 데이터 보강 우선순위를 먼저 확인합니다.
             </p>
           </div>
@@ -461,7 +608,7 @@ function AllIndustriesWorkspace({
               <span className="rounded px-2 py-1 text-xs font-bold bg-emerald-50 text-emerald-600">{industry.company_count} company</span>
             </div>
             <h3 className="mt-5 text-xl font-extrabold">{industry.name}</h3>
-            <p className="mt-2 min-h-10 text-sm font-medium leading-5 text-toss-gray">{industry.interpretation}</p>
+            <p className="mt-2 min-h-10 text-sm font-medium leading-5 text-toss-ink2">{industry.interpretation}</p>
             <div className="mt-5 space-y-2 text-sm">
               <MetricRow label="Latest revenue" value={industry.latestRevenueLabel} />
               <MetricRow label="Coverage" value={industry.coverageLabel} />
@@ -523,7 +670,7 @@ function IndustryWorkspace({
           <div>
             <p className="text-sm font-bold text-toss-blue">Amazon Tracker / {industry?.name ?? "Industry"}</p>
             <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">Industry Company Overview</h2>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-gray">
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-ink2">
               산업군 안의 기업별 트래킹 상태와 커버리지 점수를 보고, 기업 상세로 들어갑니다.
             </p>
           </div>
@@ -561,7 +708,7 @@ function IndustryWorkspace({
                     </span>
                   </div>
                   <p className="text-lg font-extrabold">{company.label}</p>
-                  <p className="mt-1 text-sm font-medium text-toss-gray">{company.interpretation}</p>
+                  <p className="mt-1 text-sm font-medium text-toss-ink2">{company.interpretation}</p>
                 </div>
                 <ChevronRight className="shrink-0 text-toss-gray transition group-hover:translate-x-1 group-hover:text-toss-blue" size={20} />
               </button>
@@ -624,7 +771,7 @@ function CompanyWorkspace({
               {industry?.name ?? "Industry"} / {company.ticker}
             </p>
             <h2 className="mt-1 text-4xl font-extrabold sm:text-5xl">{company.label}</h2>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-gray">{company.interpretation}</p>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-ink2">{company.interpretation}</p>
           </div>
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
             <TinyStat label="Latest Amazon month" value={company.latest_month ?? "No data"} />
@@ -709,12 +856,12 @@ function OverviewTab({
     <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
       <SectionCard eyebrow="Executive Summary" title={`${company.label} proxy summary`}>
         <div className="space-y-4">
-          <p className="text-sm leading-6 text-toss-gray">{company.interpretation}</p>
+          <p className="text-sm leading-6 text-toss-ink2">{company.interpretation}</p>
           <div className="grid gap-3 sm:grid-cols-2">
             <MiniCard label="Amazon proxy role" value={company.amazon_us_direct_coverage_of_total.base >= 0.05 ? "Useful signal" : "Reference signal"} helper="proxy strength" />
             <MiniCard label="Tracked families" value={String(company.family_count)} helper={`${company.asin_count} ASINs`} />
           </div>
-          <div className="rounded-lg bg-[#f7f9fc] p-4 text-sm leading-6 text-toss-gray">
+          <div className="rounded-lg bg-[#f7f9fc] p-4 text-sm leading-6 text-toss-ink2">
             {company.latest_month ? (
               <p>
                 Latest Amazon month is <span className="font-bold text-toss-ink">{company.latest_month}</span> and latest revenue is{" "}
@@ -760,7 +907,7 @@ function ProductsTab({
         {familyGroups.length ? (
           <div className="space-y-4">
             <ProductFamilyToggle options={familyGroups.map((group) => ({ id: group.id, label: group.label, count: group.rows.length }))} selectedFamily={selectedFamily} onChange={setSelectedFamily} />
-            <div className="rounded-lg bg-[#f7f9fc] p-4 text-sm leading-6 text-toss-gray">
+            <div className="rounded-lg bg-[#f7f9fc] p-4 text-sm leading-6 text-toss-ink2">
               {company.company === "samyang" ? (
                 <p>
                   Samyang은 <span className="font-bold text-toss-ink">Sauce</span>와 <span className="font-bold text-toss-ink">Ramen</span>으로만 묶어 보여줍니다. Sauce는 Buldak sauce만, 나머지는 Ramen으로 봅니다.
@@ -921,11 +1068,18 @@ function ModelTab({
   usdKrw: number;
 }) {
   const models = getCompanyModels(company.company);
+  const demandSeries = getCompanyDemandSeries(company.company);
+  const demandHasSample = demandSeries.some((entry) => entry.is_sample);
   return (
     <div className="space-y-5">
       <SectionCard eyebrow="Revenue Modeling" title="분기 매출 예측 회귀">
         <RevenueModelExplorer models={models} currency={currency} usdKrw={usdKrw} minNForBest={revenueModels?.minNForBest} />
       </SectionCard>
+      {demandSeries.length ? (
+        <SectionCard eyebrow="Demand Signals" title="검색 수요 신호 (무료)">
+          <DemandSignalPanel series={demandSeries} anySample={demandHasSample} />
+        </SectionCard>
+      ) : null}
     </div>
   );
 }
@@ -1093,7 +1247,7 @@ function DataTab({ company }: { company: DashboardCompany }) {
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <p className="font-extrabold">{item.source_name}</p>
-                  <p className="mt-1 text-sm leading-6 text-toss-gray">{item.description}</p>
+                  <p className="mt-1 text-sm leading-6 text-toss-ink2">{item.description}</p>
                 </div>
                 <div className="flex shrink-0 gap-2">
                   <Badge>{item.source_type}</Badge>
@@ -1101,7 +1255,7 @@ function DataTab({ company }: { company: DashboardCompany }) {
                   <Badge>P{item.priority}</Badge>
                 </div>
               </div>
-              <p className="mt-3 text-sm text-toss-gray">{item.why_it_matters}</p>
+              <p className="mt-3 text-sm leading-6 text-toss-ink2">{item.why_it_matters}</p>
             </div>
           ))}
         </div>
@@ -1114,7 +1268,7 @@ function DataTab({ company }: { company: DashboardCompany }) {
             <div key={item.source_name} className="flex flex-col gap-2 rounded-lg bg-[#f7f9fc] p-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="font-extrabold">{item.source_name}</p>
-                <p className="mt-1 text-sm leading-6 text-toss-gray">{item.description}</p>
+                <p className="mt-1 text-sm leading-6 text-toss-ink2">{item.description}</p>
               </div>
               <div className="flex shrink-0 gap-2">
                 <Badge>{item.current_status}</Badge>
@@ -1154,7 +1308,7 @@ function DataTab({ company }: { company: DashboardCompany }) {
 
       <details className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
         <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">Methodology</summary>
-        <div className="mt-4 space-y-3 text-sm leading-6 text-toss-gray">
+        <div className="mt-4 space-y-3 text-sm leading-6 text-toss-ink2">
           {methodologyNotes.map((note) => (
             <p key={note}>{note}</p>
           ))}

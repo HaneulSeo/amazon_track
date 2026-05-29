@@ -4,7 +4,7 @@
 
 :root {
   color: #191f28;
-  background: #f6f8fb;
+  background: #eef1f6;
 }
 
 * {
@@ -19,8 +19,10 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(circle at top right, rgba(49, 130, 246, 0.12), transparent 30rem),
-    linear-gradient(180deg, #ffffff 0%, #f6f8fb 34rem);
+    radial-gradient(900px circle at 100% -5%, rgba(49, 130, 246, 0.10), transparent 55%),
+    radial-gradient(700px circle at -5% 0%, rgba(0, 166, 97, 0.06), transparent 45%),
+    #eef1f6;
+  background-attachment: fixed;
   color: #191f28;
   font-family:
     ui-sans-serif,
@@ -28,8 +30,11 @@ body {
     -apple-system,
     BlinkMacSystemFont,
     "Segoe UI",
+    "Pretendard",
     sans-serif;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 button,
@@ -42,6 +47,12 @@ input {
   background: #cfe4ff;
 }
 
+/* Numeric data reads cleaner with tabular figures and aligned columns. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
 .recharts-cartesian-axis-tick-value {
   fill: #8b95a1;
   font-size: 12px;
@@ -49,4 +60,27 @@ input {
 
 .recharts-tooltip-wrapper {
   outline: none;
+}
+
+/* Slim, unobtrusive scrollbars to match the dashboard chrome. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cdd3db transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #cdd3db;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #b0b8c1;
+  background-clip: content-box;
 }
