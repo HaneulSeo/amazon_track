@@ -484,35 +484,35 @@ function AmazonSidebar({
   onShowAll: () => void;
 }) {
   return (
-    <aside className="hidden w-72 shrink-0 border-r border-[#dde2ea] bg-white px-5 py-6 lg:block">
+    <aside className="hidden w-72 shrink-0 border-r border-toss-line bg-white px-5 py-6 lg:block">
       <div className="flex items-center gap-3">
         <div className="grid h-11 w-11 place-items-center rounded-lg bg-toss-blue text-white">
           <Store size={22} />
         </div>
         <div>
           <p className="text-lg font-extrabold">Amazon Tracker</p>
-          <p className="text-xs font-semibold text-toss-gray">Industry console</p>
+          <p className="text-xs font-semibold text-toss-gray">산업 콘솔</p>
         </div>
       </div>
 
       <button className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-toss-gray hover:text-toss-blue" type="button" onClick={onBackHome}>
         <Home size={16} />
-        Main dashboard
+        메인으로
       </button>
 
       <div className="mt-7">
-        <p className="mb-3 px-3 text-xs font-bold uppercase text-toss-gray">Amazon sections</p>
+        <p className="mb-3 px-3 text-xs font-bold uppercase tracking-wide text-toss-gray">산업 카테고리</p>
         <div className="space-y-1">
           <button
-            className={`flex w-full items-center justify-between rounded-md px-3 py-3 text-left text-sm font-bold transition ${
-              activeIndustry === null ? "bg-toss-blue text-white shadow-soft" : "text-toss-gray hover:bg-[#f1f4f8] hover:text-toss-ink"
+            className={`flex w-full items-center justify-between rounded-lg px-3 py-3 text-left text-sm font-bold transition ${
+              activeIndustry === null ? "bg-toss-blue text-white shadow-sm" : "text-toss-gray hover:bg-toss-wash2 hover:text-toss-ink"
             }`}
             type="button"
             onClick={onShowAll}
           >
             <span className="flex items-center gap-3">
               <LayoutDashboard size={18} />
-              All Industries
+              전체 산업
             </span>
             <span>{industries.length}</span>
           </button>
@@ -521,8 +521,8 @@ function AmazonSidebar({
             return (
               <button
                 key={industry.id}
-                className={`flex w-full items-center justify-between rounded-md px-3 py-3 text-left text-sm font-bold transition ${
-                  activeIndustry === industry.id ? "bg-toss-blue text-white shadow-soft" : "text-toss-gray hover:bg-[#f1f4f8] hover:text-toss-ink"
+                className={`flex w-full items-center justify-between rounded-lg px-3 py-3 text-left text-sm font-bold transition ${
+                  activeIndustry === industry.id ? "bg-toss-blue text-white shadow-sm" : "text-toss-gray hover:bg-toss-wash2 hover:text-toss-ink"
                 }`}
                 type="button"
                 onClick={() => onSelectIndustry(industry.id)}
@@ -538,10 +538,10 @@ function AmazonSidebar({
         </div>
       </div>
 
-      <div className="mt-8 rounded-lg bg-[#f7f9fc] p-4">
-        <p className="text-sm font-bold">Data status</p>
+      <div className="mt-8 rounded-xl bg-toss-wash p-4">
+        <p className="text-sm font-bold">데이터 현황</p>
         <p className="mt-2 text-sm leading-6 text-toss-ink2">
-          {overview.raw_file_count} CSV files · {overview.total_asin_count} ASINs · {overview.month_count} months
+          CSV {overview.raw_file_count}개 · ASIN {overview.total_asin_count}개 · {overview.month_count}개월
         </p>
       </div>
     </aside>
@@ -574,21 +574,21 @@ function AllIndustriesWorkspace({
   const latestTrend = trendRows.some((row) => row.revenue !== null || row.units !== null || row.avg_price !== null || row.avg_bsr !== null);
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea] sm:p-6">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div className="space-y-6">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-toss-line sm:p-7">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="text-sm font-bold text-toss-blue">Amazon Tracker</p>
-            <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">Industry Overview</h2>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-ink2">
-              산업별로 Amazon US proxy의 설명력과 데이터 보강 우선순위를 먼저 확인합니다.
+            <h2 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">산업 개요</h2>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-toss-ink2">
+              산업별로 Amazon US 프록시의 설명력과 데이터 보강 우선순위를 먼저 확인합니다.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <TinyStat label="Tracked industries" value={String(overview.tracked_industry_count)} />
-            <TinyStat label="Tracked companies" value={String(overview.tracked_company_count)} />
-            <TinyStat label="ASINs" value={formatNumber(overview.total_asin_count)} />
-            <TinyStat label="Avg coverage" value={overview.average_coverage_score === null ? "-" : `${overview.average_coverage_score.toFixed(1)}`} tone={trendTone(overview.average_coverage_score)} />
+            <TinyStat label="추적 산업" value={String(overview.tracked_industry_count)} />
+            <TinyStat label="추적 기업" value={String(overview.tracked_company_count)} />
+            <TinyStat label="ASIN" value={formatNumber(overview.total_asin_count)} />
+            <TinyStat label="평균 커버리지" value={overview.average_coverage_score === null ? "-" : `${overview.average_coverage_score.toFixed(1)}`} tone={trendTone(overview.average_coverage_score)} />
           </div>
         </div>
       </section>
@@ -597,32 +597,32 @@ function AllIndustriesWorkspace({
         {industryRows.map((industry) => (
           <button
             key={industry.id}
-            className="group rounded-lg bg-white p-5 text-left shadow-soft ring-1 ring-[#dde2ea] transition hover:-translate-y-0.5 hover:ring-toss-blue"
+            className="group rounded-2xl bg-white p-6 text-left shadow-card ring-1 ring-toss-line transition hover:-translate-y-1 hover:shadow-pop hover:ring-toss-blue/40"
             type="button"
             onClick={() => onSelectIndustry(industry.id)}
           >
             <div className="flex items-start justify-between gap-3">
-              <span className="grid h-10 w-10 place-items-center rounded-md bg-[#eef5ff] text-toss-blue">
+              <span className="grid h-11 w-11 place-items-center rounded-xl bg-toss-sky text-toss-blue">
                 <IndustryIcon industry={industry} />
               </span>
-              <span className="rounded px-2 py-1 text-xs font-bold bg-emerald-50 text-emerald-600">{industry.company_count} company</span>
+              <span className="rounded-full bg-pos/10 px-2.5 py-1 text-xs font-bold text-pos">기업 {industry.company_count}개</span>
             </div>
             <h3 className="mt-5 text-xl font-extrabold">{industry.name}</h3>
-            <p className="mt-2 min-h-10 text-sm font-medium leading-5 text-toss-ink2">{industry.interpretation}</p>
-            <div className="mt-5 space-y-2 text-sm">
-              <MetricRow label="Latest revenue" value={industry.latestRevenueLabel} />
-              <MetricRow label="Coverage" value={industry.coverageLabel} />
-              <MetricRow label="Latest month" value={industry.latest_month ?? "-"} />
+            <p className="mt-2 min-h-10 text-sm font-medium leading-6 text-toss-ink2">{industry.interpretation}</p>
+            <div className="mt-5 space-y-2.5 border-t border-toss-line pt-4 text-sm">
+              <MetricRow label="최신 매출" value={industry.latestRevenueLabel} />
+              <MetricRow label="커버리지" value={industry.coverageLabel} />
+              <MetricRow label="최신 월" value={industry.latest_month ?? "-"} />
             </div>
-            <div className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-toss-blue">
-              Open industry
+            <div className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-toss-blue">
+              산업 열기
               <ChevronRight className="transition group-hover:translate-x-1" size={17} />
             </div>
           </button>
         ))}
       </div>
 
-      <SectionCard eyebrow="Average Movement" title="Tracked industry trend">
+      <SectionCard eyebrow="평균 추이" title="추적 산업 추이">
         {latestTrend ? (
           <BrandTrendChart data={toBrandTrend(trendRows)} currency={currency} usdKrw={usdKrw} />
         ) : (
@@ -664,51 +664,51 @@ function IndustryWorkspace({
   );
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea] sm:p-6">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+    <div className="space-y-6">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-toss-line sm:p-7">
+        <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <p className="text-sm font-bold text-toss-blue">Amazon Tracker / {industry?.name ?? "Industry"}</p>
-            <h2 className="mt-1 text-3xl font-extrabold sm:text-4xl">Industry Company Overview</h2>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-ink2">
-              산업군 안의 기업별 트래킹 상태와 커버리지 점수를 보고, 기업 상세로 들어갑니다.
+            <p className="text-sm font-bold text-toss-blue">Amazon Tracker / {industry?.name ?? "산업"}</p>
+            <h2 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">기업 개요</h2>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-toss-ink2">
+              산업군 안의 기업별 추적 상태와 커버리지 점수를 보고, 기업 상세로 들어갑니다.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <TinyStat label="Companies" value={String(visibleCompanies.length)} />
-            <TinyStat label="ASINs" value={String(asinCount)} />
-            <TinyStat label="Coverage" value={industry?.average_coverage_score === null ? "-" : `${industry.average_coverage_score.toFixed(1)}`} tone={trendTone(industry?.average_coverage_score)} />
-            <TinyStat label="Latest month" value={industry?.latest_month ?? "-"} />
+            <TinyStat label="기업" value={String(visibleCompanies.length)} />
+            <TinyStat label="ASIN" value={String(asinCount)} />
+            <TinyStat label="커버리지" value={industry?.average_coverage_score === null ? "-" : `${industry.average_coverage_score.toFixed(1)}`} tone={trendTone(industry?.average_coverage_score)} />
+            <TinyStat label="최신 월" value={industry?.latest_month ?? "-"} />
           </div>
         </div>
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-        <div className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
-          <div className="mb-4 flex items-center justify-between">
+        <div className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-toss-line">
+          <div className="mb-5 flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-toss-blue">Companies</p>
-              <h3 className="mt-1 text-xl font-extrabold">{industry?.name ?? "Industry"} portfolio</h3>
+              <p className="text-sm font-bold text-toss-blue">기업 목록</p>
+              <h3 className="mt-1 text-xl font-extrabold">{industry?.name ?? "산업"} 포트폴리오</h3>
             </div>
-            <span className="rounded-md bg-[#eef5ff] px-3 py-1 text-xs font-bold text-toss-blue">{visibleCompanies.length} company</span>
+            <span className="rounded-full bg-toss-sky px-3 py-1 text-xs font-bold text-toss-blue">기업 {visibleCompanies.length}개</span>
           </div>
           <div className="space-y-3">
             {visibleCompanies.map((company) => (
               <button
                 key={company.company}
-                className="group flex w-full items-center justify-between rounded-lg bg-[#f7f9fc] p-4 text-left ring-1 ring-transparent transition hover:bg-white hover:ring-toss-blue"
+                className="group flex w-full items-center justify-between rounded-xl bg-toss-wash p-4 text-left ring-1 ring-transparent transition hover:bg-white hover:shadow-card hover:ring-toss-blue/40"
                 type="button"
                 onClick={() => onOpenCompany(company.company)}
               >
                 <div className="min-w-0">
                   <div className="mb-2 flex flex-wrap items-center gap-2">
-                    <span className="rounded bg-white px-2 py-1 text-xs font-bold text-toss-blue ring-1 ring-[#dde2ea]">{company.ticker}</span>
-                    <span className="rounded bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-600">
-                      {company.coverage_score === null ? "Low signal" : `${company.coverage_score.toFixed(1)} coverage`}
+                    <span className="rounded-md bg-white px-2 py-1 text-xs font-bold text-toss-blue ring-1 ring-toss-line">{company.ticker}</span>
+                    <span className="rounded-md bg-pos/10 px-2 py-1 text-xs font-bold text-pos">
+                      {company.coverage_score === null ? "신호 약함" : `커버리지 ${company.coverage_score.toFixed(1)}`}
                     </span>
                   </div>
                   <p className="text-lg font-extrabold">{company.label}</p>
-                  <p className="mt-1 text-sm font-medium text-toss-ink2">{company.interpretation}</p>
+                  <p className="mt-1 text-sm font-medium leading-6 text-toss-ink2">{company.interpretation}</p>
                 </div>
                 <ChevronRight className="shrink-0 text-toss-gray transition group-hover:translate-x-1 group-hover:text-toss-blue" size={20} />
               </button>
@@ -716,13 +716,13 @@ function IndustryWorkspace({
           </div>
         </div>
 
-        <div className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
-          <div className="mb-4 flex items-center justify-between">
+        <div className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-toss-line">
+          <div className="mb-5 flex items-center justify-between">
             <div>
-              <p className="text-sm font-bold text-toss-blue">Average Trend</p>
-              <h3 className="mt-1 text-xl font-extrabold">{industry?.name ?? "Industry"} movement</h3>
+              <p className="text-sm font-bold text-toss-blue">평균 추이</p>
+              <h3 className="mt-1 text-xl font-extrabold">{industry?.name ?? "산업"} 추이</h3>
             </div>
-            <p className="text-xs font-bold text-toss-gray">{industry?.latest_month ?? "No data"}</p>
+            <p className="text-xs font-bold text-toss-gray">{industry?.latest_month ?? "데이터 없음"}</p>
           </div>
           {hasTrend ? (
             <BrandTrendChart data={trendData} currency={currency} usdKrw={usdKrw} />
@@ -759,53 +759,53 @@ function CompanyWorkspace({
   const hasTrend = companyMonthly.some((row) => row.total_revenue !== null || row.total_units !== null || row.avg_price !== null);
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea] sm:p-6">
-        <button className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-toss-gray hover:text-toss-blue" type="button" onClick={onBack}>
+    <div className="space-y-6">
+      <section className="rounded-2xl bg-white p-6 shadow-card ring-1 ring-toss-line sm:p-7">
+        <button className="mb-5 inline-flex items-center gap-1.5 text-sm font-bold text-toss-gray hover:text-toss-blue" type="button" onClick={onBack}>
           <ArrowLeft size={17} />
-          Back to {industry?.name ?? "Industry"}
+          {industry?.name ?? "산업"}으로
         </button>
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="text-sm font-bold text-toss-blue">
-              {industry?.name ?? "Industry"} / {company.ticker}
+              {industry?.name ?? "산업"} / {company.ticker}
             </p>
-            <h2 className="mt-1 text-4xl font-extrabold sm:text-5xl">{company.label}</h2>
-            <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-toss-ink2">{company.interpretation}</p>
+            <h2 className="mt-1 text-4xl font-extrabold tracking-tight sm:text-5xl">{company.label}</h2>
+            <p className="mt-3 max-w-2xl text-sm font-medium leading-7 text-toss-ink2">{company.interpretation}</p>
           </div>
           <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
-            <TinyStat label="Latest Amazon month" value={company.latest_month ?? "No data"} />
-            <TinyStat label="Latest Amazon revenue" value={formatMoneyFromUsd(company.latest_revenue, currency, usdKrw)} />
-            <TinyStat label="Latest Amazon units" value={formatNumber(company.latest_units)} />
-            <TinyStat label="Latest DART quarter" value={latestDart?.quarter ?? "No data"} />
+            <TinyStat label="최신 아마존 월" value={company.latest_month ?? "데이터 없음"} />
+            <TinyStat label="최신 아마존 매출" value={formatMoneyFromUsd(company.latest_revenue, currency, usdKrw)} />
+            <TinyStat label="최신 아마존 판매량" value={formatNumber(company.latest_units)} />
+            <TinyStat label="최신 DART 분기" value={latestDart?.quarter ?? "데이터 없음"} />
             <TinyStat
-              label="Latest DART revenue"
-              value={latestDart?.revenue_krw === null || latestDart?.revenue_krw === undefined ? "No data" : formatMoneyFromKrw(latestDart.revenue_krw, currency, usdKrw)}
+              label="최신 DART 매출"
+              value={latestDart?.revenue_krw === null || latestDart?.revenue_krw === undefined ? "데이터 없음" : formatMoneyFromKrw(latestDart.revenue_krw, currency, usdKrw)}
             />
-            <TinyStat label="Latest stock close" value={latestStock ? formatNumber(latestStock.adj_close ?? latestStock.close) : "No data"} helper={latestStock?.month ?? "No data"} />
+            <TinyStat label="최신 종가" value={latestStock ? formatNumber(latestStock.adj_close ?? latestStock.close) : "데이터 없음"} helper={latestStock?.month ?? "데이터 없음"} />
           </div>
         </div>
       </section>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          label="Latest revenue"
+          label="최신 매출"
           value={formatMoneyFromUsd(company.latest_revenue, currency, usdKrw)}
-          helper={company.latest_month ?? "No revenue yet"}
+          helper={company.latest_month ?? "매출 데이터 없음"}
           delta={null}
           icon={CircleDollarSign}
         />
-        <KpiCard label="Latest units" value={formatNumber(company.latest_units)} helper={`${company.product_count} tracked products`} delta={null} icon={Package} />
+        <KpiCard label="최신 판매량" value={formatNumber(company.latest_units)} helper={`추적 제품 ${company.product_count}개`} delta={null} icon={Package} />
       </div>
 
-      <nav className="flex gap-2 overflow-auto rounded-lg bg-white p-2 shadow-soft ring-1 ring-[#dde2ea]">
+      <nav className="flex gap-1.5 overflow-auto rounded-2xl bg-white p-1.5 shadow-card ring-1 ring-toss-line">
         {tabs.map((tab) => {
           const TabIcon = tab.icon;
           return (
             <button
               key={tab.id}
-              className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-md px-4 text-sm font-extrabold transition ${
-                activeTab === tab.id ? "bg-toss-blue text-white" : "text-toss-gray hover:bg-[#f4f6fa] hover:text-toss-ink"
+              className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-extrabold transition ${
+                activeTab === tab.id ? "bg-toss-blue text-white shadow-sm" : "text-toss-gray hover:bg-toss-wash2 hover:text-toss-ink"
               }`}
               type="button"
               onClick={() => setActiveTab(tab.id)}
@@ -854,33 +854,33 @@ function OverviewTab({
 
   return (
     <div className="grid gap-5 xl:grid-cols-[1.15fr_0.85fr]">
-      <SectionCard eyebrow="Executive Summary" title={`${company.label} proxy summary`}>
+      <SectionCard eyebrow="요약" title={`${company.label} 요약`}>
         <div className="space-y-4">
-          <p className="text-sm leading-6 text-toss-ink2">{company.interpretation}</p>
+          <p className="text-sm leading-7 text-toss-ink2">{company.interpretation}</p>
           <div className="grid gap-3 sm:grid-cols-2">
-            <MiniCard label="Amazon proxy role" value={company.amazon_us_direct_coverage_of_total.base >= 0.05 ? "Useful signal" : "Reference signal"} helper="proxy strength" />
-            <MiniCard label="Tracked families" value={String(company.family_count)} helper={`${company.asin_count} ASINs`} />
+            <MiniCard label="아마존 프록시 역할" value={company.amazon_us_direct_coverage_of_total.base >= 0.05 ? "유효 신호" : "참고 신호"} helper="프록시 강도" />
+            <MiniCard label="추적 제품군" value={String(company.family_count)} helper={`ASIN ${company.asin_count}개`} />
           </div>
-          <div className="rounded-lg bg-[#f7f9fc] p-4 text-sm leading-6 text-toss-ink2">
+          <div className="rounded-xl bg-toss-wash p-4 text-sm leading-7 text-toss-ink2">
             {company.latest_month ? (
               <p>
-                Latest Amazon month is <span className="font-bold text-toss-ink">{company.latest_month}</span> and latest revenue is{" "}
-                <span className="font-bold text-toss-ink">{formatMoneyFromUsd(company.latest_revenue, currency, usdKrw)}</span>.
+                최신 아마존 월은 <span className="font-bold text-toss-ink">{company.latest_month}</span>, 최신 매출은{" "}
+                <span className="font-bold text-toss-ink">{formatMoneyFromUsd(company.latest_revenue, currency, usdKrw)}</span> 입니다.
               </p>
             ) : (
-              <p>Amazon monthly proxy data is not available yet.</p>
+              <p>아마존 월별 프록시 데이터가 아직 없습니다.</p>
             )}
             {companyMonthly.length ? (
               <p className="mt-2">
-                Latest DART quarter and stock trend are reviewed in Benchmark. Overview is a short read-through, not a full comparison screen.
+                최신 DART 분기와 주가 추이는 Benchmark 탭에서 확인합니다. 요약은 빠르게 읽는 화면이며, 전체 비교는 Benchmark에서 다룹니다.
               </p>
             ) : null}
           </div>
         </div>
       </SectionCard>
 
-      <SectionCard eyebrow="Amazon US Trend" title="Monthly proxy trend">
-        {hasTrend ? <BrandTrendChart data={trendData} currency={currency} usdKrw={usdKrw} /> : <EmptyState message="추세 차트는 현재 매출/판매량 값이 있는 CSV가 들어오면 활성화됩니다." />}
+      <SectionCard eyebrow="Amazon US 추이" title="월별 프록시 추이">
+        {hasTrend ? <BrandTrendChart data={trendData} currency={currency} usdKrw={usdKrw} /> : <EmptyState message="매출·판매량 값이 있는 데이터가 들어오면 추이 차트가 활성화됩니다." />}
       </SectionCard>
     </div>
   );
@@ -903,35 +903,35 @@ function ProductsTab({
 
   return (
     <div className="space-y-5">
-      <SectionCard eyebrow="Product Family Analysis" title="Family selector">
+      <SectionCard eyebrow="제품군 분석" title="제품군 선택">
         {familyGroups.length ? (
           <div className="space-y-4">
             <ProductFamilyToggle options={familyGroups.map((group) => ({ id: group.id, label: group.label, count: group.rows.length }))} selectedFamily={selectedFamily} onChange={setSelectedFamily} />
-            <div className="rounded-lg bg-[#f7f9fc] p-4 text-sm leading-6 text-toss-ink2">
+            <div className="rounded-xl bg-toss-wash p-4 text-sm leading-7 text-toss-ink2">
               {company.company === "samyang" ? (
                 <p>
-                  Samyang은 <span className="font-bold text-toss-ink">Sauce</span>와 <span className="font-bold text-toss-ink">Ramen</span>으로만 묶어 보여줍니다. Sauce는 Buldak sauce만, 나머지는 Ramen으로 봅니다.
+                  삼양은 <span className="font-bold text-toss-ink">Sauce</span>와 <span className="font-bold text-toss-ink">Ramen</span> 두 군으로만 묶어 보여줍니다. Sauce는 불닭 소스만, 나머지는 Ramen으로 봅니다.
                 </p>
               ) : (
                 <p>
-                  선택한 family의 최신 ASIN만 보여줍니다. family가 많으면 상위 family와 Other만 먼저 노출하고 나머지는 묶습니다.
+                  선택한 제품군의 최신 ASIN만 보여줍니다. 제품군이 많으면 상위 제품군과 기타(Other)만 먼저 노출하고 나머지는 묶습니다.
                 </p>
               )}
             </div>
             {visibleRows.length ? (
-              <div className="overflow-auto rounded-lg ring-1 ring-toss-line">
+              <div className="overflow-auto rounded-xl ring-1 ring-toss-line">
                 <table className="min-w-[1080px] w-full bg-white text-left text-sm">
-                  <thead className="bg-toss-wash text-xs uppercase text-toss-gray">
+                  <thead className="bg-toss-wash text-xs font-bold uppercase tracking-wide text-toss-gray">
                     <tr>
                       <th className="px-4 py-3">ASIN</th>
-                      <th className="px-4 py-3">Product name / family</th>
-                      <th className="px-4 py-3 text-right">Latest month</th>
-                      <th className="px-4 py-3 text-right">Revenue</th>
-                      <th className="px-4 py-3 text-right">Units</th>
+                      <th className="px-4 py-3">제품명 / 제품군</th>
+                      <th className="px-4 py-3 text-right">최신 월</th>
+                      <th className="px-4 py-3 text-right">매출</th>
+                      <th className="px-4 py-3 text-right">판매량</th>
                       <th className="px-4 py-3 text-right">BSR</th>
-                      <th className="px-4 py-3 text-right">Reviews</th>
-                      <th className="px-4 py-3">Revenue source</th>
-                      <th className="px-4 py-3">Warnings</th>
+                      <th className="px-4 py-3 text-right">리뷰</th>
+                      <th className="px-4 py-3">매출 출처</th>
+                      <th className="px-4 py-3">경고</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-toss-line">
@@ -959,7 +959,7 @@ function ProductsTab({
                 </table>
               </div>
             ) : (
-              <EmptyState message="선택한 family에 표시할 제품이 없습니다." />
+              <EmptyState message="선택한 제품군에 표시할 제품이 없습니다." />
             )}
           </div>
         ) : (
@@ -967,20 +967,20 @@ function ProductsTab({
         )}
       </SectionCard>
 
-      <SectionCard eyebrow="Product Ranking" title="Latest month ASIN ranking">
+      <SectionCard eyebrow="제품 랭킹" title="최신 월 ASIN 랭킹">
         {productRows.length ? (
-          <div className="overflow-auto rounded-lg ring-1 ring-toss-line">
+          <div className="overflow-auto rounded-xl ring-1 ring-toss-line">
             <table className="min-w-[980px] w-full bg-white text-left text-sm">
-              <thead className="bg-toss-wash text-xs uppercase text-toss-gray">
+              <thead className="bg-toss-wash text-xs font-bold uppercase tracking-wide text-toss-gray">
                 <tr>
-                  <th className="px-4 py-3">Rank</th>
+                  <th className="px-4 py-3">순위</th>
                   <th className="px-4 py-3">ASIN</th>
-                  <th className="px-4 py-3">Product</th>
-                  <th className="px-4 py-3">Family</th>
-                  <th className="px-4 py-3 text-right">Revenue</th>
-                  <th className="px-4 py-3 text-right">Units</th>
+                  <th className="px-4 py-3">제품</th>
+                  <th className="px-4 py-3">제품군</th>
+                  <th className="px-4 py-3 text-right">매출</th>
+                  <th className="px-4 py-3 text-right">판매량</th>
                   <th className="px-4 py-3 text-right">BSR</th>
-                  <th className="px-4 py-3 text-right">Reviews</th>
+                  <th className="px-4 py-3 text-right">리뷰</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-toss-line">
@@ -1031,16 +1031,16 @@ function BenchmarkTab({
   const comparisonOptions = buildComparisonOptions(company.company, companyMonthly, tradeQuarterly, dartRows, stockRows);
 
   return (
-    <div className="space-y-5">
-      <SectionCard eyebrow="Benchmark Summary" title="DART and stock first">
+    <div className="space-y-6">
+      <SectionCard eyebrow="벤치마크 요약" title="DART 매출과 주가">
         <BenchmarkSummary key={company.company} dartRows={dartRows} stockRows={stockRows} currency={currency} usdKrw={usdKrw} />
       </SectionCard>
 
-      <SectionCard eyebrow="Comparison Explorer" title="Pick the series to compare">
+      <SectionCard eyebrow="지표 비교" title="지수로 보는 추이 비교">
         <ComparisonExplorer key={company.company} rows={comparisonRows} options={comparisonOptions} currency={currency} usdKrw={usdKrw} />
       </SectionCard>
 
-      <SectionCard eyebrow="Detailed Data" title="Select a dataset to inspect">
+      <SectionCard eyebrow="상세 데이터" title="확인할 데이터 선택">
         <BenchmarkDataTable
           key={company.company}
           companyLabel={company.label}
@@ -1071,12 +1071,12 @@ function ModelTab({
   const demandSeries = getCompanyDemandSeries(company.company);
   const demandHasSample = demandSeries.some((entry) => entry.is_sample);
   return (
-    <div className="space-y-5">
-      <SectionCard eyebrow="Revenue Modeling" title="분기 매출 예측 회귀">
+    <div className="space-y-6">
+      <SectionCard eyebrow="매출 모델링" title="분기 매출 예측 회귀">
         <RevenueModelExplorer models={models} currency={currency} usdKrw={usdKrw} minNForBest={revenueModels?.minNForBest} />
       </SectionCard>
       {demandSeries.length ? (
-        <SectionCard eyebrow="Demand Signals" title="검색 수요 신호 (무료)">
+        <SectionCard eyebrow="수요 신호" title="검색 수요 신호 (무료)">
           <DemandSignalPanel series={demandSeries} anySample={demandHasSample} />
         </SectionCard>
       ) : null}
@@ -1201,11 +1201,11 @@ function buildComparisonOptions(
 ): ComparisonSeriesOption[] {
   const comparisonRows = buildComparisonRows(_company, companyMonthly, tradeQuarterly, dartRows, stockRows);
   return [
-    { id: "dartRevenue", label: "DART quarterly revenue", source: "dart", unit: "krw", available: comparisonRows.some((row) => row.dartRevenue !== null) },
-    { id: "amazonRevenue", label: "Amazon tracked revenue", source: "amazon", unit: "usd", available: comparisonRows.some((row) => row.amazonRevenue !== null) },
-    { id: "amazonUnits", label: "Amazon tracked units", source: "amazon", unit: "units", available: comparisonRows.some((row) => row.amazonUnits !== null) },
-    { id: "trassExport", label: "TRASS export value", source: "trass", unit: "krw", available: comparisonRows.some((row) => row.trassExport !== null) },
-    { id: "stockPrice", label: "Stock price", source: "stock", unit: "price", available: comparisonRows.some((row) => row.stockPrice !== null) }
+    { id: "dartRevenue", label: "DART 분기 매출", source: "dart", unit: "krw", available: comparisonRows.some((row) => row.dartRevenue !== null) },
+    { id: "amazonRevenue", label: "Amazon 추적 매출", source: "amazon", unit: "usd", available: comparisonRows.some((row) => row.amazonRevenue !== null) },
+    { id: "amazonUnits", label: "Amazon 추적 판매량", source: "amazon", unit: "units", available: comparisonRows.some((row) => row.amazonUnits !== null) },
+    { id: "trassExport", label: "TRASS 수출액", source: "trass", unit: "krw", available: comparisonRows.some((row) => row.trassExport !== null) },
+    { id: "stockPrice", label: "주가", source: "stock", unit: "price", available: comparisonRows.some((row) => row.stockPrice !== null) }
   ];
 }
 
@@ -1239,11 +1239,11 @@ function DataTab({ company }: { company: DashboardCompany }) {
 
   return (
     <div className="space-y-5">
-      <details className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
-        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">Missing Data Checklist</summary>
+      <details className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-toss-line sm:p-6">
+        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">보강 필요 데이터 체크리스트</summary>
         <div className="mt-4 space-y-3">
           {groupedChecklist.map((item) => (
-            <div key={item.source_name} className="rounded-lg bg-[#f7f9fc] p-4">
+            <div key={item.source_name} className="rounded-xl bg-toss-wash p-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <p className="font-extrabold">{item.source_name}</p>
@@ -1261,11 +1261,11 @@ function DataTab({ company }: { company: DashboardCompany }) {
         </div>
       </details>
 
-      <details className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
-        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">Source Status</summary>
+      <details className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-toss-line sm:p-6">
+        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">데이터 소스 현황</summary>
         <div className="mt-4 space-y-3">
           {checklist.map((item) => (
-            <div key={item.source_name} className="flex flex-col gap-2 rounded-lg bg-[#f7f9fc] p-4 sm:flex-row sm:items-start sm:justify-between">
+            <div key={item.source_name} className="flex flex-col gap-2 rounded-lg bg-toss-wash p-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="font-extrabold">{item.source_name}</p>
                 <p className="mt-1 text-sm leading-6 text-toss-ink2">{item.description}</p>
@@ -1279,8 +1279,8 @@ function DataTab({ company }: { company: DashboardCompany }) {
         </div>
       </details>
 
-      <details className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
-        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">Raw Warnings</summary>
+      <details className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-toss-line sm:p-6">
+        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">원본 경고</summary>
         <div className="mt-4">
           {rawWarnings.length ? (
             <div className="flex flex-wrap gap-2">
@@ -1289,30 +1289,30 @@ function DataTab({ company }: { company: DashboardCompany }) {
               ))}
             </div>
           ) : (
-            <EmptyState message="Raw warning이 없습니다." />
+            <EmptyState message="원본 경고가 없습니다." />
           )}
         </div>
       </details>
 
-      <details className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
-        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">Diagnostics</summary>
+      <details className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-toss-line sm:p-6">
+        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">진단 지표</summary>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          <MiniCard label="Amazon data quality" value={coverage ? coverage.amazon_data_quality_score.toFixed(1) : "-"} helper="hidden diagnostic" />
-          <MiniCard label="Revenue exposure" value={coverage ? coverage.revenue_exposure_score.toFixed(1) : "-"} helper="hidden diagnostic" />
-          <MiniCard label="Channel gap" value={coverage ? coverage.channel_gap_score.toFixed(1) : "-"} helper="hidden diagnostic" />
-          <MiniCard label="Region gap" value={coverage ? coverage.region_gap_score.toFixed(1) : "-"} helper="hidden diagnostic" />
-          <MiniCard label="Missing data" value={coverage ? coverage.missing_data_score.toFixed(1) : "-"} helper="hidden diagnostic" />
-          <MiniCard label="Next priority" value={coverage ? coverage.next_data_priority_score.toFixed(1) : "-"} helper="hidden diagnostic" />
+          <MiniCard label="아마존 데이터 품질" value={coverage ? coverage.amazon_data_quality_score.toFixed(1) : "-"} helper="내부 진단" />
+          <MiniCard label="매출 노출도" value={coverage ? coverage.revenue_exposure_score.toFixed(1) : "-"} helper="내부 진단" />
+          <MiniCard label="채널 격차" value={coverage ? coverage.channel_gap_score.toFixed(1) : "-"} helper="내부 진단" />
+          <MiniCard label="지역 격차" value={coverage ? coverage.region_gap_score.toFixed(1) : "-"} helper="내부 진단" />
+          <MiniCard label="결측 데이터" value={coverage ? coverage.missing_data_score.toFixed(1) : "-"} helper="내부 진단" />
+          <MiniCard label="다음 우선순위" value={coverage ? coverage.next_data_priority_score.toFixed(1) : "-"} helper="내부 진단" />
         </div>
       </details>
 
-      <details className="rounded-lg bg-white p-5 shadow-soft ring-1 ring-[#dde2ea]">
-        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">Methodology</summary>
-        <div className="mt-4 space-y-3 text-sm leading-6 text-toss-ink2">
+      <details className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-toss-line sm:p-6">
+        <summary className="cursor-pointer list-none text-sm font-extrabold text-toss-ink">방법론</summary>
+        <div className="mt-4 space-y-3 text-sm leading-7 text-toss-ink2">
           {methodologyNotes.map((note) => (
             <p key={note}>{note}</p>
           ))}
-          <p>추정치는 assumption으로만 사용하고, 투자 판단의 최종 근거로 쓰지 않습니다.</p>
+          <p>추정치는 가정(assumption)으로만 사용하고, 투자 판단의 최종 근거로 쓰지 않습니다.</p>
         </div>
       </details>
     </div>
@@ -1321,7 +1321,7 @@ function DataTab({ company }: { company: DashboardCompany }) {
 
 function TinyStat({ label, value, tone = "text-toss-ink", helper }: { label: string; value: string; tone?: string; helper?: string }) {
   return (
-    <div className="rounded-lg bg-[#f7f9fc] px-4 py-3 ring-1 ring-[#dde2ea]">
+    <div className="rounded-lg bg-toss-wash px-4 py-3 ring-1 ring-toss-line">
       <p className="text-xs font-bold uppercase text-toss-gray">{label}</p>
       <p className={`mt-1 text-lg font-extrabold ${tone}`}>{value}</p>
       {helper ? <p className="mt-1 text-xs font-semibold text-toss-gray">{helper}</p> : null}
@@ -1349,11 +1349,11 @@ function MiniCard({ label, value, helper }: { label: string; value: string; help
 }
 
 function Badge({ children }: { children: ReactNode }) {
-  return <span className="rounded-md bg-white px-2 py-1 text-xs font-bold text-toss-blue ring-1 ring-[#dde2ea]">{children}</span>;
+  return <span className="rounded-md bg-white px-2 py-1 text-xs font-bold text-toss-blue ring-1 ring-toss-line">{children}</span>;
 }
 
 function EmptyState({ message }: { message: string }) {
-  return <div className="rounded-lg bg-[#f7f9fc] p-5 text-sm font-semibold text-toss-gray">{message}</div>;
+  return <div className="rounded-lg bg-toss-wash p-5 text-sm font-semibold text-toss-gray">{message}</div>;
 }
 
 function getAggregatedMonthlyTrend() {

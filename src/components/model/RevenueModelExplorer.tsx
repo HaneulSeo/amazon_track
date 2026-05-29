@@ -58,10 +58,10 @@ function formatValue(value: number, unit: "krw" | "usd", mode: ModelMode, curren
 }
 
 function confidence(fit: LagFit | null, minN: number): { label: string; tone: string } {
-  if (!fit || fit.r2 === null) return { label: "데이터 부족", tone: "bg-[#edf1f5] text-[#7c8696]" };
+  if (!fit || fit.r2 === null) return { label: "데이터 부족", tone: "bg-toss-wash2 text-toss-gray" };
   if (fit.n < minN) return { label: `표본 부족 (n=${fit.n})`, tone: "bg-amber-50 text-amber-600" };
   if (fit.pValue !== null && fit.pValue < 0.05) return { label: "통계적으로 유의 (p<0.05)", tone: "bg-emerald-50 text-emerald-600" };
-  return { label: "유의성 약함", tone: "bg-[#eef1f5] text-toss-gray" };
+  return { label: "유의성 약함", tone: "bg-toss-wash2 text-toss-gray" };
 }
 
 export function RevenueModelExplorer({ models, currency, usdKrw, minNForBest = 4 }: Props) {
@@ -108,7 +108,7 @@ export function RevenueModelExplorer({ models, currency, usdKrw, minNForBest = 4
   }, [pair, mode, lag]);
 
   if (!pair) {
-    return <div className="rounded-lg bg-[#f7f9fc] p-5 text-sm font-semibold text-toss-gray">이 회사는 모델링할 시계열이 없습니다.</div>;
+    return <div className="rounded-lg bg-toss-wash p-5 text-sm font-semibold text-toss-gray">이 회사는 모델링할 시계열이 없습니다.</div>;
   }
 
   const xs = scatter.map((p) => p.x);
@@ -129,7 +129,7 @@ export function RevenueModelExplorer({ models, currency, usdKrw, minNForBest = 4
 
   return (
     <div className="space-y-5">
-      <div className="rounded-lg bg-[#eef5ff] p-4 text-sm leading-6 text-toss-gray">
+      <div className="rounded-lg bg-toss-sky p-4 text-sm leading-6 text-toss-gray">
         DART 분기 매출을 타깃으로, <span className="font-bold text-toss-ink">Amazon US</span> 또는{" "}
         <span className="font-bold text-toss-ink">TRASS 수출</span>로 예측력을 회귀로 측정합니다. 두 proxy는 같은 수요를 측정하므로
         한 모델에 함께 넣지 않고 <span className="font-bold text-toss-ink">쌍(pair)</span>으로만 비교합니다. 매출 인식 시차를 보기 위해
@@ -155,7 +155,7 @@ export function RevenueModelExplorer({ models, currency, usdKrw, minNForBest = 4
                   <button
                     key={entry.id}
                     className={`rounded-full px-4 py-2 text-sm font-bold transition ${
-                      active ? "bg-toss-blue text-white" : "bg-white text-toss-gray ring-1 ring-[#dde2ea] hover:text-toss-ink"
+                      active ? "bg-toss-blue text-white" : "bg-white text-toss-gray ring-1 ring-toss-line hover:text-toss-ink"
                     }`}
                     type="button"
                     onClick={() => setPairId(entry.id)}
@@ -169,7 +169,7 @@ export function RevenueModelExplorer({ models, currency, usdKrw, minNForBest = 4
         ))}
       </div>
 
-      <div className="flex flex-col gap-4 rounded-lg bg-white p-4 ring-1 ring-[#dde2ea] lg:flex-row lg:items-center lg:justify-between">
+      <div className="flex flex-col gap-4 rounded-lg bg-white p-4 ring-1 ring-toss-line lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-sm font-extrabold text-toss-ink">
             {pair.targetLabel} <span className="text-toss-gray">~</span> {pair.predictorLabel}
@@ -178,7 +178,7 @@ export function RevenueModelExplorer({ models, currency, usdKrw, minNForBest = 4
             {mode === "levels" ? "원 수준(level) 회귀" : "전년동기대비(YoY) 회귀 — 추세·계절성 제거"} · lag {lag}분기
           </p>
         </div>
-        <div className="flex items-center rounded-md bg-[#f4f6fa] p-1 ring-1 ring-[#dde2ea]">
+        <div className="flex items-center rounded-md bg-toss-wash p-1 ring-1 ring-toss-line">
           {(["levels", "yoy"] as ModelMode[]).map((item) => (
             <button
               key={item}
@@ -251,7 +251,7 @@ export function RevenueModelExplorer({ models, currency, usdKrw, minNForBest = 4
         </div>
       </div>
 
-      <div className="rounded-lg bg-white p-4 ring-1 ring-[#dde2ea]">
+      <div className="rounded-lg bg-white p-4 ring-1 ring-toss-line">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-bold text-toss-ink">시차(lag)별 R² — 막대를 눌러 lag 선택</p>
           <input

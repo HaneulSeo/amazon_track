@@ -33,7 +33,7 @@ export function BrandTrendChart({ data, currency, usdKrw }: BrandTrendChartProps
   return (
     <div className="grid gap-5 xl:grid-cols-2">
       <div className="min-h-[320px] rounded-lg bg-toss-wash p-4">
-        <p className="mb-4 text-sm font-semibold text-toss-gray">Monthly estimated revenue</p>
+        <p className="mb-4 text-sm font-semibold text-toss-gray">월별 추정 매출</p>
         <ResponsiveContainer width="100%" height={280}>
           <AreaChart data={data} margin={{ top: 8, right: 10, bottom: 0, left: 0 }}>
             <defs>
@@ -46,26 +46,26 @@ export function BrandTrendChart({ data, currency, usdKrw }: BrandTrendChartProps
             <XAxis dataKey="month" tickLine={false} axisLine={false} minTickGap={24} />
             <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatMoneyFromUsd(Number(value), currency, usdKrw)} width={72} />
             <Tooltip formatter={(value) => formatMoneyFromUsd(Number(value), currency, usdKrw, false)} contentStyle={tooltipStyle()} />
-            <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#3182f6" strokeWidth={3} fill="url(#revenueGradient)" />
+            <Area type="monotone" dataKey="revenue" name="매출" stroke="#3182f6" strokeWidth={3} fill="url(#revenueGradient)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
       <div className="min-h-[320px] rounded-lg bg-toss-wash p-4">
-        <p className="mb-4 text-sm font-semibold text-toss-gray">Monthly estimated unit sales</p>
+        <p className="mb-4 text-sm font-semibold text-toss-gray">월별 추정 판매량</p>
         <ResponsiveContainer width="100%" height={280}>
           <LineChart data={data} margin={{ top: 8, right: 10, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="#e5e8eb" vertical={false} />
             <XAxis dataKey="month" tickLine={false} axisLine={false} minTickGap={24} />
             <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatNumber(Number(value))} width={64} />
             <Tooltip formatter={(value) => formatNumber(Number(value), false)} contentStyle={tooltipStyle()} />
-            <Line type="monotone" dataKey="units" name="Units" stroke="#00a661" strokeWidth={3} dot={false} />
+            <Line type="monotone" dataKey="units" name="판매량" stroke="#00a661" strokeWidth={3} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       <div className="min-h-[300px] rounded-lg bg-toss-wash p-4 xl:col-span-2">
-        <p className="mb-4 text-sm font-semibold text-toss-gray">Price and BSR movement</p>
+        <p className="mb-4 text-sm font-semibold text-toss-gray">가격과 BSR 추이</p>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={data} margin={{ top: 8, right: 10, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="#e5e8eb" vertical={false} />
@@ -74,8 +74,8 @@ export function BrandTrendChart({ data, currency, usdKrw }: BrandTrendChartProps
             <YAxis yAxisId="rank" orientation="right" tickLine={false} axisLine={false} tickFormatter={(value) => formatNumber(Number(value))} width={56} />
             <Tooltip contentStyle={tooltipStyle()} />
             <Legend />
-            <Line yAxisId="price" type="monotone" dataKey="avgPrice" name="Avg price" stroke="#3182f6" strokeWidth={3} dot={false} />
-            <Line yAxisId="rank" type="monotone" dataKey="avgRank" name="Avg BSR" stroke="#f59f00" strokeWidth={3} dot={false} />
+            <Line yAxisId="price" type="monotone" dataKey="avgPrice" name="평균 가격" stroke="#3182f6" strokeWidth={3} dot={false} />
+            <Line yAxisId="rank" type="monotone" dataKey="avgRank" name="평균 BSR" stroke="#f59f00" strokeWidth={3} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>

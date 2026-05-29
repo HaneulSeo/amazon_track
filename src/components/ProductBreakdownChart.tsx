@@ -27,7 +27,7 @@ export function ProductBreakdownChart({ products, trends, latestMonth, currency,
       if (topIds.has(row.productId)) {
         item[labels.get(row.productId) ?? row.asin] = row.revenue;
       } else {
-        item.Other = Number(item.Other ?? 0) + row.revenue;
+        item["기타"] = Number(item["기타"] ?? 0) + row.revenue;
       }
     }
     return item;
@@ -43,12 +43,12 @@ export function ProductBreakdownChart({ products, trends, latestMonth, currency,
       share: row.revenueShare
     }));
 
-  const stackedKeys = [...topProducts.map((product) => labels.get(product.productId) ?? product.asin), "Other"];
+  const stackedKeys = [...topProducts.map((product) => labels.get(product.productId) ?? product.asin), "기타"];
 
   return (
     <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
       <div className="min-h-[360px] rounded-lg bg-toss-wash p-4">
-        <p className="mb-4 text-sm font-semibold text-toss-gray">Revenue contribution by product</p>
+        <p className="mb-4 text-sm font-semibold text-toss-gray">제품별 매출 기여도</p>
         <ResponsiveContainer width="100%" height={310}>
           <AreaChart data={stackedData} margin={{ top: 8, right: 10, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="#e5e8eb" vertical={false} />
@@ -71,14 +71,14 @@ export function ProductBreakdownChart({ products, trends, latestMonth, currency,
       </div>
 
       <div className="min-h-[360px] rounded-lg bg-toss-wash p-4">
-        <p className="mb-4 text-sm font-semibold text-toss-gray">Latest month revenue share</p>
+        <p className="mb-4 text-sm font-semibold text-toss-gray">최신 월 매출 비중</p>
         <ResponsiveContainer width="100%" height={310}>
           <BarChart data={latestRows} layout="vertical" margin={{ top: 0, right: 18, bottom: 0, left: 0 }}>
             <CartesianGrid stroke="#e5e8eb" horizontal={false} />
             <XAxis type="number" hide />
             <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} width={96} />
             <Tooltip formatter={(value) => formatMoneyFromUsd(Number(value), currency, usdKrw, false)} contentStyle={{ border: "1px solid #e5e8eb", borderRadius: 8 }} />
-            <Bar dataKey="revenue" name="Revenue" fill="#3182f6" radius={[0, 6, 6, 0]} />
+            <Bar dataKey="revenue" name="매출" fill="#3182f6" radius={[0, 6, 6, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

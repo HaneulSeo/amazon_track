@@ -58,7 +58,7 @@ export function ProductTable({ rows, currency, usdKrw }: ProductTableProps) {
             className="h-11 w-full rounded-md border-0 bg-toss-wash pl-10 pr-4 outline-none ring-1 ring-toss-line transition focus:ring-2 focus:ring-toss-blue"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search product, ASIN, month"
+            placeholder="제품, ASIN, 월 검색"
           />
         </div>
         <div className="flex gap-3">
@@ -67,7 +67,7 @@ export function ProductTable({ rows, currency, usdKrw }: ProductTableProps) {
             value={month}
             onChange={(event) => setMonth(event.target.value)}
           >
-            <option value="all">All months</option>
+            <option value="all">전체 월</option>
             {months.map((item) => (
               <option key={item} value={item}>
                 {item}
@@ -89,15 +89,15 @@ export function ProductTable({ rows, currency, usdKrw }: ProductTableProps) {
         <table className="min-w-[980px] w-full border-collapse bg-white text-left text-sm">
           <thead className="sticky top-0 bg-toss-wash text-xs uppercase text-toss-gray">
             <tr>
-              <th className="px-4 py-3">Month</th>
+              <th className="px-4 py-3">월</th>
               <th className="px-4 py-3">ASIN</th>
-              <th className="px-4 py-3">Product / ASIN</th>
-              <th className="px-4 py-3 text-right">Revenue</th>
-              <th className="px-4 py-3 text-right">Units</th>
-              <th className="px-4 py-3 text-right">Price</th>
+              <th className="px-4 py-3">제품 / ASIN</th>
+              <th className="px-4 py-3 text-right">매출</th>
+              <th className="px-4 py-3 text-right">판매량</th>
+              <th className="px-4 py-3 text-right">가격</th>
               <th className="px-4 py-3 text-right">BSR</th>
-              <th className="px-4 py-3 text-right">Reviews</th>
-              <th className="px-4 py-3 text-right">Share</th>
+              <th className="px-4 py-3 text-right">리뷰</th>
+              <th className="px-4 py-3 text-right">비중</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-toss-line">

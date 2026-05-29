@@ -21,13 +21,13 @@ export function ProductFamilyToggle({ options, selectedFamily, onChange }: Produ
           <button
             key={option.id}
             className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold transition ${
-              active ? "bg-toss-blue text-white" : "bg-white text-toss-gray ring-1 ring-[#dde2ea] hover:text-toss-ink"
+              active ? "bg-toss-blue text-white" : "bg-white text-toss-gray ring-1 ring-toss-line hover:text-toss-ink"
             }`}
             type="button"
             onClick={() => onChange(option.id)}
           >
             <span>{option.label}</span>
-            <span className={`rounded-full px-2 py-0.5 text-xs ${active ? "bg-white/15 text-white" : "bg-[#f4f6fa] text-toss-gray"}`}>{option.count}</span>
+            <span className={`rounded-full px-2 py-0.5 text-xs ${active ? "bg-white/15 text-white" : "bg-toss-wash text-toss-gray"}`}>{option.count}</span>
           </button>
         );
       })}

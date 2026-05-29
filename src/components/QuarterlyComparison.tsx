@@ -39,7 +39,7 @@ export function QuarterlyComparison({ rows, baseQuarter, currency, usdKrw }: Qua
 
       <div className="grid gap-5 xl:grid-cols-[1fr_1fr]">
         <div className="min-h-[330px] rounded-lg bg-toss-wash p-4">
-          <p className="mb-4 text-sm font-semibold text-toss-gray">Quarterly revenue amount</p>
+          <p className="mb-4 text-sm font-semibold text-toss-gray">분기 매출 규모</p>
           <ResponsiveContainer width="100%" height={285}>
             <BarChart data={chartData} margin={{ top: 8, right: 10, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="#e5e8eb" vertical={false} />
@@ -56,14 +56,14 @@ export function QuarterlyComparison({ rows, baseQuarter, currency, usdKrw }: Qua
                 contentStyle={{ border: "1px solid #e5e8eb", borderRadius: 8 }}
               />
               <Legend />
-              <Bar dataKey="externalDisplayRevenue" name="External benchmark" fill="#8b95a1" radius={[6, 6, 0, 0]} />
-              <Bar dataKey="trackedDisplayRevenue" name="Tracked Amazon" fill="#3182f6" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="externalDisplayRevenue" name="외부 벤치마크" fill="#8b95a1" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="trackedDisplayRevenue" name="Amazon 추적" fill="#3182f6" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
         <div className="min-h-[330px] rounded-lg bg-toss-wash p-4">
-          <p className="mb-4 text-sm font-semibold text-toss-gray">Normalized trend index</p>
+          <p className="mb-4 text-sm font-semibold text-toss-gray">지수화 추이</p>
           <ResponsiveContainer width="100%" height={285}>
             <LineChart data={chartRows} margin={{ top: 8, right: 10, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="#e5e8eb" vertical={false} />
@@ -71,8 +71,8 @@ export function QuarterlyComparison({ rows, baseQuarter, currency, usdKrw }: Qua
               <YAxis tickLine={false} axisLine={false} width={48} />
               <Tooltip contentStyle={{ border: "1px solid #e5e8eb", borderRadius: 8 }} />
               <Legend />
-              <Line type="monotone" dataKey="externalIndex" name="External index" stroke="#8b95a1" strokeWidth={3} dot={false} />
-              <Line type="monotone" dataKey="trackedIndex" name="Tracked index" stroke="#3182f6" strokeWidth={3} dot={false} />
+              <Line type="monotone" dataKey="externalIndex" name="외부 지수" stroke="#8b95a1" strokeWidth={3} dot={false} />
+              <Line type="monotone" dataKey="trackedIndex" name="추적 지수" stroke="#3182f6" strokeWidth={3} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -82,15 +82,15 @@ export function QuarterlyComparison({ rows, baseQuarter, currency, usdKrw }: Qua
         <table className="min-w-[980px] w-full bg-white text-left text-sm">
           <thead className="bg-toss-wash text-xs uppercase text-toss-gray">
             <tr>
-              <th className="px-4 py-3">Quarter</th>
-              <th className="px-4 py-3 text-right">External revenue</th>
-              <th className="px-4 py-3 text-right">External YoY</th>
-              <th className="px-4 py-3 text-right">External QoQ</th>
-              <th className="px-4 py-3 text-right">Tracked revenue</th>
-              <th className="px-4 py-3 text-right">Tracked YoY</th>
-              <th className="px-4 py-3 text-right">Tracked QoQ</th>
-              <th className="px-4 py-3 text-right">Index gap</th>
-              <th className="px-4 py-3">Comment</th>
+              <th className="px-4 py-3">분기</th>
+              <th className="px-4 py-3 text-right">외부 매출</th>
+              <th className="px-4 py-3 text-right">외부 YoY</th>
+              <th className="px-4 py-3 text-right">외부 QoQ</th>
+              <th className="px-4 py-3 text-right">추적 매출</th>
+              <th className="px-4 py-3 text-right">추적 YoY</th>
+              <th className="px-4 py-3 text-right">추적 QoQ</th>
+              <th className="px-4 py-3 text-right">지수 격차</th>
+              <th className="px-4 py-3">코멘트</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-toss-line">

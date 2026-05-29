@@ -56,13 +56,13 @@ export function BenchmarkDataTable({
   const options = useMemo(
     () =>
       [
-        { key: "dartQuarterlyRevenue" as const, label: "DART quarterly revenue", available: dartRows.length > 0 },
-        { key: "amazonMonthlyProxy" as const, label: "Amazon monthly proxy", available: companyMonthly.length > 0 },
-        { key: "amazonQuarterlyAggregate" as const, label: "Amazon quarterly aggregate", available: companyMonthly.length > 0 },
-        { key: "trassMonthly" as const, label: "TRASS monthly", available: tradeMonthly.length > 0 },
-        { key: "trassQuarterly" as const, label: "TRASS quarterly", available: tradeQuarterly.length > 0 },
-        { key: "stockMonthly" as const, label: "Stock monthly", available: stockRows.length > 0 },
-        { key: "existingQuarterlyComparison" as const, label: "Existing quarterly comparison", available: quarterlyComparison.length > 0 }
+        { key: "dartQuarterlyRevenue" as const, label: "DART 분기 매출", available: dartRows.length > 0 },
+        { key: "amazonMonthlyProxy" as const, label: "Amazon 월별 프록시", available: companyMonthly.length > 0 },
+        { key: "amazonQuarterlyAggregate" as const, label: "Amazon 분기 합산", available: companyMonthly.length > 0 },
+        { key: "trassMonthly" as const, label: "TRASS 월별", available: tradeMonthly.length > 0 },
+        { key: "trassQuarterly" as const, label: "TRASS 분기", available: tradeQuarterly.length > 0 },
+        { key: "stockMonthly" as const, label: "주가 월별", available: stockRows.length > 0 },
+        { key: "existingQuarterlyComparison" as const, label: "분기 비교", available: quarterlyComparison.length > 0 }
       ],
     [companyMonthly.length, dartRows.length, quarterlyComparison.length, stockRows.length, tradeMonthly.length, tradeQuarterly.length]
   );
@@ -98,17 +98,17 @@ export function BenchmarkDataTable({
       case "dartQuarterlyRevenue":
         return (
           <SimpleTable
-            headers={["Quarter", "Revenue", "Source"]}
+            headers={["분기", "매출", "출처"]}
             rows={dartRows
               .slice()
               .sort((a, b) => b.quarter.localeCompare(a.quarter))
-              .map((row) => [row.quarter, formatMoneyFromKrw(row.revenue_krw, currency, usdKrw), row.source_url ? "available" : "missing"])}
+              .map((row) => [row.quarter, formatMoneyFromKrw(row.revenue_krw, currency, usdKrw), row.source_url ? "있음" : "없음"])}
           />
         );
       case "amazonMonthlyProxy":
         return (
           <SimpleTable
-            headers={["Month", "Revenue", "Units", "Warnings"]}
+            headers={["월", "매출", "판매량", "경고"]}
             rows={companyMonthly
               .slice()
               .sort((a, b) => b.month.localeCompare(a.month))
@@ -124,7 +124,7 @@ export function BenchmarkDataTable({
       case "amazonQuarterlyAggregate":
         return (
           <SimpleTable
-            headers={["Quarter", "Revenue", "Units", "Months"]}
+            headers={["분기", "매출", "판매량", "개월 수"]}
             rows={amazonQuarterly
               .slice()
               .sort((a, b) => b.quarter.localeCompare(a.quarter))
@@ -134,7 +134,7 @@ export function BenchmarkDataTable({
       case "trassMonthly":
         return (
           <SimpleTable
-            headers={["Month", "Product line", "Scope", "Export value", "Weight"]}
+            headers={["월", "품목", "범위", "수출액", "중량"]}
             rows={tradeMonthly
               .slice()
               .sort((a, b) => b.month.localeCompare(a.month))
@@ -145,7 +145,7 @@ export function BenchmarkDataTable({
       case "trassQuarterly":
         return (
           <SimpleTable
-            headers={["Quarter", "Product line", "Scope", "Export value", "Weight"]}
+            headers={["분기", "품목", "범위", "수출액", "중량"]}
             rows={tradeQuarterly
               .slice()
               .sort((a, b) => b.quarter.localeCompare(a.quarter))
@@ -156,7 +156,7 @@ export function BenchmarkDataTable({
       case "stockMonthly":
         return (
           <SimpleTable
-            headers={["Month", "Close", "Adj close", "Index 100"]}
+            headers={["월", "종가", "수정 종가", "지수 100"]}
             rows={stockRows
               .slice()
               .sort((a, b) => b.month.localeCompare(a.month))
@@ -180,10 +180,10 @@ export function BenchmarkDataTable({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg bg-white p-4 ring-1 ring-[#dde2ea]">
-        <p className="text-sm font-bold text-toss-blue">Detailed Data</p>
+      <div className="rounded-lg bg-white p-4 ring-1 ring-toss-line">
+        <p className="text-sm font-bold text-toss-blue">상세 데이터</p>
         <p className="mt-1 text-sm leading-6 text-toss-gray">
-          {companyLabel}의 원천 데이터를 선택해서 확인합니다. 기본은 DART와 Amazon proxy 중심입니다.
+          {companyLabel}의 원천 데이터를 선택해서 확인합니다. 기본은 DART와 Amazon 프록시 중심입니다.
         </p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           {options.map((option) => (
@@ -193,21 +193,21 @@ export function BenchmarkDataTable({
                 selectedKey === option.key
                   ? "bg-toss-blue text-white"
                   : option.available
-                    ? "bg-[#f4f6fa] text-toss-gray hover:text-toss-ink"
-                    : "cursor-not-allowed bg-[#edf1f5] text-[#a4adba]"
+                    ? "bg-toss-wash text-toss-gray hover:text-toss-ink"
+                    : "cursor-not-allowed bg-toss-wash2 text-toss-gray"
               }`}
               disabled={!option.available}
               type="button"
               onClick={() => setSelectedKey(option.key)}
             >
               {option.label}
-              {!option.available ? <span className="ml-2 text-xs font-extrabold">No data</span> : null}
+              {!option.available ? <span className="ml-2 text-xs font-extrabold">데이터 없음</span> : null}
             </button>
           ))}
         </div>
       </div>
 
-      {content ?? <div className="rounded-lg bg-[#f7f9fc] p-5 text-sm font-semibold text-toss-gray">선택한 데이터가 없습니다.</div>}
+      {content ?? <div className="rounded-lg bg-toss-wash p-5 text-sm font-semibold text-toss-gray">선택한 데이터가 없습니다.</div>}
     </div>
   );
 }
@@ -239,7 +239,7 @@ function SimpleTable({ headers, rows }: { headers: string[]; rows: string[][] })
           ) : (
             <tr>
               <td className="px-4 py-5 text-sm font-semibold text-toss-gray" colSpan={headers.length}>
-                No data
+                데이터 없음
               </td>
             </tr>
           )}

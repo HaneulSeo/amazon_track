@@ -41,26 +41,26 @@ export function BenchmarkSummary({ dartRows, stockRows, currency, usdKrw }: Benc
     <div className="space-y-5">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MiniStat
-          label="Latest DART quarter"
-          value={latestDart?.quarter ?? "No data"}
-          helper={latestDart ? (latestDart.source_url ? "Source available" : "Reported revenue") : "No data"}
+          label="최신 DART 분기"
+          value={latestDart?.quarter ?? "데이터 없음"}
+          helper={latestDart ? (latestDart.source_url ? "출처 있음" : "공시 매출") : "데이터 없음"}
         />
         <MiniStat
-          label="Latest DART revenue"
-          value={latestDart?.revenue_krw === null || latestDart?.revenue_krw === undefined ? "No data" : formatMoneyFromKrw(latestDart.revenue_krw, currency, usdKrw)}
-          helper={latestDart?.period_type === "derived_q4" ? "Derived Q4" : "Reported quarter"}
+          label="최신 DART 매출"
+          value={latestDart?.revenue_krw === null || latestDart?.revenue_krw === undefined ? "데이터 없음" : formatMoneyFromKrw(latestDart.revenue_krw, currency, usdKrw)}
+          helper={latestDart?.period_type === "derived_q4" ? "추정 4분기" : "공시 분기"}
         />
-        <MiniStat label="Latest stock month" value={latestStock?.month ?? "No data"} helper={latestStock?.stock_ticker ?? "No data"} />
+        <MiniStat label="최신 주가 월" value={latestStock?.month ?? "데이터 없음"} helper={latestStock?.stock_ticker ?? "데이터 없음"} />
         <MiniStat
-          label="Latest stock close"
-          value={latestStock ? formatNumber(latestStock.adj_close ?? latestStock.close) : "No data"}
-          helper={latestStock?.date ?? "Monthly close"}
+          label="최신 종가"
+          value={latestStock ? formatNumber(latestStock.adj_close ?? latestStock.close) : "데이터 없음"}
+          helper={latestStock?.date ?? "월말 종가"}
         />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
         <div className="min-h-[340px] rounded-lg bg-toss-wash p-4">
-          <p className="mb-4 text-sm font-semibold text-toss-gray">DART quarterly revenue</p>
+          <p className="mb-4 text-sm font-semibold text-toss-gray">DART 분기 매출</p>
           <ResponsiveContainer width="100%" height={290}>
             <AreaChart data={dartSeries} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
               <defs>
@@ -73,20 +73,20 @@ export function BenchmarkSummary({ dartRows, stockRows, currency, usdKrw }: Benc
               <XAxis dataKey="quarter" tickLine={false} axisLine={false} minTickGap={24} />
               <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatMoneyFromKrw(Number(value), currency, usdKrw)} width={80} />
               <Tooltip formatter={(value) => formatMoneyFromKrw(Number(value), currency, usdKrw, false)} contentStyle={tooltipStyle()} />
-              <Area type="monotone" dataKey="revenue" name="DART revenue" stroke="#3182f6" strokeWidth={3} fill="url(#dartRevenueGradient)" />
+              <Area type="monotone" dataKey="revenue" name="DART 매출" stroke="#3182f6" strokeWidth={3} fill="url(#dartRevenueGradient)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
         <div className="min-h-[340px] rounded-lg bg-toss-wash p-4">
-          <p className="mb-4 text-sm font-semibold text-toss-gray">Stock monthly trend</p>
+          <p className="mb-4 text-sm font-semibold text-toss-gray">월별 주가 추이</p>
           <ResponsiveContainer width="100%" height={290}>
             <LineChart data={stockSeries} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
               <CartesianGrid stroke="#e5e8eb" vertical={false} />
               <XAxis dataKey="month" tickLine={false} axisLine={false} minTickGap={24} />
               <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => formatNumber(Number(value))} width={64} />
               <Tooltip formatter={(value) => formatNumber(Number(value), false)} contentStyle={tooltipStyle()} />
-              <Line type="monotone" dataKey="close" name="Stock close" stroke="#00a661" strokeWidth={3} dot={false} />
+              <Line type="monotone" dataKey="close" name="종가" stroke="#00a661" strokeWidth={3} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -97,7 +97,7 @@ export function BenchmarkSummary({ dartRows, stockRows, currency, usdKrw }: Benc
 
 function MiniStat({ label, value, helper }: { label: string; value: string; helper?: string }) {
   return (
-    <div className="rounded-lg bg-white p-4 ring-1 ring-[#dde2ea]">
+    <div className="rounded-lg bg-white p-4 ring-1 ring-toss-line">
       <p className="text-xs font-bold uppercase text-toss-gray">{label}</p>
       <p className="mt-1 text-lg font-extrabold text-toss-ink">{value}</p>
       {helper ? <p className="mt-1 text-xs font-semibold text-toss-gray">{helper}</p> : null}

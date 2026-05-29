@@ -37,7 +37,7 @@ export function ProductDetail({ products, trends, currency, usdKrw }: ProductDet
     <div className="space-y-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <label className="w-full sm:max-w-md">
-          <span className="mb-2 block text-sm font-semibold text-toss-gray">Product</span>
+          <span className="mb-2 block text-sm font-semibold text-toss-gray">제품</span>
           <select
             className="h-12 w-full rounded-md border-0 bg-toss-wash px-4 font-semibold text-toss-ink outline-none ring-1 ring-toss-line transition focus:ring-2 focus:ring-toss-blue"
             value={selected.productId}
@@ -51,29 +51,29 @@ export function ProductDetail({ products, trends, currency, usdKrw }: ProductDet
           </select>
         </label>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <MiniMetric icon={BadgeDollarSign} label="Latest revenue" value={formatMoneyFromUsd(selected.latestRevenue, currency, usdKrw)} />
-          <MiniMetric icon={PackageSearch} label="Units" value={formatNumber(selected.latestUnits)} />
-          <MiniMetric icon={Activity} label="3M growth" value={formatPercent(selected.recent3Growth)} tone={trendTone(selected.recent3Growth)} />
-          <MiniMetric icon={Star} label="Rating" value={selected.latestRating?.toFixed(1) ?? "-"} />
+          <MiniMetric icon={BadgeDollarSign} label="최신 매출" value={formatMoneyFromUsd(selected.latestRevenue, currency, usdKrw)} />
+          <MiniMetric icon={PackageSearch} label="판매량" value={formatNumber(selected.latestUnits)} />
+          <MiniMetric icon={Activity} label="3개월 성장" value={formatPercent(selected.recent3Growth)} tone={trendTone(selected.recent3Growth)} />
+          <MiniMetric icon={Star} label="평점" value={selected.latestRating?.toFixed(1) ?? "-"} />
         </div>
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
         <DetailChart
           data={data}
-          title="Revenue and unit sales"
+          title="매출과 판매량"
           lines={[
-            { key: "revenue", name: "Revenue", color: "#3182f6", axis: "left", formatter: (value) => formatMoneyFromUsd(value, currency, usdKrw) },
-            { key: "units", name: "Units", color: "#00a661", axis: "right", formatter: formatNumber }
+            { key: "revenue", name: "매출", color: "#3182f6", axis: "left", formatter: (value) => formatMoneyFromUsd(value, currency, usdKrw) },
+            { key: "units", name: "판매량", color: "#00a661", axis: "right", formatter: formatNumber }
           ]}
         />
         <DetailChart
           data={data}
-          title="Price, BSR and reviews"
+          title="가격 · BSR · 리뷰"
           lines={[
-            { key: "avgPrice", name: "Avg price", color: "#3182f6", axis: "left", formatter: (value) => `$${Number(value).toFixed(2)}` },
-            { key: "avgRank", name: "Avg BSR", color: "#f59f00", axis: "right", formatter: formatNumber },
-            { key: "reviews", name: "Reviews", color: "#e64980", axis: "right", formatter: formatNumber }
+            { key: "avgPrice", name: "평균 가격", color: "#3182f6", axis: "left", formatter: (value) => `$${Number(value).toFixed(2)}` },
+            { key: "avgRank", name: "평균 BSR", color: "#f59f00", axis: "right", formatter: formatNumber },
+            { key: "reviews", name: "리뷰", color: "#e64980", axis: "right", formatter: formatNumber }
           ]}
         />
       </div>
