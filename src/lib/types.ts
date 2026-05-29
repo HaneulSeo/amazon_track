@@ -113,6 +113,52 @@ export type ComparisonPoint = {
   stockPrice?: number | null;
 };
 
+export type ModelMode = "levels" | "yoy";
+
+export type LagFit = {
+  lag: number;
+  n: number;
+  slope: number | null;
+  intercept: number | null;
+  r2: number | null;
+  adjR2: number | null;
+  corr: number | null;
+  pValue: number | null;
+};
+
+export type ModelPair = {
+  id: string;
+  kind: "revenue~amazon" | "revenue~trass" | "amazon~trass";
+  targetLabel: string;
+  predictorLabel: string;
+  targetUnit: "krw" | "usd";
+  predictorUnit: "krw" | "usd";
+  scope: string | null;
+  note: string | null;
+  series: Array<{ period: string; target: number | null; predictor: number | null }>;
+  fits: Record<ModelMode, LagFit[]>;
+  best: Record<ModelMode, LagFit | null>;
+};
+
+export type CompanyModels = {
+  company: string;
+  label: string;
+  availability: {
+    dart: boolean;
+    amazon: boolean;
+    trass: boolean;
+    trassScopes: string[];
+  };
+  pairs: ModelPair[];
+};
+
+export type RevenueModels = {
+  generatedAt: string;
+  maxLag: number;
+  minNForBest: number;
+  companies: CompanyModels[];
+};
+
 export type DashboardOverview = {
   tracked_company_count: number;
   tracked_industry_count: number;
@@ -384,6 +430,7 @@ export type DashboardData = {
   dartQuarterlyRevenue: DartQuarterlyRevenueRow[];
   quarterlyComparison: QuarterlyComparison[];
   companyStockMonthly: StockMonthlyRow[];
+  revenueModels: RevenueModels;
   tables: {
     amazon_us_monthly: MonthlyProductLike[];
     company_monthly_proxy: Array<{

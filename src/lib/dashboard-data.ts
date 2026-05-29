@@ -34,6 +34,11 @@ export const companyStockMonthly = dashboardData.companyStockMonthly;
 export const sourceGapMap = dashboardData.tables.source_gap_map;
 export const companyCoverageScore = dashboardData.tables.company_coverage_score;
 export const companyMonthlyProxy = dashboardData.tables.company_monthly_proxy;
+export const revenueModels = dashboardData.revenueModels;
+
+export function getCompanyModels(companyId: string) {
+  return revenueModels?.companies.find((entry) => entry.company === companyId) ?? null;
+}
 
 export function getCompany(companyId: string): DashboardCompany | undefined {
   return companies.find((company) => company.company === companyId);

@@ -14,6 +14,7 @@ import {
   LineChart,
   Package,
   Search,
+  Sigma,
   Sparkles,
   Store,
   TrendingUp
@@ -25,11 +26,13 @@ import { BenchmarkSummary } from "@/components/benchmark/BenchmarkSummary";
 import { BenchmarkDataTable } from "@/components/benchmark/BenchmarkDataTable";
 import { ComparisonExplorer } from "@/components/benchmark/ComparisonExplorer";
 import { ProductFamilyToggle } from "@/components/products/ProductFamilyToggle";
+import { RevenueModelExplorer } from "@/components/model/RevenueModelExplorer";
 import {
   companies,
   companyCoverageScore,
   getCompany,
   getCompanyDartQuarterly,
+  getCompanyModels,
   getCompanyCoverage,
   getCompanyMonthly,
   getCompanyProducts,
@@ -43,6 +46,7 @@ import {
   missingDataChecklist,
   overview,
   quarterlyComparison,
+  revenueModels,
   toBrandTrend
 } from "@/lib/dashboard-data";
 import { type DisplayCurrency, formatMoneyFromKrw, formatMoneyFromUsd, formatNumber, formatPercent, productLabel, trendTone } from "@/lib/format";
@@ -60,12 +64,13 @@ import type {
 } from "@/lib/types";
 
 type Workspace = "home" | "amazon";
-type DetailTab = "overview" | "products" | "benchmark" | "data";
+type DetailTab = "overview" | "products" | "benchmark" | "model" | "data";
 
 const tabs: Array<{ id: DetailTab; label: string; icon: typeof LineChart }> = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "products", label: "Products", icon: Package },
   { id: "benchmark", label: "Benchmark", icon: BarChart3 },
+  { id: "model", label: "Model", icon: Sigma },
   { id: "data", label: "Data", icon: Database }
 ];
 
@@ -668,6 +673,7 @@ function CompanyWorkspace({
       {activeTab === "overview" ? <OverviewTab company={company} companyMonthly={companyMonthly} currency={currency} usdKrw={usdKrw} hasTrend={hasTrend} /> : null}
       {activeTab === "products" ? <ProductsTab key={company.company} company={company} currency={currency} usdKrw={usdKrw} /> : null}
       {activeTab === "benchmark" ? <BenchmarkTab company={company} currency={currency} usdKrw={usdKrw} /> : null}
+      {activeTab === "model" ? <ModelTab company={company} currency={currency} usdKrw={usdKrw} /> : null}
       {activeTab === "data" ? <DataTab company={company} /> : null}
     </div>
   );
@@ -900,6 +906,25 @@ function BenchmarkTab({
           currency={currency}
           usdKrw={usdKrw}
         />
+      </SectionCard>
+    </div>
+  );
+}
+
+function ModelTab({
+  company,
+  currency,
+  usdKrw
+}: {
+  company: DashboardCompany;
+  currency: DisplayCurrency;
+  usdKrw: number;
+}) {
+  const models = getCompanyModels(company.company);
+  return (
+    <div className="space-y-5">
+      <SectionCard eyebrow="Revenue Modeling" title="분기 매출 예측 회귀">
+        <RevenueModelExplorer models={models} currency={currency} usdKrw={usdKrw} minNForBest={revenueModels?.minNForBest} />
       </SectionCard>
     </div>
   );

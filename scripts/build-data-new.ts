@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { parse } from "csv-parse/sync";
+import { buildRevenueModels } from "./revenue-models";
 
 type Company = "coway" | "samyang" | "tnl";
 type CanonicalColumn =
@@ -1912,7 +1913,12 @@ function writeOutputsFromExistingDashboard(existing: ExistingDashboardJson) {
 
   const refreshed = {
     ...existing,
-    generated_at: new Date().toISOString()
+    generated_at: new Date().toISOString(),
+    revenueModels: buildRevenueModels({
+      dart: tables.dart_quarterly_revenue ?? [],
+      amazonMonthly: tables.company_monthly_proxy ?? [],
+      trassQuarterly: tables.trass_trade_quarterly ?? []
+    })
   };
 
   fs.writeFileSync(path.join(publicDataRoot, "dashboard_data.json"), JSON.stringify(refreshed, null, 2));
@@ -2017,6 +2023,11 @@ function main() {
       processedTrade.dartQuarterlyRevenue
     )
   );
+  const revenueModels = buildRevenueModels({
+    dart: processedTrade.dartQuarterlyRevenue,
+    amazonMonthly: companyMonthly,
+    trassQuarterly: processedTrade.trassTradeQuarterly
+  });
 
   const allSummary = {
     company_count: 3,
@@ -2061,6 +2072,7 @@ function main() {
     dartQuarterlyRevenue: processedTrade.dartQuarterlyRevenue,
     quarterlyComparison,
     companyStockMonthly,
+    revenueModels,
     tables: {
       amazon_us_monthly: productMonthly,
       company_monthly_proxy: companyMonthly,
