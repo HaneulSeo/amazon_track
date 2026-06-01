@@ -142,6 +142,14 @@ type TradeMonthlyRow = {
   export_weight_kg: number | null;
   domestic_company_count: number | null;
   foreign_counterparty_count: number | null;
+  trass_raw_value: number | null;
+  trass_observed_days: number | null;
+  trass_target_days: number | null;
+  trass_30d_normalized: number | null;
+  trass_is_partial_month: boolean;
+  trass_adjustment_factor: number | null;
+  trass_value_for_trend: number | null;
+  trass_total_source: string;
 };
 
 type TradeQuarterlyRow = {
@@ -155,6 +163,14 @@ type TradeQuarterlyRow = {
   export_weight_kg: number | null;
   domestic_company_count: number | null;
   foreign_counterparty_count: number | null;
+  trass_raw_value: number | null;
+  trass_observed_days: number | null;
+  trass_target_days: number | null;
+  trass_30d_normalized: number | null;
+  trass_is_partial_month: boolean;
+  trass_adjustment_factor: number | null;
+  trass_value_for_trend: number | null;
+  trass_total_source: string;
 };
 
 type CountryTradeMonthlyRow = {
@@ -166,6 +182,57 @@ type CountryTradeMonthlyRow = {
   export_value_usd: number | null;
   export_value_krw: number | null;
   export_weight_kg: number | null;
+  trass_raw_value: number | null;
+  trass_observed_days: number | null;
+  trass_target_days: number | null;
+  trass_30d_normalized: number | null;
+  trass_is_partial_month: boolean;
+  trass_adjustment_factor: number | null;
+  trass_value_for_trend: number | null;
+};
+
+type TrassCompanyMonthlyRow = {
+  company: Company;
+  month: string;
+  quarter: string;
+  trass_reported_total_value: number | null;
+  trass_fallback_total_value: number | null;
+  trass_raw_value: number | null;
+  trass_observed_days: number | null;
+  trass_target_days: number | null;
+  trass_30d_normalized: number | null;
+  trass_is_partial_month: boolean;
+  trass_adjustment_factor: number | null;
+  trass_value_for_trend: number | null;
+  trass_total_source: string;
+  trass_country_weighted_feature: number | null;
+  trass_country_weighted_normalized_feature: number | null;
+  trass_country_weight_coverage: number | null;
+  trass_country_count: number;
+  country_scopes: string[];
+  data_quality_warnings: string[];
+};
+
+type TrassCompanyQuarterlyRow = {
+  company: Company;
+  quarter: string;
+  trass_reported_total_value: number | null;
+  trass_fallback_total_value: number | null;
+  trass_raw_value: number | null;
+  trass_observed_days: number | null;
+  trass_target_days: number | null;
+  trass_30d_normalized: number | null;
+  trass_is_partial_month: boolean;
+  trass_adjustment_factor: number | null;
+  trass_value_for_trend: number | null;
+  trass_total_source: string;
+  trass_country_weighted_feature: number | null;
+  trass_country_weighted_normalized_feature: number | null;
+  trass_country_weight_coverage: number | null;
+  month_count: number;
+  months_present: number;
+  is_complete_quarter: boolean;
+  data_quality_warnings: string[];
 };
 
 type StockMonthlyRow = {
@@ -214,6 +281,24 @@ type QuarterlyComparisonRow = {
   externalIndex: number | null;
   trackedIndex: number | null;
   indexGap: number | null;
+};
+
+type CorrelationConfidence = "high" | "medium" | "low" | "not_enough_data";
+
+type CorrelationResultRow = {
+  company: Company;
+  target_source: "dart";
+  target_metric: "revenue_krw";
+  indicator_source: "amazon" | "trass" | "stock" | "reviews";
+  indicator_metric: string;
+  lag_quarters: number;
+  period_type: "quarterly_to_quarterly";
+  sample_size: number;
+  pearson_corr: number | null;
+  spearman_corr: number | null;
+  r_squared: number | null;
+  confidence: CorrelationConfidence;
+  interpretation: string;
 };
 
 type CoverageScoreRow = {
@@ -293,6 +378,9 @@ type ExistingDashboardJson = {
   missingDataChecklist?: unknown[];
   methodologyNotes?: unknown[];
   companyStockMonthly?: StockMonthlyRow[];
+  trassCompanyMonthly?: TrassCompanyMonthlyRow[];
+  trassCompanyQuarterly?: TrassCompanyQuarterlyRow[];
+  correlationResults?: CorrelationResultRow[];
   tables?: {
     amazon_us_monthly?: MonthlyProductRow[];
     company_monthly_proxy?: CompanyMonthlyRow[];
@@ -302,8 +390,11 @@ type ExistingDashboardJson = {
     trass_trade_monthly?: TradeMonthlyRow[];
     trass_trade_quarterly?: TradeQuarterlyRow[];
     trass_country_monthly?: CountryTradeMonthlyRow[];
+    trass_company_monthly?: TrassCompanyMonthlyRow[];
+    trass_company_quarterly?: TrassCompanyQuarterlyRow[];
     dart_quarterly_revenue?: DartQuarterlyRevenueRow[];
     quarterly_comparison?: QuarterlyComparisonRow[];
+    correlation_results?: CorrelationResultRow[];
     company_stock_monthly?: StockMonthlyRow[];
   };
 };
@@ -314,6 +405,7 @@ const processedRoot = path.join(root, "data", "processed");
 const publicDataRoot = path.join(root, "public", "data");
 const exposureConfigPath = path.join(root, "data", "config", "company_exposure.yml");
 const productFamilyRulesPath = path.join(root, "data", "config", "product_family_rules.yml");
+const trassPartialMonthOverridesPath = path.join(root, "data", "config", "trass_partial_month_overrides.yml");
 const productCatalogPath = path.join(root, "data", "config", "product_catalog.csv");
 const companyIndustryMeta: Record<Company, CompanyIndustryMeta> = {
   coway: {
@@ -669,6 +761,176 @@ function buildColumnMap(headers: string[]): Partial<Record<CanonicalColumn, stri
   return map;
 }
 
+type PartialMonthOverride = {
+  observed_days: number;
+  target_days: number;
+  reason: string;
+};
+
+type PartialMonthOverrides = Record<string, PartialMonthOverride>;
+
+function daysInMonth(month: string): number {
+  const match = month.match(/^(\d{4})-(\d{2})$/);
+  if (!match) return 30;
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]);
+  return new Date(year, monthIndex, 0).getDate();
+}
+
+function parsePartialMonthOverridesYaml(content: string): PartialMonthOverrides {
+  const lines = content.split(/\r?\n/);
+  const result: PartialMonthOverrides = {};
+  let currentKey: string | null = null;
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/\t/g, "  ");
+    if (!line.trim() || line.trim().startsWith("#")) continue;
+    const indent = line.match(/^ */)?.[0].length ?? 0;
+    const trimmed = line.trim();
+    if (indent === 0 && trimmed.endsWith(":")) {
+      const key = trimmed.slice(0, -1);
+      if (key === "partial_month_overrides") {
+        currentKey = null;
+      } else {
+        currentKey = key.replace(/^"(.*)"$/, "$1");
+      }
+      continue;
+    }
+    if (!currentKey) continue;
+    if (indent === 2 && trimmed.endsWith(":")) continue;
+    if (indent === 2 && trimmed.includes(":")) {
+      const [key, ...rest] = trimmed.split(":");
+      const value = rest.join(":").trim().replace(/^"(.*)"$/, "$1");
+      result[currentKey] = result[currentKey] ?? { observed_days: 0, target_days: 30, reason: "" };
+      if (key.trim() === "observed_days") result[currentKey].observed_days = Number(value);
+      if (key.trim() === "target_days") result[currentKey].target_days = Number(value);
+      if (key.trim() === "reason") result[currentKey].reason = value;
+    }
+  }
+  return result;
+}
+
+function loadPartialMonthOverrides(): PartialMonthOverrides {
+  if (!fs.existsSync(trassPartialMonthOverridesPath)) return {};
+  return parsePartialMonthOverridesYaml(fs.readFileSync(trassPartialMonthOverridesPath, "utf8"));
+}
+
+const partialMonthOverrides = loadPartialMonthOverrides();
+
+function getTrassObservedDays(month: string, sourceDescriptor: string): { observedDays: number; targetDays: number; isPartialMonth: boolean; reason: string } {
+  const override = partialMonthOverrides[month];
+  if (override && override.observed_days > 0 && override.target_days > 0) {
+    return {
+      observedDays: override.observed_days,
+      targetDays: override.target_days,
+      isPartialMonth: override.observed_days < daysInMonth(month),
+      reason: override.reason || "configured partial month override"
+    };
+  }
+
+  const rangeMatch = sourceDescriptor.match(/(\d{4}-\d{2}-\d{2})\s*(?:~|to|\-)\s*(\d{4}-\d{2}-\d{2})/i);
+  if (rangeMatch) {
+    const start = new Date(rangeMatch[1]);
+    const end = new Date(rangeMatch[2]);
+    const observedDays = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+    return {
+      observedDays,
+      targetDays: 30,
+      isPartialMonth: observedDays < daysInMonth(month),
+      reason: "inferred from source descriptor range"
+    };
+  }
+
+  const monthDays = daysInMonth(month);
+  return {
+    observedDays: monthDays,
+    targetDays: 30,
+    isPartialMonth: false,
+    reason: "full month default"
+  };
+}
+
+function normalizeTrassValue(value: number | null, observedDays: number, targetDays: number): number | null {
+  if (value === null || !Number.isFinite(value) || observedDays <= 0 || targetDays <= 0) return null;
+  return round((value * targetDays) / observedDays, 2);
+}
+
+function computePearson(valuesX: Array<number | null>, valuesY: Array<number | null>): number | null {
+  const pairs = valuesX
+    .map((x, index) => [x, valuesY[index]] as const)
+    .filter((pair): pair is [number, number] => typeof pair[0] === "number" && typeof pair[1] === "number" && Number.isFinite(pair[0]) && Number.isFinite(pair[1]));
+  if (pairs.length < 2) return null;
+  const xs = pairs.map(([x]) => x);
+  const ys = pairs.map(([, y]) => y);
+  const meanX = xs.reduce((sum, value) => sum + value, 0) / xs.length;
+  const meanY = ys.reduce((sum, value) => sum + value, 0) / ys.length;
+  let numerator = 0;
+  let denomX = 0;
+  let denomY = 0;
+  for (let i = 0; i < pairs.length; i++) {
+    const dx = xs[i] - meanX;
+    const dy = ys[i] - meanY;
+    numerator += dx * dy;
+    denomX += dx * dx;
+    denomY += dy * dy;
+  }
+  const denom = Math.sqrt(denomX * denomY);
+  return denom === 0 ? null : round(numerator / denom, 4);
+}
+
+function rankValues(values: Array<number | null>): Array<number | null> {
+  const ranked = values
+    .map((value, index) => ({ value, index }))
+    .filter((item): item is { value: number; index: number } => typeof item.value === "number" && Number.isFinite(item.value))
+    .sort((a, b) => a.value - b.value);
+  const ranks = new Array<number | null>(values.length).fill(null);
+  let i = 0;
+  while (i < ranked.length) {
+    let j = i + 1;
+    while (j < ranked.length && ranked[j].value === ranked[i].value) j++;
+    const avgRank = (i + j + 1) / 2;
+    for (let k = i; k < j; k++) ranks[ranked[k].index] = avgRank;
+    i = j;
+  }
+  return ranks;
+}
+
+function computeSpearman(valuesX: Array<number | null>, valuesY: Array<number | null>): number | null {
+  const rx = rankValues(valuesX);
+  const ry = rankValues(valuesY);
+  return computePearson(rx, ry);
+}
+
+function computeRSquared(valuesX: Array<number | null>, valuesY: Array<number | null>): number | null {
+  const pearson = computePearson(valuesX, valuesY);
+  return pearson === null ? null : round(pearson * pearson, 4);
+}
+
+function quartifyMonth(month: string): string {
+  const match = month.match(/^(\d{4})-(\d{2})$/);
+  if (!match) return month;
+  const quarter = Math.floor((Number(match[2]) - 1) / 3) + 1;
+  return `${match[1]}-Q${quarter}`;
+}
+
+function getCompanyTrassWeightMap(company: Company): Record<string, number> {
+  const exposure = exposureConfig[company].total_revenue_exposure;
+  if (company === "samyang") {
+    return {
+      us: exposure.usa_estimate ?? 0.2,
+      cn: exposure.china_estimate ?? 0.2,
+      total: exposure.overseas_total ?? 0.77
+    };
+  }
+  if (company === "tnl") {
+    return {
+      us: exposure.hero_mighty_patch_related_base ?? 1
+    };
+  }
+  return {
+    total: exposure.usa ?? 1
+  };
+}
+
 function parseExposureYaml(content: string): Record<Company, CompanyExposureFileConfig> {
   const lines = content.split(/\r?\n/);
   const result: Partial<Record<Company, CompanyExposureFileConfig>> = {};
@@ -882,6 +1144,307 @@ function loadProcessedStockData(): StockMonthlyRow[] {
 
 const companyStockMonthly = loadProcessedStockData();
 
+function getTrassSourceMetric(row: { export_value_krw: number | null; export_value_usd: number | null }): number | null {
+  return row.export_value_krw ?? (row.export_value_usd !== null ? row.export_value_usd * 1300 : null);
+}
+
+function enrichTrassMonthlyRows(rows: TradeMonthlyRow[]): TradeMonthlyRow[] {
+  const grouped = new Map<string, TradeMonthlyRow[]>();
+  for (const row of rows) {
+    const key = `${row.company}__${row.product_line}__${row.month}`;
+    grouped.set(key, [...(grouped.get(key) ?? []), row]);
+  }
+
+  const enriched = rows.map((row): TradeMonthlyRow => {
+    const timing = getTrassObservedDays(row.month, row.source_descriptor);
+    const rawValue = getTrassSourceMetric(row);
+    const normalized = normalizeTrassValue(rawValue, timing.observedDays, timing.targetDays);
+    return {
+      ...row,
+      trass_raw_value: rawValue,
+      trass_observed_days: timing.observedDays,
+      trass_target_days: timing.targetDays,
+      trass_30d_normalized: normalized,
+      trass_is_partial_month: timing.isPartialMonth,
+      trass_adjustment_factor: timing.observedDays > 0 ? round(timing.targetDays / timing.observedDays, 4) : null,
+      trass_value_for_trend: normalized,
+      trass_total_source: "reported"
+    } as TradeMonthlyRow;
+  });
+
+  return enriched.sort((a, b) => a.company.localeCompare(b.company) || a.product_line.localeCompare(b.product_line) || a.country_scope.localeCompare(b.country_scope) || monthSortKey(a.month) - monthSortKey(b.month));
+}
+
+function enrichTrassCountryRows(rows: CountryTradeMonthlyRow[]): CountryTradeMonthlyRow[] {
+  return rows
+    .map((row): CountryTradeMonthlyRow => {
+      const timing = getTrassObservedDays(row.month, row.country_scope);
+      const rawValue = getTrassSourceMetric(row);
+      const normalized = normalizeTrassValue(rawValue, timing.observedDays, timing.targetDays);
+      return {
+        ...row,
+        trass_raw_value: rawValue,
+        trass_observed_days: timing.observedDays,
+        trass_target_days: timing.targetDays,
+        trass_30d_normalized: normalized,
+        trass_is_partial_month: timing.isPartialMonth,
+        trass_adjustment_factor: timing.observedDays > 0 ? round(timing.targetDays / timing.observedDays, 4) : null,
+        trass_value_for_trend: normalized
+      } as CountryTradeMonthlyRow;
+    })
+    .sort((a, b) => a.company.localeCompare(b.company) || a.country_scope.localeCompare(b.country_scope) || monthSortKey(a.month) - monthSortKey(b.month));
+}
+
+function buildTrassCompanyMonthlyRows(rows: TradeMonthlyRow[]): TrassCompanyMonthlyRow[] {
+  const monthlyBuckets = new Map<string, TradeMonthlyRow[]>();
+  for (const row of rows) {
+    monthlyBuckets.set(`${row.company}__${row.month}`, [...(monthlyBuckets.get(`${row.company}__${row.month}`) ?? []), row]);
+  }
+
+  const output: TrassCompanyMonthlyRow[] = [];
+  for (const [key, bucket] of monthlyBuckets.entries()) {
+    const [company, month] = key.split("__") as [Company, string];
+    const quarter = quartifyMonth(month);
+    const timing = getTrassObservedDays(month, bucket[0]?.source_descriptor ?? "");
+    const reportedRows = bucket.filter((row) => row.country_scope === "total");
+    const countryRows = bucket.filter((row) => row.country_scope !== "total");
+    const reportedTotal = sum(reportedRows.map((row) => getTrassSourceMetric(row)));
+    const fallbackTotal = sum(countryRows.map((row) => getTrassSourceMetric(row)));
+    const source = reportedRows.length && reportedRows.some((row) => getTrassSourceMetric(row) !== null) ? "reported" : "country_sum_fallback";
+    const rawValue = source === "reported" ? reportedTotal : fallbackTotal;
+    const normalized = normalizeTrassValue(rawValue, timing.observedDays, timing.targetDays);
+    const countryTotals = new Map<string, number>();
+    for (const row of countryRows) {
+      const value = row.trass_value_for_trend ?? getTrassSourceMetric(row);
+      if (value === null) continue;
+      countryTotals.set(row.country_scope, (countryTotals.get(row.country_scope) ?? 0) + value);
+    }
+    const weightMap = getCompanyTrassWeightMap(company);
+    const weightedPairs = [...countryTotals.entries()].map(([country, value]) => ({
+      country,
+      value,
+      weight: weightMap[country] ?? 0
+    }));
+    const weightCoverage = round(sum(weightedPairs.map((pair) => pair.weight)), 4);
+    const weightedFeature = round(weightedPairs.reduce((total, pair) => total + pair.value * pair.weight, 0), 2);
+    const weightedNormalized = weightCoverage && weightCoverage > 0 ? round((weightedFeature ?? 0) / weightCoverage, 2) : null;
+
+    output.push({
+      company,
+      month,
+      quarter,
+      trass_reported_total_value: reportedRows.length ? reportedTotal : null,
+      trass_fallback_total_value: countryRows.length ? fallbackTotal : null,
+      trass_raw_value: rawValue,
+      trass_observed_days: timing.observedDays,
+      trass_target_days: timing.targetDays,
+      trass_30d_normalized: normalized,
+      trass_is_partial_month: timing.isPartialMonth,
+      trass_adjustment_factor: timing.observedDays > 0 ? round(timing.targetDays / timing.observedDays, 4) : null,
+      trass_value_for_trend: normalized,
+      trass_total_source: source,
+      trass_country_weighted_feature: weightedFeature,
+      trass_country_weighted_normalized_feature: weightedNormalized,
+      trass_country_weight_coverage: weightCoverage,
+      trass_country_count: countryTotals.size,
+      country_scopes: [...new Set(bucket.map((row) => row.country_scope))].sort(),
+      data_quality_warnings: [
+        ...(source === "country_sum_fallback" ? ["trass_total_fallback_to_country_sum"] : []),
+        ...(timing.isPartialMonth ? ["trass_partial_month_normalized"] : [])
+      ]
+    });
+  }
+
+  return output.sort((a, b) => a.company.localeCompare(b.company) || monthSortKey(a.month) - monthSortKey(b.month));
+}
+
+function buildTrassCompanyQuarterlyRows(rows: TrassCompanyMonthlyRow[]): TrassCompanyQuarterlyRow[] {
+  const buckets = new Map<string, TrassCompanyMonthlyRow[]>();
+  for (const row of rows) {
+    buckets.set(`${row.company}__${row.quarter}`, [...(buckets.get(`${row.company}__${row.quarter}`) ?? []), row]);
+  }
+
+  const output: TrassCompanyQuarterlyRow[] = [];
+  for (const [key, bucket] of buckets.entries()) {
+    const [company, quarter] = key.split("__") as [Company, string];
+    const sorted = [...bucket].sort((a, b) => monthSortKey(a.month) - monthSortKey(b.month));
+    const reportedTotal = sum(sorted.map((row) => row.trass_reported_total_value));
+    const fallbackTotal = sum(sorted.map((row) => row.trass_fallback_total_value));
+    const rawValue = sum(sorted.map((row) => row.trass_raw_value));
+    const observedDays = sum(sorted.map((row) => row.trass_observed_days)) || null;
+    const targetDays = sum(sorted.map((row) => row.trass_target_days)) || null;
+    const normalized = sum(sorted.map((row) => row.trass_30d_normalized));
+    const weightedFeature = sum(sorted.map((row) => row.trass_country_weighted_feature));
+    const weightCoverage = mean(sorted.map((row) => row.trass_country_weight_coverage));
+    const weightedNormalized = weightCoverage && weightCoverage > 0 ? round(weightedFeature / weightCoverage, 2) : null;
+    const monthsPresent = new Set(sorted.map((row) => row.month)).size;
+    const isCompleteQuarter = monthsPresent >= 3;
+
+    output.push({
+      company,
+      quarter,
+      trass_reported_total_value: sorted.some((row) => row.trass_reported_total_value !== null) ? reportedTotal : null,
+      trass_fallback_total_value: sorted.some((row) => row.trass_fallback_total_value !== null) ? fallbackTotal : null,
+      trass_raw_value: rawValue,
+      trass_observed_days: observedDays,
+      trass_target_days: targetDays,
+      trass_30d_normalized: normalized,
+      trass_is_partial_month: sorted.some((row) => row.trass_is_partial_month),
+      trass_adjustment_factor: observedDays && targetDays && observedDays > 0 ? round(targetDays / observedDays, 4) : null,
+      trass_value_for_trend: normalized,
+      trass_total_source: sorted.some((row) => row.trass_total_source === "reported") ? "reported" : "country_sum_fallback",
+      trass_country_weighted_feature: weightedFeature,
+      trass_country_weighted_normalized_feature: weightedNormalized,
+      trass_country_weight_coverage: weightCoverage ?? null,
+      month_count: monthsPresent,
+      months_present: monthsPresent,
+      is_complete_quarter: isCompleteQuarter,
+      data_quality_warnings: sorted.flatMap((row) => row.data_quality_warnings).slice(0, 8)
+    });
+  }
+
+  return output.sort((a, b) => a.company.localeCompare(b.company) || a.quarter.localeCompare(b.quarter));
+}
+
+function buildTrassDetailedQuarterlyRows(rows: TradeMonthlyRow[]): TradeQuarterlyRow[] {
+  const buckets = new Map<string, TradeMonthlyRow[]>();
+  for (const row of rows) {
+    const key = `${row.company}__${row.product_line}__${row.country_scope}__${row.quarter}`;
+    buckets.set(key, [...(buckets.get(key) ?? []), row]);
+  }
+
+  const output: TradeQuarterlyRow[] = [];
+  for (const [key, bucket] of buckets.entries()) {
+    const [company, productLine, countryScope, quarter] = key.split("__") as [Company, string, string, string];
+    const sorted = [...bucket].sort((a, b) => monthSortKey(a.month) - monthSortKey(b.month));
+    const rawValue = sum(sorted.map((row) => row.trass_raw_value));
+    const normalized = sum(sorted.map((row) => row.trass_30d_normalized));
+    const observedDays = sum(sorted.map((row) => row.trass_observed_days)) || null;
+    const targetDays = sum(sorted.map((row) => row.trass_target_days)) || null;
+    const isPartialMonth = sorted.some((row) => row.trass_is_partial_month);
+    output.push({
+      company,
+      company_label: sorted[0]?.company_label ?? companyIndustryMeta[company].display_name,
+      product_line: productLine,
+      country_scope: countryScope,
+      quarter,
+      export_value_usd: sum(sorted.map((row) => row.export_value_usd)),
+      export_value_krw: sum(sorted.map((row) => row.export_value_krw)),
+      export_weight_kg: sum(sorted.map((row) => row.export_weight_kg)),
+      domestic_company_count: sum(sorted.map((row) => row.domestic_company_count)),
+      foreign_counterparty_count: sum(sorted.map((row) => row.foreign_counterparty_count)),
+      trass_raw_value: rawValue,
+      trass_observed_days: observedDays,
+      trass_target_days: targetDays,
+      trass_30d_normalized: normalized,
+      trass_is_partial_month: isPartialMonth,
+      trass_adjustment_factor: observedDays && targetDays && observedDays > 0 ? round(targetDays / observedDays, 4) : null,
+      trass_value_for_trend: normalized,
+      trass_total_source: "reported"
+    });
+  }
+
+  return output.sort((a, b) => a.company.localeCompare(b.company) || a.product_line.localeCompare(b.product_line) || a.country_scope.localeCompare(b.country_scope) || a.quarter.localeCompare(b.quarter));
+}
+
+function buildCorrelationResults(
+  companyMonthly: CompanyMonthlyRow[],
+  trassCompanyQuarterly: TrassCompanyQuarterlyRow[],
+  dartRows: DartQuarterlyRevenueRow[],
+  stockRows: StockMonthlyRow[]
+): CorrelationResultRow[] {
+  const results: CorrelationResultRow[] = [];
+  const companies: Company[] = ["coway", "samyang", "tnl"];
+
+  for (const company of companies) {
+    const dartSeries = dartRows
+      .filter((row) => row.company === company)
+      .map((row) => ({ quarter: row.quarter, value: row.revenue_krw }))
+      .sort((a, b) => normalizeQuarterSortKey(a.quarter) - normalizeQuarterSortKey(b.quarter));
+    const amazonSeries = companyMonthly
+      .filter((row) => row.company === company)
+      .map((row) => ({ quarter: quartifyMonth(row.month), value: row.total_revenue }))
+      .reduce((map, item) => {
+        map.set(item.quarter, (map.get(item.quarter) ?? 0) + (item.value ?? 0));
+        return map;
+      }, new Map<string, number>());
+    const trassSeries = trassCompanyQuarterly
+      .filter((row) => row.company === company)
+      .map((row) => ({ quarter: row.quarter, value: row.trass_value_for_trend }));
+    const stockSeries = stockRows
+      .filter((row) => row.company === company)
+      .slice()
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((row) => ({ quarter: quartifyMonth(row.month), value: row.adj_close ?? row.close }))
+      .reduce((map, item) => {
+        map.set(item.quarter, item.value);
+        return map;
+      }, new Map<string, number | null>());
+
+    const indicatorSets = [
+      { source: "amazon" as const, metric: "revenue_krw", series: [...amazonSeries.entries()].map(([quarter, value]) => ({ quarter, value })) },
+      { source: "trass" as const, metric: "trass_value_for_trend", series: trassSeries },
+      { source: "stock" as const, metric: "adj_close", series: [...stockSeries.entries()].map(([quarter, value]) => ({ quarter, value })) }
+    ];
+
+    for (const indicator of indicatorSets) {
+      for (let lag = 0; lag <= 4; lag++) {
+        const xs: Array<number | null> = [];
+        const ys: Array<number | null> = [];
+        for (const dart of dartSeries) {
+          const shiftedQuarter = shiftQuarter(dart.quarter, -lag);
+          const indicatorValue = indicator.series.find((row) => row.quarter === shiftedQuarter)?.value ?? null;
+          xs.push(indicatorValue);
+          ys.push(dart.value);
+        }
+        const sampleSize = xs.filter((value, index) => value !== null && ys[index] !== null).length;
+        const pearson = computePearson(xs, ys);
+        const spearman = computeSpearman(xs, ys);
+        const r2 = computeRSquared(xs, ys);
+        const confidence: CorrelationConfidence =
+          sampleSize < 3 || pearson === null ? "not_enough_data" : sampleSize >= 8 ? "high" : sampleSize >= 4 ? "medium" : "low";
+        const interpretation =
+          confidence === "not_enough_data"
+            ? "Insufficient sample for a stable lag correlation."
+            : `${indicator.source.toUpperCase()} vs DART at lag ${lag}Q uses ${sampleSize} aligned quarters.`;
+        results.push({
+          company,
+          target_source: "dart",
+          target_metric: "revenue_krw",
+          indicator_source: indicator.source,
+          indicator_metric: indicator.metric,
+          lag_quarters: lag,
+          period_type: "quarterly_to_quarterly",
+          sample_size: sampleSize,
+          pearson_corr: pearson,
+          spearman_corr: spearman,
+          r_squared: r2,
+          confidence,
+          interpretation
+        });
+      }
+    }
+  }
+
+  return results;
+}
+
+function shiftQuarter(quarter: string, delta: number): string {
+  const match = quarter.match(/^(\d{4})-Q([1-4])$/);
+  if (!match) return quarter;
+  let year = Number(match[1]);
+  let q = Number(match[2]) + delta;
+  while (q <= 0) {
+    year -= 1;
+    q += 4;
+  }
+  while (q > 4) {
+    year += 1;
+    q -= 4;
+  }
+  return `${year}-Q${q}`;
+}
+
 function loadExistingDashboardData(): ExistingDashboardJson | null {
   const existingPath = path.join(publicDataRoot, "dashboard_data.json");
   if (!fs.existsSync(existingPath)) return null;
@@ -912,7 +1475,15 @@ function loadProcessedTradeData() {
     export_value_krw: parseNumber(row.export_value_krw),
     export_weight_kg: parseNumber(row.export_weight_kg),
     domestic_company_count: parseNumber(row.domestic_company_count),
-    foreign_counterparty_count: parseNumber(row.foreign_counterparty_count)
+    foreign_counterparty_count: parseNumber(row.foreign_counterparty_count),
+    trass_raw_value: parseNumber(row.trass_raw_value),
+    trass_observed_days: parseNumber(row.trass_observed_days),
+    trass_target_days: parseNumber(row.trass_target_days),
+    trass_30d_normalized: parseNumber(row.trass_30d_normalized),
+    trass_is_partial_month: parseBoolLike(row.trass_is_partial_month),
+    trass_adjustment_factor: parseNumber(row.trass_adjustment_factor),
+    trass_value_for_trend: parseNumber(row.trass_value_for_trend),
+    trass_total_source: row.trass_total_source === "country_sum_fallback" ? "country_sum_fallback" : "reported"
   }));
   const trassTradeQuarterly = readCsvIfExists<TradeQuarterlyRow>(path.join(processedRoot, "trass_trade_quarterly.csv")).map((row) => ({
     ...row,
@@ -920,13 +1491,28 @@ function loadProcessedTradeData() {
     export_value_krw: parseNumber(row.export_value_krw),
     export_weight_kg: parseNumber(row.export_weight_kg),
     domestic_company_count: parseNumber(row.domestic_company_count),
-    foreign_counterparty_count: parseNumber(row.foreign_counterparty_count)
+    foreign_counterparty_count: parseNumber(row.foreign_counterparty_count),
+    trass_raw_value: parseNumber(row.trass_raw_value),
+    trass_observed_days: parseNumber(row.trass_observed_days),
+    trass_target_days: parseNumber(row.trass_target_days),
+    trass_30d_normalized: parseNumber(row.trass_30d_normalized),
+    trass_is_partial_month: parseBoolLike(row.trass_is_partial_month),
+    trass_adjustment_factor: parseNumber(row.trass_adjustment_factor),
+    trass_value_for_trend: parseNumber(row.trass_value_for_trend),
+    trass_total_source: row.trass_total_source === "country_sum_fallback" ? "country_sum_fallback" : "reported"
   }));
   const trassCountryMonthly = readCsvIfExists<CountryTradeMonthlyRow>(path.join(processedRoot, "trass_country_monthly.csv")).map((row) => ({
     ...row,
     export_value_usd: parseNumber(row.export_value_usd),
     export_value_krw: parseNumber(row.export_value_krw),
-    export_weight_kg: parseNumber(row.export_weight_kg)
+    export_weight_kg: parseNumber(row.export_weight_kg),
+    trass_raw_value: parseNumber(row.trass_raw_value),
+    trass_observed_days: parseNumber(row.trass_observed_days),
+    trass_target_days: parseNumber(row.trass_target_days),
+    trass_30d_normalized: parseNumber(row.trass_30d_normalized),
+    trass_is_partial_month: parseBoolLike(row.trass_is_partial_month),
+    trass_adjustment_factor: parseNumber(row.trass_adjustment_factor),
+    trass_value_for_trend: parseNumber(row.trass_value_for_trend)
   }));
   const dartQuarterlyRevenue = readCsvIfExists<DartQuarterlyRevenueRow>(path.join(processedRoot, "dart_quarterly_revenue.csv")).map((row) => ({
     ...row,
@@ -1908,8 +2494,11 @@ function writeOutputsFromExistingDashboard(existing: ExistingDashboardJson) {
   if (tables.trass_trade_monthly) fs.writeFileSync(path.join(processedRoot, "trass_trade_monthly.csv"), writeCsv(toCsvRows(tables.trass_trade_monthly)));
   if (tables.trass_trade_quarterly) fs.writeFileSync(path.join(processedRoot, "trass_trade_quarterly.csv"), writeCsv(toCsvRows(tables.trass_trade_quarterly)));
   if (tables.trass_country_monthly) fs.writeFileSync(path.join(processedRoot, "trass_country_monthly.csv"), writeCsv(toCsvRows(tables.trass_country_monthly)));
+  if (tables.trass_company_monthly) fs.writeFileSync(path.join(processedRoot, "trass_company_monthly.csv"), writeCsv(toCsvRows(tables.trass_company_monthly)));
+  if (tables.trass_company_quarterly) fs.writeFileSync(path.join(processedRoot, "trass_company_quarterly.csv"), writeCsv(toCsvRows(tables.trass_company_quarterly)));
   if (tables.dart_quarterly_revenue) fs.writeFileSync(path.join(processedRoot, "dart_quarterly_revenue.csv"), writeCsv(toCsvRows(tables.dart_quarterly_revenue)));
   if (tables.quarterly_comparison) fs.writeFileSync(path.join(processedRoot, "quarterly_comparison.csv"), writeCsv(toCsvRows(tables.quarterly_comparison)));
+  if (tables.correlation_results) fs.writeFileSync(path.join(processedRoot, "correlation_results.csv"), writeCsv(toCsvRows(tables.correlation_results)));
   if (tables.company_stock_monthly) fs.writeFileSync(path.join(processedRoot, "company_stock_monthly.csv"), writeCsv(toCsvRows(tables.company_stock_monthly)));
 
   const refreshed = {
@@ -1934,8 +2523,11 @@ function writeOutputsFromExistingDashboard(existing: ExistingDashboardJson) {
   if (tables.trass_trade_monthly) console.log(`wrote data/processed/trass_trade_monthly.csv (${tables.trass_trade_monthly.length} rows)`);
   if (tables.trass_trade_quarterly) console.log(`wrote data/processed/trass_trade_quarterly.csv (${tables.trass_trade_quarterly.length} rows)`);
   if (tables.trass_country_monthly) console.log(`wrote data/processed/trass_country_monthly.csv (${tables.trass_country_monthly.length} rows)`);
+  if (tables.trass_company_monthly) console.log(`wrote data/processed/trass_company_monthly.csv (${tables.trass_company_monthly.length} rows)`);
+  if (tables.trass_company_quarterly) console.log(`wrote data/processed/trass_company_quarterly.csv (${tables.trass_company_quarterly.length} rows)`);
   if (tables.dart_quarterly_revenue) console.log(`wrote data/processed/dart_quarterly_revenue.csv (${tables.dart_quarterly_revenue.length} rows)`);
   if (tables.quarterly_comparison) console.log(`wrote data/processed/quarterly_comparison.csv (${tables.quarterly_comparison.length} rows)`);
+  if (tables.correlation_results) console.log(`wrote data/processed/correlation_results.csv (${tables.correlation_results.length} rows)`);
   if (tables.company_stock_monthly) console.log(`wrote data/processed/company_stock_monthly.csv (${tables.company_stock_monthly.length} rows)`);
   console.log(`wrote public/data/dashboard_data.json`);
 }
@@ -1953,21 +2545,26 @@ function main() {
   const productMonthly = finalizeRevenueShare(addProductLevelGrowth(buildProductMonthlyRows(dailyRecords)));
   const companyMonthly = ["coway", "samyang", "tnl"].flatMap((company) => computeCompanyMetric(company as Company, productMonthly.filter((row) => row.company === company)));
   const processedTrade = ensureProcessedTradeData();
+  const trassTradeMonthly = enrichTrassMonthlyRows(processedTrade.trassTradeMonthly);
+  const trassTradeQuarterly = buildTrassDetailedQuarterlyRows(trassTradeMonthly);
+  const trassCountryMonthly = enrichTrassCountryRows(processedTrade.trassCountryMonthly);
+  const trassCompanyMonthly = buildTrassCompanyMonthlyRows(trassTradeMonthly);
+  const trassCompanyQuarterly = buildTrassCompanyQuarterlyRows(trassCompanyMonthly);
 
   const dataAvailability: Record<Company, { dartQuarterly: boolean; trassTrade: boolean; trassCountry: boolean }> = {
     coway: {
       dartQuarterly: processedTrade.dartQuarterlyRevenue.some((row) => row.company === "coway"),
-      trassTrade: processedTrade.trassTradeQuarterly.some((row) => row.company === "coway"),
+      trassTrade: trassTradeQuarterly.some((row) => row.company === "coway"),
       trassCountry: processedTrade.trassCountryMonthly.some((row) => row.company === "coway" && row.country_scope !== "total")
     },
     samyang: {
       dartQuarterly: processedTrade.dartQuarterlyRevenue.some((row) => row.company === "samyang"),
-      trassTrade: processedTrade.trassTradeQuarterly.some((row) => row.company === "samyang"),
+      trassTrade: trassTradeQuarterly.some((row) => row.company === "samyang"),
       trassCountry: processedTrade.trassCountryMonthly.some((row) => row.company === "samyang" && row.country_scope !== "total")
     },
     tnl: {
       dartQuarterly: processedTrade.dartQuarterlyRevenue.some((row) => row.company === "tnl"),
-      trassTrade: processedTrade.trassTradeQuarterly.some((row) => row.company === "tnl"),
+      trassTrade: trassTradeQuarterly.some((row) => row.company === "tnl"),
       trassCountry: processedTrade.trassCountryMonthly.some((row) => row.company === "tnl" && row.country_scope !== "total")
     }
   };
@@ -2030,6 +2627,7 @@ function main() {
     amazonMonthly: companyMonthly,
     trassQuarterly: processedTrade.trassTradeQuarterly
   });
+  const correlationResults = buildCorrelationResults(companyMonthly, trassCompanyQuarterly, processedTrade.dartQuarterlyRevenue, companyStockMonthly);
 
   const allSummary = {
     company_count: 3,
@@ -2040,11 +2638,14 @@ function main() {
     product_family_row_count: familyMonthly.length,
     unique_asin_count: new Set(productMonthly.map((row) => row.asin)).size,
     month_count: new Set(productMonthly.map((row) => row.month)).size,
-    trade_monthly_row_count: processedTrade.trassTradeMonthly.length,
-    trade_quarterly_row_count: processedTrade.trassTradeQuarterly.length,
-    trade_country_monthly_row_count: processedTrade.trassCountryMonthly.length,
+    trade_monthly_row_count: trassTradeMonthly.length,
+    trade_quarterly_row_count: trassTradeQuarterly.length,
+    trade_country_monthly_row_count: trassCountryMonthly.length,
+    trass_company_monthly_row_count: trassCompanyMonthly.length,
+    trass_company_quarterly_row_count: trassCompanyQuarterly.length,
     dart_quarterly_row_count: processedTrade.dartQuarterlyRevenue.length,
     quarterly_comparison_row_count: quarterlyComparison.length,
+    correlation_result_row_count: correlationResults.length,
     stock_monthly_row_count: companyStockMonthly.length,
     company_coverage: coverageOutput,
     date_range: {
@@ -2068,11 +2669,14 @@ function main() {
     regionalExposure,
     missingDataChecklist,
     methodologyNotes,
-    tradeMonthly: processedTrade.trassTradeMonthly,
-    tradeQuarterly: processedTrade.trassTradeQuarterly,
-    tradeCountryMonthly: processedTrade.trassCountryMonthly,
+    tradeMonthly: trassTradeMonthly,
+    tradeQuarterly: trassTradeQuarterly,
+    tradeCountryMonthly: trassCountryMonthly,
+    trassCompanyMonthly,
+    trassCompanyQuarterly,
     dartQuarterlyRevenue: processedTrade.dartQuarterlyRevenue,
     quarterlyComparison,
+    correlationResults,
     companyStockMonthly,
     revenueModels,
     demandSignals: buildDemandSignals(),
@@ -2082,11 +2686,14 @@ function main() {
       product_family_monthly: familyMonthly,
       company_coverage_score: coverageOutput,
       source_gap_map: sourceGapMap,
-      trass_trade_monthly: processedTrade.trassTradeMonthly,
-      trass_trade_quarterly: processedTrade.trassTradeQuarterly,
-      trass_country_monthly: processedTrade.trassCountryMonthly,
+      trass_trade_monthly: trassTradeMonthly,
+      trass_trade_quarterly: trassTradeQuarterly,
+      trass_country_monthly: trassCountryMonthly,
+      trass_company_monthly: trassCompanyMonthly,
+      trass_company_quarterly: trassCompanyQuarterly,
       dart_quarterly_revenue: processedTrade.dartQuarterlyRevenue,
       quarterly_comparison: quarterlyComparison,
+      correlation_results: correlationResults,
       company_stock_monthly: companyStockMonthly
     }
   };
@@ -2099,11 +2706,14 @@ function main() {
   fs.writeFileSync(path.join(processedRoot, "product_family_monthly.csv"), writeCsv(toCsvRows(familyMonthly)));
   fs.writeFileSync(path.join(processedRoot, "company_coverage_score.csv"), writeCsv(toCsvRows(coverageOutput)));
   fs.writeFileSync(path.join(processedRoot, "source_gap_map.csv"), writeCsv(toCsvRows(sourceGapMap)));
-  fs.writeFileSync(path.join(processedRoot, "trass_trade_monthly.csv"), writeCsv(toCsvRows(processedTrade.trassTradeMonthly)));
-  fs.writeFileSync(path.join(processedRoot, "trass_trade_quarterly.csv"), writeCsv(toCsvRows(processedTrade.trassTradeQuarterly)));
-  fs.writeFileSync(path.join(processedRoot, "trass_country_monthly.csv"), writeCsv(toCsvRows(processedTrade.trassCountryMonthly)));
+  fs.writeFileSync(path.join(processedRoot, "trass_trade_monthly.csv"), writeCsv(toCsvRows(trassTradeMonthly)));
+  fs.writeFileSync(path.join(processedRoot, "trass_trade_quarterly.csv"), writeCsv(toCsvRows(trassTradeQuarterly)));
+  fs.writeFileSync(path.join(processedRoot, "trass_country_monthly.csv"), writeCsv(toCsvRows(trassCountryMonthly)));
+  fs.writeFileSync(path.join(processedRoot, "trass_company_monthly.csv"), writeCsv(toCsvRows(trassCompanyMonthly)));
+  fs.writeFileSync(path.join(processedRoot, "trass_company_quarterly.csv"), writeCsv(toCsvRows(trassCompanyQuarterly)));
   fs.writeFileSync(path.join(processedRoot, "dart_quarterly_revenue.csv"), writeCsv(toCsvRows(processedTrade.dartQuarterlyRevenue)));
   fs.writeFileSync(path.join(processedRoot, "quarterly_comparison.csv"), writeCsv(toCsvRows(quarterlyComparison)));
+  fs.writeFileSync(path.join(processedRoot, "correlation_results.csv"), writeCsv(toCsvRows(correlationResults)));
   fs.writeFileSync(path.join(processedRoot, "company_stock_monthly.csv"), writeCsv(toCsvRows(companyStockMonthly)));
   fs.writeFileSync(path.join(publicDataRoot, "dashboard_data.json"), JSON.stringify(jsonPayload, null, 2));
 
@@ -2112,11 +2722,14 @@ function main() {
   console.log(`wrote data/processed/product_family_monthly.csv (${familyMonthly.length} rows)`);
   console.log(`wrote data/processed/company_coverage_score.csv (${coverageOutput.length} rows)`);
   console.log(`wrote data/processed/source_gap_map.csv (${sourceGapMap.length} rows)`);
-  console.log(`wrote data/processed/trass_trade_monthly.csv (${processedTrade.trassTradeMonthly.length} rows)`);
-  console.log(`wrote data/processed/trass_trade_quarterly.csv (${processedTrade.trassTradeQuarterly.length} rows)`);
-  console.log(`wrote data/processed/trass_country_monthly.csv (${processedTrade.trassCountryMonthly.length} rows)`);
+  console.log(`wrote data/processed/trass_trade_monthly.csv (${trassTradeMonthly.length} rows)`);
+  console.log(`wrote data/processed/trass_trade_quarterly.csv (${trassTradeQuarterly.length} rows)`);
+  console.log(`wrote data/processed/trass_country_monthly.csv (${trassCountryMonthly.length} rows)`);
+  console.log(`wrote data/processed/trass_company_monthly.csv (${trassCompanyMonthly.length} rows)`);
+  console.log(`wrote data/processed/trass_company_quarterly.csv (${trassCompanyQuarterly.length} rows)`);
   console.log(`wrote data/processed/dart_quarterly_revenue.csv (${processedTrade.dartQuarterlyRevenue.length} rows)`);
   console.log(`wrote data/processed/quarterly_comparison.csv (${quarterlyComparison.length} rows)`);
+  console.log(`wrote data/processed/correlation_results.csv (${correlationResults.length} rows)`);
   console.log(`wrote data/processed/company_stock_monthly.csv (${companyStockMonthly.length} rows)`);
   console.log(`wrote public/data/dashboard_data.json`);
 }

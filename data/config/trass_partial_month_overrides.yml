@@ -1,0 +1,5 @@
+partial_month_overrides:
+  "2026-05":
+    observed_days: 10
+    target_days: 30
+    reason: "TRASS May data appears to cover only early-month partial period"

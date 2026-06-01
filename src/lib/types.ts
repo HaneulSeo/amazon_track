@@ -96,6 +96,35 @@ export type QuarterlyComparison = {
   indexGap: number | null;
 };
 
+export type CorrelationConfidence = "high" | "medium" | "low" | "not_enough_data";
+
+export type CorrelationResult = {
+  company: string;
+  target_source: "dart";
+  target_metric: "revenue_krw";
+  indicator_source: "amazon" | "trass" | "stock" | "reviews";
+  indicator_metric: string;
+  lag_quarters: number;
+  period_type: "quarterly_to_quarterly";
+  sample_size: number;
+  pearson_corr: number | null;
+  spearman_corr: number | null;
+  r_squared: number | null;
+  confidence: CorrelationConfidence;
+  interpretation: string;
+};
+
+export type SourceStatus = {
+  company: string;
+  source: "amazon" | "trass" | "dart" | "stock" | "manual";
+  latest_period: string | null;
+  available: boolean;
+  row_count: number;
+  value_label: string | null;
+  confidence: "high" | "medium" | "low";
+  warning: string | null;
+};
+
 export type ComparisonSeriesOption = {
   id: string;
   label: string;
@@ -359,6 +388,14 @@ export type TradeMonthlyRow = {
   export_weight_kg: number | null;
   domestic_company_count: number | null;
   foreign_counterparty_count: number | null;
+  trass_raw_value: number | null;
+  trass_observed_days: number | null;
+  trass_target_days: number | null;
+  trass_30d_normalized: number | null;
+  trass_is_partial_month: boolean;
+  trass_adjustment_factor: number | null;
+  trass_value_for_trend: number | null;
+  trass_total_source: "reported" | "country_sum_fallback";
 };
 
 export type TradeQuarterlyRow = {
@@ -372,6 +409,14 @@ export type TradeQuarterlyRow = {
   export_weight_kg: number | null;
   domestic_company_count: number | null;
   foreign_counterparty_count: number | null;
+  trass_raw_value: number | null;
+  trass_observed_days: number | null;
+  trass_target_days: number | null;
+  trass_30d_normalized: number | null;
+  trass_is_partial_month: boolean;
+  trass_adjustment_factor: number | null;
+  trass_value_for_trend: number | null;
+  trass_total_source: "reported" | "country_sum_fallback";
 };
 
 export type CountryTradeMonthlyRow = {
@@ -383,6 +428,57 @@ export type CountryTradeMonthlyRow = {
   export_value_usd: number | null;
   export_value_krw: number | null;
   export_weight_kg: number | null;
+  trass_raw_value: number | null;
+  trass_observed_days: number | null;
+  trass_target_days: number | null;
+  trass_30d_normalized: number | null;
+  trass_is_partial_month: boolean;
+  trass_adjustment_factor: number | null;
+  trass_value_for_trend: number | null;
+};
+
+export type TrassCompanyMonthlyRow = {
+  company: string;
+  month: string;
+  quarter: string;
+  trass_reported_total_value: number | null;
+  trass_fallback_total_value: number | null;
+  trass_raw_value: number | null;
+  trass_observed_days: number | null;
+  trass_target_days: number | null;
+  trass_30d_normalized: number | null;
+  trass_is_partial_month: boolean;
+  trass_adjustment_factor: number | null;
+  trass_value_for_trend: number | null;
+  trass_total_source: "reported" | "country_sum_fallback";
+  trass_country_weighted_feature: number | null;
+  trass_country_weighted_normalized_feature: number | null;
+  trass_country_weight_coverage: number | null;
+  trass_country_count: number;
+  country_scopes: string[];
+  data_quality_warnings: string[];
+};
+
+export type TrassCompanyQuarterlyRow = {
+  company: string;
+  quarter: string;
+  trass_reported_total_value: number | null;
+  trass_fallback_total_value: number | null;
+  trass_raw_value: number | null;
+  trass_observed_days: number | null;
+  trass_target_days: number | null;
+  trass_30d_normalized: number | null;
+  trass_is_partial_month: boolean;
+  trass_adjustment_factor: number | null;
+  trass_value_for_trend: number | null;
+  trass_total_source: "reported" | "country_sum_fallback";
+  trass_country_weighted_feature: number | null;
+  trass_country_weighted_normalized_feature: number | null;
+  trass_country_weight_coverage: number | null;
+  month_count: number;
+  months_present: number;
+  is_complete_quarter: boolean;
+  data_quality_warnings: string[];
 };
 
 export type DartQuarterlyRevenueRow = {
@@ -460,8 +556,11 @@ export type DashboardData = {
   tradeMonthly: TradeMonthlyRow[];
   tradeQuarterly: TradeQuarterlyRow[];
   tradeCountryMonthly: CountryTradeMonthlyRow[];
+  trassCompanyMonthly: TrassCompanyMonthlyRow[];
+  trassCompanyQuarterly: TrassCompanyQuarterlyRow[];
   dartQuarterlyRevenue: DartQuarterlyRevenueRow[];
   quarterlyComparison: QuarterlyComparison[];
+  correlationResults: CorrelationResult[];
   companyStockMonthly: StockMonthlyRow[];
   revenueModels: RevenueModels;
   demandSignals?: DemandSignals;
@@ -506,8 +605,11 @@ export type DashboardData = {
     trass_trade_monthly?: TradeMonthlyRow[];
     trass_trade_quarterly?: TradeQuarterlyRow[];
     trass_country_monthly?: CountryTradeMonthlyRow[];
+    trass_company_monthly?: TrassCompanyMonthlyRow[];
+    trass_company_quarterly?: TrassCompanyQuarterlyRow[];
     dart_quarterly_revenue?: DartQuarterlyRevenueRow[];
     quarterly_comparison?: QuarterlyComparison[];
+    correlation_results?: CorrelationResult[];
     company_stock_monthly?: StockMonthlyRow[];
   };
 };

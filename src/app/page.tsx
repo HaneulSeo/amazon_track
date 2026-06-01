@@ -31,6 +31,7 @@ import { SectionCard } from "@/components/SectionCard";
 import { BenchmarkSummary } from "@/components/benchmark/BenchmarkSummary";
 import { BenchmarkDataTable } from "@/components/benchmark/BenchmarkDataTable";
 import { ComparisonExplorer } from "@/components/benchmark/ComparisonExplorer";
+import { CorrelationSummaryCards } from "@/components/correlation/CorrelationSummaryCards";
 import { ProductFamilyToggle } from "@/components/products/ProductFamilyToggle";
 import { RevenueModelExplorer } from "@/components/model/RevenueModelExplorer";
 import { DemandSignalPanel } from "@/components/model/DemandSignalPanel";
@@ -45,8 +46,12 @@ import {
   getCompanyMonthly,
   getCompanyProducts,
   getCompanySources,
+  getCompanyTradeCountryMonthly,
   getCompanyTradeMonthly,
   getCompanyTradeQuarterly,
+  getCompanyTrassMonthly,
+  getCompanyTrassQuarterly,
+  getCompanyCorrelationResults,
   getCompanyStockMonthly,
   getIndustry,
   industries,
@@ -67,7 +72,7 @@ import type {
   DashboardIndustry,
   MonthlyProductLike,
   TradeMonthlyRow,
-  TradeQuarterlyRow,
+  TrassCompanyQuarterlyRow,
   StockMonthlyRow
 } from "@/lib/types";
 
@@ -1025,10 +1030,14 @@ function BenchmarkTab({
   const companyMonthly = getCompanyMonthly(company.company);
   const tradeMonthly = getCompanyTradeMonthly(company.company);
   const tradeQuarterly = getCompanyTradeQuarterly(company.company);
+  const tradeCountryMonthly = getCompanyTradeCountryMonthly(company.company);
+  const trassMonthly = getCompanyTrassMonthly(company.company);
+  const trassQuarterly = getCompanyTrassQuarterly(company.company);
   const stockRows = getCompanyStockMonthly(company.company);
   const dartRows = getCompanyDartQuarterly(company.company);
-  const comparisonRows = buildComparisonRows(company.company, companyMonthly, tradeQuarterly, dartRows, stockRows);
-  const comparisonOptions = buildComparisonOptions(company.company, companyMonthly, tradeQuarterly, dartRows, stockRows);
+  const correlationResults = getCompanyCorrelationResults(company.company);
+  const comparisonRows = buildComparisonRows(company.company, companyMonthly, trassQuarterly, dartRows, stockRows);
+  const comparisonOptions = buildComparisonOptions(company.company, companyMonthly, trassQuarterly, dartRows, stockRows);
 
   return (
     <div className="space-y-6">
@@ -1037,6 +1046,10 @@ function BenchmarkTab({
       </SectionCard>
 
       <SectionCard eyebrow="지표 비교" title="지수로 보는 추이 비교">
+        <CorrelationSummaryCards results={correlationResults} />
+      </SectionCard>
+
+      <SectionCard eyebrow="Comparison Explorer" title="비교할 시리즈 선택">
         <ComparisonExplorer key={company.company} rows={comparisonRows} options={comparisonOptions} currency={currency} usdKrw={usdKrw} />
       </SectionCard>
 
@@ -1047,9 +1060,13 @@ function BenchmarkTab({
           companyMonthly={companyMonthly}
           tradeMonthly={tradeMonthly}
           tradeQuarterly={tradeQuarterly}
+          tradeCountryMonthly={tradeCountryMonthly}
+          trassMonthly={trassMonthly}
+          trassQuarterly={trassQuarterly}
           dartRows={dartRows}
           stockRows={stockRows}
           quarterlyComparison={quarterlyComparison.filter((row) => row.company === company.company)}
+          correlationResults={correlationResults}
           currency={currency}
           usdKrw={usdKrw}
         />
@@ -1151,7 +1168,7 @@ function mapProductFamily(company: string, family: string) {
 function buildComparisonRows(
   _company: string,
   companyMonthly: CompanyMonthlyRow[],
-  tradeQuarterly: TradeQuarterlyRow[],
+  trassQuarterly: TrassCompanyQuarterlyRow[],
   dartRows: ReturnType<typeof getCompanyDartQuarterly>,
   stockRows: StockMonthlyRow[]
 ): ComparisonRow[] {
@@ -1160,7 +1177,7 @@ function buildComparisonRows(
     const quarter = monthToQuarter(row.month);
     if (quarter) quarters.add(quarter);
   }
-  for (const row of tradeQuarterly) quarters.add(row.quarter);
+  for (const row of trassQuarterly) quarters.add(row.quarter);
   for (const row of dartRows) quarters.add(row.quarter);
   for (const row of stockRows) {
     const quarter = monthToQuarter(row.month);
@@ -1172,12 +1189,9 @@ function buildComparisonRows(
     .slice(-24)
     .map((period) => {
       const amazonRows = companyMonthly.filter((row) => monthToQuarter(row.month) === period);
-      const trassQuarterRows = tradeQuarterly.filter((row) => row.quarter === period);
+      const trassQuarterRows = trassQuarterly.filter((row) => row.quarter === period);
       const dartRow = dartRows.find((row) => row.quarter === period) ?? null;
       const stockQuarterRows = stockRows.filter((row) => monthToQuarter(row.month) === period);
-
-      const totalTrassRows = trassQuarterRows.filter((row) => row.country_scope === "total");
-      const trassSourceRows = totalTrassRows.length ? totalTrassRows : trassQuarterRows;
 
       const latestStockRow = stockQuarterRows.slice().sort((a, b) => a.month.localeCompare(b.month)).at(-1) ?? null;
 
@@ -1186,7 +1200,7 @@ function buildComparisonRows(
         dartRevenue: dartRow?.revenue_krw ?? null,
         amazonRevenue: amazonRows.reduce((sum, row) => sum + (row.total_revenue ?? 0), 0) || null,
         amazonUnits: amazonRows.reduce((sum, row) => sum + (row.total_units ?? 0), 0) || null,
-        trassExport: trassSourceRows.reduce((sum, row) => sum + (row.export_value_krw ?? 0), 0) || null,
+        trassExport: trassQuarterRows.reduce((sum, row) => sum + (row.trass_value_for_trend ?? 0), 0) || null,
         stockPrice: latestStockRow ? latestStockRow.adj_close ?? latestStockRow.close : null
       };
     });
@@ -1195,11 +1209,11 @@ function buildComparisonRows(
 function buildComparisonOptions(
   _company: string,
   companyMonthly: CompanyMonthlyRow[],
-  tradeQuarterly: TradeQuarterlyRow[],
+  trassQuarterly: TrassCompanyQuarterlyRow[],
   dartRows: ReturnType<typeof getCompanyDartQuarterly>,
   stockRows: StockMonthlyRow[]
 ): ComparisonSeriesOption[] {
-  const comparisonRows = buildComparisonRows(_company, companyMonthly, tradeQuarterly, dartRows, stockRows);
+  const comparisonRows = buildComparisonRows(_company, companyMonthly, trassQuarterly, dartRows, stockRows);
   return [
     { id: "dartRevenue", label: "DART 분기 매출", source: "dart", unit: "krw", available: comparisonRows.some((row) => row.dartRevenue !== null) },
     { id: "amazonRevenue", label: "Amazon 추적 매출", source: "amazon", unit: "usd", available: comparisonRows.some((row) => row.amazonRevenue !== null) },

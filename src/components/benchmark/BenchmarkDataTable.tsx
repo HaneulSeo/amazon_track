@@ -2,10 +2,14 @@
 
 import { useMemo, useState } from "react";
 import type {
+  CorrelationResult,
   CompanyMonthlyRow,
+  CountryTradeMonthlyRow,
   DartQuarterlyRevenueRow,
   QuarterlyComparison,
   StockMonthlyRow,
+  TrassCompanyMonthlyRow,
+  TrassCompanyQuarterlyRow,
   TradeMonthlyRow,
   TradeQuarterlyRow
 } from "@/lib/types";
@@ -17,9 +21,13 @@ type BenchmarkDataTableProps = {
   companyMonthly: CompanyMonthlyRow[];
   tradeMonthly: TradeMonthlyRow[];
   tradeQuarterly: TradeQuarterlyRow[];
+  tradeCountryMonthly: CountryTradeMonthlyRow[];
+  trassMonthly: TrassCompanyMonthlyRow[];
+  trassQuarterly: TrassCompanyQuarterlyRow[];
   dartRows: DartQuarterlyRevenueRow[];
   stockRows: StockMonthlyRow[];
   quarterlyComparison: QuarterlyComparison[];
+  correlationResults: CorrelationResult[];
   currency: DisplayCurrency;
   usdKrw: number;
 };
@@ -30,8 +38,12 @@ type DatasetKey =
   | "amazonQuarterlyAggregate"
   | "trassMonthly"
   | "trassQuarterly"
+  | "trassCompanyMonthly"
+  | "trassCompanyQuarterly"
+  | "trassCountryMonthly"
   | "stockMonthly"
-  | "existingQuarterlyComparison";
+  | "existingQuarterlyComparison"
+  | "correlationResults";
 
 function monthToQuarter(month: string) {
   const match = month.match(/^(\d{4})-(\d{2})/);
@@ -47,9 +59,13 @@ export function BenchmarkDataTable({
   companyMonthly,
   tradeMonthly,
   tradeQuarterly,
+  tradeCountryMonthly,
+  trassMonthly,
+  trassQuarterly,
   dartRows,
   stockRows,
   quarterlyComparison,
+  correlationResults,
   currency,
   usdKrw
 }: BenchmarkDataTableProps) {
@@ -61,10 +77,14 @@ export function BenchmarkDataTable({
         { key: "amazonQuarterlyAggregate" as const, label: "Amazon 분기 합산", available: companyMonthly.length > 0 },
         { key: "trassMonthly" as const, label: "TRASS 월별", available: tradeMonthly.length > 0 },
         { key: "trassQuarterly" as const, label: "TRASS 분기", available: tradeQuarterly.length > 0 },
+        { key: "trassCompanyMonthly" as const, label: "TRASS company monthly", available: trassMonthly.length > 0 },
+        { key: "trassCompanyQuarterly" as const, label: "TRASS company quarterly", available: trassQuarterly.length > 0 },
+        { key: "trassCountryMonthly" as const, label: "TRASS country monthly", available: tradeCountryMonthly.length > 0 },
         { key: "stockMonthly" as const, label: "주가 월별", available: stockRows.length > 0 },
-        { key: "existingQuarterlyComparison" as const, label: "분기 비교", available: quarterlyComparison.length > 0 }
+        { key: "existingQuarterlyComparison" as const, label: "분기 비교", available: quarterlyComparison.length > 0 },
+        { key: "correlationResults" as const, label: "상관 결과", available: correlationResults.length > 0 }
       ],
-    [companyMonthly.length, dartRows.length, quarterlyComparison.length, stockRows.length, tradeMonthly.length, tradeQuarterly.length]
+    [companyMonthly.length, correlationResults.length, dartRows.length, quarterlyComparison.length, stockRows.length, tradeCountryMonthly.length, tradeMonthly.length, tradeQuarterly.length, trassMonthly.length, trassQuarterly.length]
   );
 
   const defaultKey = options.find((option) => option.available)?.key ?? "dartQuarterlyRevenue";
@@ -139,7 +159,15 @@ export function BenchmarkDataTable({
               .slice()
               .sort((a, b) => b.month.localeCompare(a.month))
               .slice(0, 24)
-              .map((row) => [row.month, row.product_line, row.country_scope, formatMoneyFromKrw(row.export_value_krw, currency, usdKrw), formatNumber(row.export_weight_kg)])}
+              .map((row) => [
+                row.month,
+                row.product_line,
+                row.country_scope,
+                formatMoneyFromKrw(row.trass_raw_value ?? row.export_value_krw, currency, usdKrw),
+                formatMoneyFromKrw(row.trass_30d_normalized ?? row.export_value_krw, currency, usdKrw),
+                row.trass_is_partial_month ? "partial" : "full",
+                formatNumber(row.export_weight_kg)
+              ])}
           />
         );
       case "trassQuarterly":
@@ -150,7 +178,71 @@ export function BenchmarkDataTable({
               .slice()
               .sort((a, b) => b.quarter.localeCompare(a.quarter))
               .slice(0, 24)
-              .map((row) => [row.quarter, row.product_line, row.country_scope, formatMoneyFromKrw(row.export_value_krw, currency, usdKrw), formatNumber(row.export_weight_kg)])}
+              .map((row) => [
+                row.quarter,
+                row.product_line,
+                row.country_scope,
+                formatMoneyFromKrw(row.trass_raw_value ?? row.export_value_krw, currency, usdKrw),
+                formatMoneyFromKrw(row.trass_30d_normalized ?? row.export_value_krw, currency, usdKrw),
+                row.trass_is_partial_month ? "partial" : "full",
+                formatNumber(row.export_weight_kg)
+              ])}
+          />
+        );
+      case "trassCompanyMonthly":
+        return (
+          <SimpleTable
+            headers={["Month", "Raw", "30d", "State", "Total source", "Weighted", "Coverage"]}
+            rows={trassMonthly
+              .slice()
+              .sort((a, b) => b.month.localeCompare(a.month))
+              .slice(0, 24)
+              .map((row) => [
+                row.month,
+                formatMoneyFromKrw(row.trass_raw_value, currency, usdKrw),
+                formatMoneyFromKrw(row.trass_30d_normalized, currency, usdKrw),
+                row.trass_is_partial_month ? "partial" : "full",
+                row.trass_total_source,
+                formatMoneyFromKrw(row.trass_country_weighted_normalized_feature, currency, usdKrw),
+                row.trass_country_weight_coverage === null ? "-" : row.trass_country_weight_coverage.toFixed(2)
+              ])}
+          />
+        );
+      case "trassCompanyQuarterly":
+        return (
+          <SimpleTable
+            headers={["Quarter", "Raw", "30d", "State", "Total source", "Weighted", "Coverage"]}
+            rows={trassQuarterly
+              .slice()
+              .sort((a, b) => b.quarter.localeCompare(a.quarter))
+              .slice(0, 24)
+              .map((row) => [
+                row.quarter,
+                formatMoneyFromKrw(row.trass_raw_value, currency, usdKrw),
+                formatMoneyFromKrw(row.trass_30d_normalized, currency, usdKrw),
+                row.trass_is_partial_month ? "partial" : "full",
+                row.trass_total_source,
+                formatMoneyFromKrw(row.trass_country_weighted_normalized_feature, currency, usdKrw),
+                row.trass_country_weight_coverage === null ? "-" : row.trass_country_weight_coverage.toFixed(2)
+              ])}
+          />
+        );
+      case "trassCountryMonthly":
+        return (
+          <SimpleTable
+            headers={["Month", "Country", "Raw", "30d", "State", "Weight"]}
+            rows={tradeCountryMonthly
+              .slice()
+              .sort((a, b) => b.month.localeCompare(a.month))
+              .slice(0, 36)
+              .map((row) => [
+                row.month,
+                row.country_scope,
+                formatMoneyFromKrw(row.trass_raw_value ?? row.export_value_krw, currency, usdKrw),
+                formatMoneyFromKrw(row.trass_30d_normalized ?? row.export_value_krw, currency, usdKrw),
+                row.trass_is_partial_month ? "partial" : "full",
+                formatNumber(row.export_weight_kg)
+              ])}
           />
         );
       case "stockMonthly":
@@ -171,6 +263,24 @@ export function BenchmarkDataTable({
             baseQuarter={quarterlyComparison.find((row) => row.externalRevenueEokKrw !== null && row.trackedRevenueUsd !== null)?.quarter ?? null}
             currency={currency}
             usdKrw={usdKrw}
+          />
+        );
+      case "correlationResults":
+        return (
+          <SimpleTable
+            headers={["Source", "Lag", "Sample", "Pearson", "Spearman", "R²", "Confidence"]}
+            rows={correlationResults
+              .slice()
+              .sort((a, b) => a.indicator_source.localeCompare(b.indicator_source) || a.lag_quarters - b.lag_quarters)
+              .map((row) => [
+                `${row.indicator_source} / ${row.indicator_metric}`,
+                `${row.lag_quarters}Q`,
+                String(row.sample_size),
+                row.pearson_corr === null ? "-" : row.pearson_corr.toFixed(3),
+                row.spearman_corr === null ? "-" : row.spearman_corr.toFixed(3),
+                row.r_squared === null ? "-" : row.r_squared.toFixed(3),
+                row.confidence
+              ])}
           />
         );
       default:

@@ -7,11 +7,14 @@ import type {
   DashboardIndustry,
   DartQuarterlyRevenueRow,
   DemandSeries,
+  CorrelationResult,
   FamilyMonthlyLike,
   MonthlyProductLike,
   QuarterlyComparison,
   SourceGap,
   StockMonthlyRow,
+  TrassCompanyMonthlyRow,
+  TrassCompanyQuarterlyRow,
   TradeQuarterlyRow
 } from "./types";
 
@@ -29,8 +32,11 @@ export const methodologyNotes = dashboardData.methodologyNotes;
 export const tradeMonthly = dashboardData.tradeMonthly;
 export const tradeQuarterly = dashboardData.tradeQuarterly;
 export const tradeCountryMonthly = dashboardData.tradeCountryMonthly;
+export const trassCompanyMonthly = dashboardData.trassCompanyMonthly;
+export const trassCompanyQuarterly = dashboardData.trassCompanyQuarterly;
 export const dartQuarterlyRevenue = dashboardData.dartQuarterlyRevenue;
 export const quarterlyComparison = dashboardData.quarterlyComparison;
+export const correlationResults = dashboardData.correlationResults;
 export const companyStockMonthly = dashboardData.companyStockMonthly;
 export const sourceGapMap = dashboardData.tables.source_gap_map;
 export const companyCoverageScore = dashboardData.tables.company_coverage_score;
@@ -90,12 +96,24 @@ export function getCompanyTradeMonthly(companyId: string) {
   return tradeMonthly.filter((row) => row.company === companyId);
 }
 
+export function getCompanyTrassMonthly(companyId: string): TrassCompanyMonthlyRow[] {
+  return trassCompanyMonthly.filter((row) => row.company === companyId);
+}
+
+export function getCompanyTrassQuarterly(companyId: string): TrassCompanyQuarterlyRow[] {
+  return trassCompanyQuarterly.filter((row) => row.company === companyId);
+}
+
 export function getCompanyDartQuarterly(companyId: string): DartQuarterlyRevenueRow[] {
   return dartQuarterlyRevenue.filter((row) => row.company === companyId);
 }
 
 export function getCompanyStockMonthly(companyId: string): StockMonthlyRow[] {
   return companyStockMonthly.filter((row) => row.company === companyId);
+}
+
+export function getCompanyCorrelationResults(companyId: string): CorrelationResult[] {
+  return correlationResults.filter((row) => row.company === companyId);
 }
 
 export function toBrandTrend(rows: Array<{
