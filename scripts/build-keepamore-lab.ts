@@ -213,6 +213,9 @@ function buildSeries(product: Record<string, unknown>): ProductPoint[] {
     mergeHistory(seriesByDate, history, field as keyof ProductPoint);
   }
 
+  const offers = Array.isArray(product.offers) ? (product.offers as Record<string, unknown>[]) : [];
+  mergeOfferHistory(seriesByDate, offers);
+
   return [...seriesByDate.values()].sort((a, b) => a.date.localeCompare(b.date));
 }
 
@@ -236,9 +239,47 @@ function mergeHistory(seriesByDate: Map<string, ProductPoint>, history: unknown[
   }
 }
 
+function mergeOfferHistory(seriesByDate: Map<string, ProductPoint>, offers: Record<string, unknown>[]) {
+  for (const offer of offers) {
+    const history = Array.isArray(offer.offerCSV) ? (offer.offerCSV as unknown[]) : [];
+    const isAmazon = Boolean(offer.isAmazon);
+    const condition = toNumber(offer.condition);
+
+    for (let i = 0; i < history.length - 2; i += 3) {
+      const keepaMinute = toNumber(history[i]);
+      const rawPrice = toNumber(history[i + 1]);
+      if (keepaMinute === null || rawPrice === null) continue;
+      const date = keepaMinuteToDate(keepaMinute);
+      const price = rawPrice > 1000 ? rawPrice / 100 : rawPrice;
+      const current = (seriesByDate.get(date) ?? { date }) as ProductPoint;
+
+      if (isAmazon) {
+        current.amazonPrice = pickBetterPrice(current.amazonPrice, price);
+      }
+
+      if (condition === 1) {
+        current.newPrice = pickBetterPrice(current.newPrice, price);
+      }
+
+      current.buyBoxPrice = pickBetterPrice(current.buyBoxPrice, price);
+      seriesByDate.set(date, current);
+    }
+
+  }
+}
+
+function pickBetterPrice(current: number | null | undefined, candidate: number) {
+  if (current === null || current === undefined || Number.isNaN(current)) return candidate;
+  if (candidate <= 0) return current;
+  return Math.min(current, candidate);
+}
+
 function normalizeKeepaValue(value: number | null, field: keyof ProductPoint) {
   if (value === null) return null;
   if (value === -1) return null;
+  if (field === "buyBoxPrice" || field === "amazonPrice" || field === "newPrice") {
+    return value > 1000 ? value / 100 : value;
+  }
   if (field === "rating") return value / 10;
   return value;
 }
