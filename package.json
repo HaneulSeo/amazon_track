@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "build:data": "tsx scripts/build-data-new.ts",
+    "fetch:keepa-lab": "tsx scripts/fetch-keepamore-lab.ts",
+    "build:keepa-lab": "tsx scripts/build-keepamore-lab.ts",
     "dev": "next dev",
     "build": "tsx scripts/build-data-new.ts && next build",
     "start": "next start",

@@ -3,6 +3,9 @@ node_modules
 out
 .vercel
 .tools
+.env
+.env.local
+.env.production
 data/raw/**
 data/*.csv
 data/.DS_Store

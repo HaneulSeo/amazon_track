@@ -35,6 +35,7 @@ import { CorrelationSummaryCards } from "@/components/correlation/CorrelationSum
 import { ProductFamilyToggle } from "@/components/products/ProductFamilyToggle";
 import { RevenueModelExplorer } from "@/components/model/RevenueModelExplorer";
 import { DemandSignalPanel } from "@/components/model/DemandSignalPanel";
+import { KeepamoreLab } from "@/components/keepamore-lab/KeepamoreLab";
 import {
   companies,
   companyCoverageScore,
@@ -62,6 +63,7 @@ import {
   revenueModels,
   toBrandTrend
 } from "@/lib/dashboard-data";
+import { keepamoreLabData } from "@/lib/keepamore-lab-data";
 import { type DisplayCurrency, formatMoneyFromKrw, formatMoneyFromUsd, formatNumber, formatPercent, productLabel, trendTone } from "@/lib/format";
 import type { LucideIcon } from "lucide-react";
 import type {
@@ -76,7 +78,7 @@ import type {
   StockMonthlyRow
 } from "@/lib/types";
 
-type Workspace = "home" | "amazon";
+type Workspace = "home" | "amazon" | "keepaLab";
 type DetailTab = "overview" | "products" | "benchmark" | "model" | "data";
 
 const tabs: Array<{ id: DetailTab; label: string; icon: typeof LineChart }> = [
@@ -127,7 +129,32 @@ export default function App() {
             setActiveIndustry(null);
             setSelectedCompany(null);
           }}
+          onOpenKeepa={() => {
+            setWorkspace("keepaLab");
+            setActiveIndustry(null);
+            setSelectedCompany(null);
+          }}
         />
+      </Shell>
+    );
+  }
+
+  if (workspace === "keepaLab") {
+    return (
+      <Shell
+        currency={currency}
+        fxAsOf={fxAsOf}
+        setCurrency={setCurrency}
+        usdKrw={usdKrw}
+        appName="Keepa 실험실"
+        onHome={() => {
+          setWorkspace("home");
+          setActiveIndustry(null);
+          setSelectedCompany(null);
+        }}
+        sidebar={<KeepaSidebar onBackHome={() => setWorkspace("home")} />}
+      >
+        <KeepamoreLab currency={currency} usdKrw={usdKrw} />
       </Shell>
     );
   }
@@ -317,6 +344,15 @@ const MINI_APPS: MiniApp[] = [
     status: "live"
   },
   {
+    id: "keepaLab",
+    name: "Keepa 실험실",
+    tagline: "ASIN 시계열 검증",
+    description: "기존 Amazon Tracker와 분리된 공간에서 Keepamore API로 다시 수집한 가격, 랭킹, 리뷰, Buy Box 시계열을 확인합니다.",
+    icon: Search,
+    accent: "from-[#0ea5e9] to-[#16a34a]",
+    status: "live"
+  },
+  {
     id: "trade",
     name: "무역 데이터",
     tagline: "수출입 통관 흐름",
@@ -348,11 +384,13 @@ const MINI_APPS: MiniApp[] = [
 function Launcher({
   currency,
   usdKrw,
-  onOpenAmazon
+  onOpenAmazon,
+  onOpenKeepa
 }: {
   currency: DisplayCurrency;
   usdKrw: number;
   onOpenAmazon: () => void;
+  onOpenKeepa: () => void;
 }) {
   const heroStats = [
     { label: "추적 기업", value: String(overview.tracked_company_count), icon: Store },
@@ -366,6 +404,13 @@ function Launcher({
     { label: "최신 월", value: overview.latest_month ?? "-" },
     { label: "ASIN", value: formatNumber(overview.total_asin_count) },
     { label: "커버리지", value: overview.average_coverage_score === null ? "-" : overview.average_coverage_score.toFixed(1) }
+  ];
+
+  const keepaStats = [
+    { label: "ASIN", value: formatNumber(keepamoreLabData.summary.asinCount) },
+    { label: "성공", value: formatNumber(keepamoreLabData.summary.successCount) },
+    { label: "실패", value: formatNumber(keepamoreLabData.summary.errorCount) },
+    { label: "회사", value: formatNumber(keepamoreLabData.summary.companyCount) }
   ];
 
   return (
@@ -402,8 +447,8 @@ function Launcher({
             <AppTile
               key={app.id}
               app={app}
-              stats={app.id === "amazon" ? amazonStats : undefined}
-              onOpen={app.id === "amazon" ? onOpenAmazon : undefined}
+              stats={app.id === "amazon" ? amazonStats : app.id === "keepaLab" ? keepaStats : undefined}
+              onOpen={app.id === "amazon" ? onOpenAmazon : app.id === "keepaLab" ? onOpenKeepa : undefined}
             />
           ))}
         </div>
@@ -548,6 +593,39 @@ function AmazonSidebar({
         <p className="mt-2 text-sm leading-6 text-toss-ink2">
           CSV {overview.raw_file_count}개 · ASIN {overview.total_asin_count}개 · {overview.month_count}개월
         </p>
+      </div>
+    </aside>
+  );
+}
+
+function KeepaSidebar({ onBackHome }: { onBackHome: () => void }) {
+  return (
+    <aside className="hidden w-72 shrink-0 border-r border-toss-line bg-white px-5 py-6 lg:block">
+      <div className="flex items-center gap-3">
+        <div className="grid h-11 w-11 place-items-center rounded-lg bg-gradient-to-br from-[#0ea5e9] to-[#16a34a] text-white">
+          <Search size={22} />
+        </div>
+        <div>
+          <p className="text-lg font-extrabold">Keepa 실험실</p>
+          <p className="text-xs font-semibold text-toss-gray">분리된 실험 공간</p>
+        </div>
+      </div>
+
+      <button className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-toss-gray hover:text-toss-blue" type="button" onClick={onBackHome}>
+        <Home size={16} />
+        메인으로
+      </button>
+
+      <div className="mt-8 rounded-xl bg-toss-wash p-4">
+        <p className="text-sm font-bold">실험실 안내</p>
+        <p className="mt-2 text-sm leading-6 text-toss-ink2">
+          기존 Amazon Tracker 데이터와 섞지 않고, Keepamore API로 다시 수집한 ASIN 시계열만 확인합니다.
+        </p>
+      </div>
+
+      <div className="mt-4 rounded-xl bg-toss-wash p-4">
+        <p className="text-sm font-bold">데이터 범위</p>
+        <p className="mt-2 text-sm leading-6 text-toss-ink2">가격 · 랭킹 · 리뷰 · Buy Box · 추정 매출/판매량이 있으면 함께 표시합니다.</p>
       </div>
     </aside>
   );
