@@ -185,6 +185,7 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
       <SectionCard eyebrow="Notes" title="Lab notes">
         <div className="space-y-2 text-sm leading-6 text-toss-ink2">
           <p>이 화면은 기존 Amazon Tracker와 분리되어 있습니다. 원본 tracker JSON은 수정하지 않습니다.</p>
+          <p>최근 1년은 train, 그 전 1년은 test로 나눠서 같은 ASIN의 Amazon 월별 추정치에 맞춥니다.</p>
           <p>Revenue estimate가 없는 경우 임의 생성하지 않고 No data로 둡니다.</p>
           <p>
             분석 기준 ASIN 수: {formatNumber(amazonEstimateLabData.summary.jungleScoutMatchedAsinCount)} · Keepa 매칭 ASIN 수:{" "}

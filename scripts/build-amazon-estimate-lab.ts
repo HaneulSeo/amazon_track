@@ -10,6 +10,7 @@ import type {
   AmazonEstimateLabError,
   AmazonEstimateLabJungleScoutObservation,
   AmazonEstimateLabKeepaMonthlyFeature,
+  AmazonEstimateLabMetrics,
   AmazonEstimateLabMonthlyEstimate,
   AmazonEstimateLabQuarterlyEstimate,
   AmazonEstimateLabSelectedModel,
@@ -26,22 +27,35 @@ type CatalogRow = {
   sourceFolder: string | null;
 };
 
-type MonthlyTrendRow = {
-  productId?: string;
+type AmazonLabelRow = {
+  company?: string;
+  source_folder?: string;
   asin?: string;
-  productName?: string;
   brand?: string;
   category?: string;
+  product_name?: string;
+  product_family?: string;
+  family_confidence?: string;
   month?: string;
+  raw_file_count?: number | string | null;
+  raw_row_count?: number | string | null;
+  date_min?: string;
+  date_max?: string;
   revenue?: number | string | null;
   units?: number | string | null;
-  avgPrice?: number | string | null;
-  avgRank?: number | string | null;
+  avg_price?: number | string | null;
+  avg_bsr?: number | string | null;
   reviews?: number | string | null;
+  review_change?: number | string | null;
   rating?: number | string | null;
   sellers?: number | string | null;
-  revenueShare?: number | string | null;
-  sourceRows?: number | string | null;
+  mom_revenue_growth?: number | string | null;
+  yoy_revenue_growth?: number | string | null;
+  rolling_3m_revenue?: number | string | null;
+  rolling_6m_revenue?: number | string | null;
+  revenue_share_in_company?: number | string | null;
+  revenue_source?: string;
+  data_quality_warnings?: string;
 };
 
 type KeepaRawEnvelope = {
@@ -66,16 +80,24 @@ type CalibrationRow = {
   asin: string;
   productName: string;
   month: string;
+  split: "train" | "test" | "holdout";
   actualSales: number | null;
   actualRevenue: number | null;
   observedPrice: number | null;
   observedBsr: number | null;
   keepaMedianBsr: number | null;
   keepaAvgPrice: number | null;
+  monthlyPriceStdDev: number | null;
+  monthlyPriceTrend: number | null;
+  monthlyPriceRange: number | null;
   buyboxRatio: number | null;
   reviewGrowth: number | null;
   ratingAvg: number | null;
   salesRankReference: number | null;
+  offerCount: number | null;
+  offerCsvPointCount: number | null;
+  liveOffersCount: number | null;
+  buyboxEligibleOfferCountTotal: number | null;
 };
 
 type FittedModel = {
@@ -86,10 +108,26 @@ type FittedModel = {
   modelType: "simple_power_law" | "log_linear" | "family_adjusted" | "demand_index_only";
   targetMetric: "monthlySales" | "monthlyRevenue";
   sampleCount: number;
+  trainSampleCount: number;
+  testSampleCount: number;
   selected: boolean;
   formula: string;
   coefficients: Record<string, number>;
   metrics: {
+    mape: number | null;
+    rmse: number | null;
+    mae: number | null;
+    r2: number | null;
+    spearman: number | null;
+  };
+  trainMetrics?: {
+    mape: number | null;
+    rmse: number | null;
+    mae: number | null;
+    r2: number | null;
+    spearman: number | null;
+  };
+  testMetrics?: {
     mape: number | null;
     rmse: number | null;
     mae: number | null;
@@ -111,35 +149,36 @@ type Prediction = {
 };
 
 const REPO_ROOT = process.cwd();
-const DASHBOARD_PATH = path.join(REPO_ROOT, "public", "data", "dashboard_data.json");
-const MONTHLY_TREND_PATH = path.join(REPO_ROOT, "public", "data", "monthly_product_trend.json");
+const AMAZON_LABEL_PATH = path.join(REPO_ROOT, "data", "processed", "amazon_us_monthly.csv");
 const KEEPA_PUBLIC_PATH = path.join(REPO_ROOT, "public", "data", "keepamore_lab.json");
 const DART_PATH = path.join(REPO_ROOT, "data", "processed", "dart_quarterly_revenue.csv");
 const OUTPUT_DIR = path.join(REPO_ROOT, "data", "processed", "amazon_estimate_lab");
 const PUBLIC_JSON_PATH = path.join(REPO_ROOT, "public", "data", "amazon_estimate_lab.json");
 
 async function main() {
-  const dashboard = (await readJsonFile<any>(DASHBOARD_PATH)) ?? {};
-  const monthlyTrend = (await readJsonFile<MonthlyTrendRow[]>(MONTHLY_TREND_PATH)) ?? [];
+  const amazonLabels = (await readCsv<AmazonLabelRow>(AMAZON_LABEL_PATH)) ?? [];
   const keepaPublic = (await readJsonFile<any>(KEEPA_PUBLIC_PATH)) ?? { products: [] };
   const keepaRawIndex = await loadKeepaRawIndex(path.join(REPO_ROOT, "data", "raw", "keepamore_lab"));
   const dartRows = await readCsv<DartRow>(DART_PATH);
 
-  const catalog = buildCatalog(dashboard.products ?? []);
+  const catalog = buildCatalog(keepaPublic.products ?? []);
   const catalogByAsin = new Map(catalog.map((row) => [row.asin, row]));
 
-  const jungleScoutObservations = buildJungleScoutObservations(monthlyTrend, catalogByAsin);
+  const jungleScoutObservations = buildJungleScoutObservations(amazonLabels, catalogByAsin);
   const keepaMonthlyFeatures = buildKeepaMonthlyFeatures(keepaPublic.products ?? [], keepaRawIndex, catalogByAsin);
   const observationsByAsinMonth = new Map(jungleScoutObservations.map((row) => [`${row.asin}:${row.month}`, row]));
 
-  const calibrationRows = buildCalibrationRows(jungleScoutObservations, keepaMonthlyFeatures);
-  const modelCatalog = fitAllModels(calibrationRows);
-  const selectedModelByCompanyFamily = chooseSelectedModels(modelCatalog, calibrationRows, catalog);
+  const split = splitMonths(jungleScoutObservations.map((row) => row.month));
+  const calibrationRows = buildCalibrationRows(jungleScoutObservations, keepaMonthlyFeatures, split);
+  const trainRows = calibrationRows.filter((row) => row.split === "train");
+  const testRows = calibrationRows.filter((row) => row.split === "test");
+  const modelCatalog = fitAllModels(trainRows, testRows);
+  const selectedModelByCompanyFamily = chooseSelectedModels(modelCatalog, trainRows, testRows, catalog);
   const selectedKeys = new Set(selectedModelByCompanyFamily.map((row) => row.modelKey));
   const calibrationResults = modelCatalog.map((row) => ({ ...row, selected: selectedKeys.has(row.modelKey) }));
   const selectedModelMap = new Map(selectedModelByCompanyFamily.map((row) => [`${row.company}:${row.productFamily}`, row]));
 
-  const monthlyEstimates = buildMonthlyEstimates(jungleScoutObservations, keepaMonthlyFeatures, selectedModelMap, observationsByAsinMonth);
+  const monthlyEstimates = buildMonthlyEstimates(jungleScoutObservations, keepaMonthlyFeatures, selectedModelMap, observationsByAsinMonth, split);
   const quarterlyCompanyEstimates = buildQuarterlyCompanyEstimates(monthlyEstimates);
   const dartComparison = buildDartComparison(quarterlyCompanyEstimates, dartRows);
   const warnings = buildWarnings(catalog, jungleScoutObservations, keepaMonthlyFeatures, selectedModelByCompanyFamily, dartComparison);
@@ -152,6 +191,9 @@ async function main() {
     jungleScoutMatchedAsinCount: new Set(jungleScoutObservations.map((row) => row.asin)).size,
     keepaMatchedAsinCount: new Set(keepaMonthlyFeatures.map((row) => row.asin)).size,
     calibrationSampleCount: calibrationRows.length,
+    trainSampleCount: trainRows.length,
+    testSampleCount: testRows.length,
+    labelMonthCount: split.all.length,
     modelCount: calibrationResults.length,
     selectedModelCount: selectedModelByCompanyFamily.length,
     backcastMonthCount: new Set(monthlyEstimates.filter((row) => row.kind === "keepa_backcast_estimate").map((row) => row.month)).size,
@@ -161,7 +203,7 @@ async function main() {
   const output: AmazonEstimateLabData = {
     generatedAt: new Date().toISOString(),
     sourceNote:
-      "Local-only calibration. Jungle Scout-like observations come from public/data/monthly_product_trend.json and Keepa/Keepamore series come from public/data/keepamore_lab.json plus raw envelopes. No external API calls were used.",
+      "Local-only calibration. Amazon monthly labels come from data/processed/amazon_us_monthly.csv for the same 20 Keepa ASINs, and Keepa/Keepamore series come from public/data/keepamore_lab.json plus raw envelopes. No external API calls were used.",
     summary,
     asinCatalog: catalog,
     jungleScoutObservations,
@@ -216,21 +258,22 @@ function buildCatalog(products: any[]): CatalogRow[] {
   return rows.sort((a, b) => a.company.localeCompare(b.company) || a.productFamily.localeCompare(b.productFamily) || a.asin.localeCompare(b.asin));
 }
 
-function buildJungleScoutObservations(rows: MonthlyTrendRow[], catalogByAsin: Map<string, CatalogRow>): AmazonEstimateLabJungleScoutObservation[] {
+function buildJungleScoutObservations(rows: AmazonLabelRow[], catalogByAsin: Map<string, CatalogRow>): AmazonEstimateLabJungleScoutObservation[] {
   const output: AmazonEstimateLabJungleScoutObservation[] = [];
   for (const row of rows ?? []) {
-    const asin = stringFrom(row.asin ?? row.productId);
+    const asin = stringFrom(row.asin);
     if (!asin) continue;
     const catalog = catalogByAsin.get(asin);
+    if (!catalog) continue;
     const units = toNumber(row.units);
     const revenue = toNumber(row.revenue);
-    const price = toNumber(row.avgPrice);
+    const price = toNumber(row.avg_price);
     const calculatedRevenue = revenue === null && units !== null && price !== null;
     output.push({
-      company: catalog?.company ?? "unknown",
-      productFamily: catalog?.productFamily ?? "Other",
+      company: stringFrom(row.company) ?? catalog?.company ?? "unknown",
+      productFamily: stringFrom(row.product_family) ?? catalog?.productFamily ?? "Other",
       asin,
-      productName: stringFrom(row.productName) ?? catalog?.productName ?? asin,
+      productName: stringFrom(row.product_name) ?? catalog?.productName ?? asin,
       brand: stringFrom(row.brand) ?? catalog?.brand ?? null,
       category: stringFrom(row.category) ?? catalog?.category ?? null,
       month: stringFrom(row.month) ?? "",
@@ -238,22 +281,51 @@ function buildJungleScoutObservations(rows: MonthlyTrendRow[], catalogByAsin: Ma
       monthlySales: units,
       monthlyRevenue: calculatedRevenue && units !== null && price !== null ? units * price : revenue,
       price,
-      bsr: toNumber(row.avgRank),
+      bsr: toNumber(row.avg_bsr),
       reviews: toNumber(row.reviews),
       rating: toNumber(row.rating),
       sellers: toNumber(row.sellers),
       calculatedRevenue,
-      sourceRows: toNumber(row.sourceRows),
-      sourceFile: "public/data/monthly_product_trend.json"
+      sourceRows: toNumber(row.raw_row_count),
+      sourceFile: path.relative(REPO_ROOT, AMAZON_LABEL_PATH)
     });
   }
   return output.sort((a, b) => a.asin.localeCompare(b.asin) || a.month.localeCompare(b.month));
 }
 
+type SplitPlan = {
+  train: Set<string>;
+  test: Set<string>;
+  holdout: Set<string>;
+  all: string[];
+};
+
+function splitMonths(months: string[]): SplitPlan {
+  const sorted = [...new Set(months.filter(Boolean))].sort();
+  const train = new Set(sorted.slice(-12));
+  const test = new Set(sorted.slice(-24, -12));
+  const holdout = new Set(sorted.filter((month) => !train.has(month) && !test.has(month)));
+  return { train, test, holdout, all: sorted };
+}
+
 async function loadKeepaRawIndex(root: string) {
   const index = new Map<
     string,
-    { salesRankReference: number | null; filePath: string; title: string | null; brand: string | null; category: string | null }
+    {
+      salesRankReference: number | null;
+      filePath: string;
+      title: string | null;
+      brand: string | null;
+      category: string | null;
+      offerCount: number | null;
+      offerCsvPointCount: number | null;
+      liveOffersCount: number | null;
+      buyboxEligibleOfferCountTotal: number | null;
+      lastPriceChange: number | null;
+      lastStockUpdate: number | null;
+      lastRatingUpdate: number | null;
+      lastUpdate: number | null;
+    }
   >();
   const files = await collectJsonFiles(root);
   for (const filePath of files) {
@@ -266,7 +338,22 @@ async function loadKeepaRawIndex(root: string) {
       filePath,
       title: stringFrom(response.title) ?? stringFrom(response.productTitle) ?? stringFrom(response.name),
       brand: stringFrom(response.brand) ?? stringFrom(response.brandName),
-      category: stringFrom(response.category) ?? stringFrom(response.categoryName)
+      category: stringFrom(response.category) ?? stringFrom(response.categoryName),
+      offerCount: Array.isArray(response.offers) ? response.offers.length : null,
+      offerCsvPointCount: Array.isArray(response.offers)
+        ? (response.offers as Array<Record<string, unknown>>).reduce(
+            (sum, offer) => sum + (Array.isArray(offer.offerCSV) ? offer.offerCSV.length : 0),
+            0
+          )
+        : null,
+      liveOffersCount: Array.isArray(response.liveOffersOrder) ? response.liveOffersOrder.length : null,
+      buyboxEligibleOfferCountTotal: Array.isArray(response.buyBoxEligibleOfferCounts)
+        ? response.buyBoxEligibleOfferCounts.reduce((sum: number, value: unknown) => sum + (toNumber(value) ?? 0), 0)
+        : null,
+      lastPriceChange: toNumber(response.lastPriceChange),
+      lastStockUpdate: toNumber(response.lastStockUpdate),
+      lastRatingUpdate: toNumber(response.lastRatingUpdate),
+      lastUpdate: toNumber(response.lastUpdate)
     };
     const current = index.get(asin);
     if (!current || candidate.filePath.localeCompare(current.filePath) >= 0) {
@@ -278,7 +365,24 @@ async function loadKeepaRawIndex(root: string) {
 
 function buildKeepaMonthlyFeatures(
   keepaPublicProducts: any[],
-  keepaRawIndex: Map<string, { salesRankReference: number | null; filePath: string; title: string | null; brand: string | null; category: string | null }>,
+  keepaRawIndex: Map<
+    string,
+    {
+      salesRankReference: number | null;
+      filePath: string;
+      title: string | null;
+      brand: string | null;
+      category: string | null;
+      offerCount: number | null;
+      offerCsvPointCount: number | null;
+      liveOffersCount: number | null;
+      buyboxEligibleOfferCountTotal: number | null;
+      lastPriceChange: number | null;
+      lastStockUpdate: number | null;
+      lastRatingUpdate: number | null;
+      lastUpdate: number | null;
+    }
+  >,
   catalogByAsin: Map<string, CatalogRow>
 ): AmazonEstimateLabKeepaMonthlyFeature[] {
   const output: AmazonEstimateLabKeepaMonthlyFeature[] = [];
@@ -303,6 +407,7 @@ function buildKeepaMonthlyFeatures(
       const amazon = numericValues(points, "amazonPrice");
       const newer = numericValues(points, "newPrice");
       const selected = selectPriceSeries(buybox, newer, amazon);
+      const priceStats = summarizePriceSeries(selected.values);
       const salesRankReference = rawMeta?.salesRankReference ?? null;
       const featureWarnings: string[] = [];
       if (salesRankReference === null) featureWarnings.push("sales_rank_reference_missing");
@@ -320,6 +425,9 @@ function buildKeepaMonthlyFeatures(
         monthlyAvgBuyboxPrice: average(buybox),
         monthlyAvgNewPrice: average(newer),
         monthlyAvgAmazonPrice: average(amazon),
+        monthlyPriceStdDev: priceStats.stdDev,
+        monthlyPriceTrend: priceStats.trend,
+        monthlyPriceRange: priceStats.range,
         monthlyPriceUsedForRevenue: selected.price,
         monthlyReviewCountEnd: null,
         monthlyReviewGrowth: null,
@@ -327,6 +435,10 @@ function buildKeepaMonthlyFeatures(
         buyboxAvailableRatio: points.length ? buybox.length / points.length : null,
         observationCount: points.length,
         salesRankReference,
+        offerCount: rawMeta?.offerCount ?? null,
+        offerCsvPointCount: rawMeta?.offerCsvPointCount ?? null,
+        liveOffersCount: rawMeta?.liveOffersCount ?? null,
+        buyboxEligibleOfferCountTotal: rawMeta?.buyboxEligibleOfferCountTotal ?? null,
         featureWarnings
       });
     }
@@ -336,60 +448,118 @@ function buildKeepaMonthlyFeatures(
 
 function buildCalibrationRows(
   observations: AmazonEstimateLabJungleScoutObservation[],
-  keepaFeatures: AmazonEstimateLabKeepaMonthlyFeature[]
+  keepaFeatures: AmazonEstimateLabKeepaMonthlyFeature[],
+  split: SplitPlan
 ): CalibrationRow[] {
   const featuresByAsinMonth = new Map(keepaFeatures.map((row) => [`${row.asin}:${row.month}`, row]));
   const rows: CalibrationRow[] = [];
   for (const obs of observations) {
     const feature = featuresByAsinMonth.get(`${obs.asin}:${obs.month}`);
+    const splitType = split.train.has(obs.month) ? "train" : split.test.has(obs.month) ? "test" : "holdout";
     rows.push({
       company: obs.company,
       productFamily: obs.productFamily,
       asin: obs.asin,
       productName: obs.productName,
       month: obs.month,
+      split: splitType,
       actualSales: obs.monthlySales,
       actualRevenue: obs.monthlyRevenue,
       observedPrice: obs.price,
       observedBsr: obs.bsr,
       keepaMedianBsr: obs.bsr ?? feature?.monthlyMedianBsr ?? null,
       keepaAvgPrice: obs.price ?? feature?.monthlyPriceUsedForRevenue ?? null,
+      monthlyPriceStdDev: feature?.monthlyPriceStdDev ?? null,
+      monthlyPriceTrend: feature?.monthlyPriceTrend ?? null,
+      monthlyPriceRange: feature?.monthlyPriceRange ?? null,
       buyboxRatio: feature?.buyboxAvailableRatio ?? null,
       reviewGrowth: feature?.monthlyReviewGrowth ?? null,
       ratingAvg: obs.rating ?? feature?.monthlyRatingAvg ?? null,
-      salesRankReference: feature?.salesRankReference ?? obs.bsr ?? null
+      salesRankReference: feature?.salesRankReference ?? obs.bsr ?? null,
+      offerCount: feature?.offerCount ?? null,
+      offerCsvPointCount: feature?.offerCsvPointCount ?? null,
+      liveOffersCount: feature?.liveOffersCount ?? null,
+      buyboxEligibleOfferCountTotal: feature?.buyboxEligibleOfferCountTotal ?? null
     });
   }
   return rows;
 }
 
-function fitAllModels(rows: CalibrationRow[]): FittedModel[] {
+function fitAllModels(trainRows: CalibrationRow[], testRows: CalibrationRow[]): FittedModel[] {
   const models: FittedModel[] = [];
-  const companies = [...new Set(rows.map((row) => row.company))].sort();
-  const companyFamilies = [...new Set(rows.map((row) => `${row.company}:${row.productFamily}`))].sort();
+  const companies = [...new Set(trainRows.map((row) => row.company))].sort();
+  const companyFamilies = [...new Set(trainRows.map((row) => `${row.company}:${row.productFamily}`))].sort();
 
-  models.push(fitModel("global", null, null, rows, "simple_power_law"));
+  models.push(attachSplitMetrics(fitModel("global", null, null, trainRows, "simple_power_law"), trainRows, testRows));
   for (const company of companies) {
-    models.push(fitModel("company", company, null, rows.filter((row) => row.company === company), "log_linear"));
+    const companyTrainRows = trainRows.filter((row) => row.company === company);
+    models.push(attachSplitMetrics(fitModel("company", company, null, companyTrainRows, "log_linear"), companyTrainRows, testRows.filter((row) => row.company === company)));
   }
   for (const key of companyFamilies) {
     const [company, productFamily] = key.split(":");
-    models.push(fitModel("family", company, productFamily, rows.filter((row) => row.company === company && row.productFamily === productFamily), "family_adjusted"));
+    const familyTrainRows = trainRows.filter((row) => row.company === company && row.productFamily === productFamily);
+    models.push(
+      attachSplitMetrics(
+        fitModel("family", company, productFamily, familyTrainRows, "family_adjusted"),
+        familyTrainRows,
+        testRows.filter((row) => row.company === company && row.productFamily === productFamily)
+      )
+    );
   }
   return models;
 }
 
-function chooseSelectedModels(models: FittedModel[], rows: CalibrationRow[], catalog: CatalogRow[]): AmazonEstimateLabSelectedModel[] {
+function attachSplitMetrics(model: FittedModel, trainRows: CalibrationRow[], testRows: CalibrationRow[]): FittedModel {
+  const trainMetrics = evaluateModel(model, trainRows);
+  const testMetrics = evaluateModel(model, testRows);
+  const trainPredictions = trainRows.map((row) => predictCalibrationRow(model, row).revenue).filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+  return {
+    ...model,
+    sampleCount: trainRows.length,
+    trainSampleCount: trainRows.length,
+    testSampleCount: testRows.length,
+    metrics: trainMetrics,
+    trainMetrics,
+    testMetrics,
+    confidence: inferConfidence(trainRows.length, trainPredictions, trainMetrics.mape)
+  };
+}
+
+function evaluateModel(model: FittedModel, rows: CalibrationRow[]): AmazonEstimateLabMetrics {
+  const pairs = rows
+    .map((row) => {
+      const prediction = predictCalibrationRow(model, row).revenue;
+      const actual = row.actualRevenue;
+      if (actual === null || prediction === null || !Number.isFinite(actual) || !Number.isFinite(prediction)) return null;
+      return { actual, predicted: prediction };
+    })
+    .filter((pair): pair is { actual: number; predicted: number } => Boolean(pair));
+  if (!pairs.length) return { mape: null, rmse: null, mae: null, r2: null, spearman: null };
+  const mape = average(pairs.map((pair) => Math.abs((pair.predicted - pair.actual) / Math.max(pair.actual, 1)))) * 100;
+  const mae = average(pairs.map((pair) => Math.abs(pair.predicted - pair.actual)));
+  const rmse = Math.sqrt(average(pairs.map((pair) => Math.pow(pair.predicted - pair.actual, 2))));
+  const meanActual = average(pairs.map((pair) => pair.actual));
+  const sst = pairs.reduce((sumValue, pair) => sumValue + Math.pow(pair.actual - meanActual, 2), 0);
+  const sse = pairs.reduce((sumValue, pair) => sumValue + Math.pow(pair.predicted - pair.actual, 2), 0);
+  const r2 = sst === 0 ? null : 1 - sse / sst;
+  const spearman = spearmanCorrelation(
+    pairs.map((pair) => pair.actual),
+    pairs.map((pair) => pair.predicted)
+  );
+  return { mape, rmse, mae, r2, spearman };
+}
+
+function chooseSelectedModels(models: FittedModel[], trainRows: CalibrationRow[], testRows: CalibrationRow[], catalog: CatalogRow[]): AmazonEstimateLabSelectedModel[] {
   const pairs = [...new Set(catalog.map((row) => `${row.company}:${row.productFamily}`))].sort();
   const selected: AmazonEstimateLabSelectedModel[] = [];
   for (const key of pairs) {
     const [company, productFamily] = key.split(":");
-    const familyRows = rows.filter((row) => row.company === company && row.productFamily === productFamily);
-    const companyRows = rows.filter((row) => row.company === company);
+    const familyTrainRows = trainRows.filter((row) => row.company === company && row.productFamily === productFamily);
+    const companyTrainRows = trainRows.filter((row) => row.company === company);
     const familyModel = models.find((model) => model.scope === "family" && model.company === company && model.productFamily === productFamily);
     const companyModel = models.find((model) => model.scope === "company" && model.company === company);
     const globalModel = models.find((model) => model.scope === "global");
-    const preferred = selectPreferredModel(familyModel, companyModel, globalModel, familyRows.length, companyRows.length, rows.length);
+    const preferred = selectPreferredModel(familyModel, companyModel, globalModel, familyTrainRows.length, companyTrainRows.length, trainRows.length);
     selected.push({
       company,
       productFamily,
@@ -398,10 +568,14 @@ function chooseSelectedModels(models: FittedModel[], rows: CalibrationRow[], cat
       modelType: preferred.modelType,
       targetMetric: preferred.targetMetric,
       sampleCount: preferred.sampleCount,
+      trainSampleCount: preferred.trainSampleCount,
+      testSampleCount: preferred.testSampleCount,
       confidence: preferred.confidence,
       formula: preferred.formula,
       coefficients: preferred.coefficients,
       metrics: preferred.metrics,
+      trainMetrics: preferred.trainMetrics,
+      testMetrics: preferred.testMetrics,
       reason:
         preferred.modelType === "demand_index_only"
           ? "Insufficient sample for a calibrated fit; using demand index fallback."
@@ -419,7 +593,8 @@ function buildMonthlyEstimates(
   observations: AmazonEstimateLabJungleScoutObservation[],
   keepaFeatures: AmazonEstimateLabKeepaMonthlyFeature[],
   selectedModelMap: Map<string, AmazonEstimateLabSelectedModel>,
-  observationsByAsinMonth: Map<string, AmazonEstimateLabJungleScoutObservation>
+  observationsByAsinMonth: Map<string, AmazonEstimateLabJungleScoutObservation>,
+  split: SplitPlan
 ): AmazonEstimateLabMonthlyEstimate[] {
   const output: AmazonEstimateLabMonthlyEstimate[] = [];
   const keepaByAsin = groupBy(keepaFeatures, (row) => row.asin);
@@ -431,16 +606,26 @@ function buildMonthlyEstimates(
     const firstObservedMonth = asinObservations[0]?.month ?? null;
     const hasObservedMonths = asinObservations.length > 0;
     const selected = selectedModelMap.get(`${sortedFeatures[0].company}:${sortedFeatures[0].productFamily}`) ?? null;
-    const baseSales = selected ? median(sortedFeatures.map((feature) => {
-      const prediction = predictWithModel(selected, feature, observationsByAsinMonth.get(`${asin}:${feature.month}`) ?? null);
-      return prediction.sales;
-    })) : null;
+    const baseRevenue = selected
+      ? median(
+          sortedFeatures.map((feature) => {
+            const obs = observationsByAsinMonth.get(`${asin}:${feature.month}`) ?? null;
+            const prediction = selected ? predictWithModel(selected, feature, obs) : fallbackPrediction(feature, obs);
+            return prediction.revenue;
+          })
+        )
+      : null;
 
     for (const feature of sortedFeatures) {
       const obs = observationsByAsinMonth.get(`${asin}:${feature.month}`) ?? null;
       const prediction = selected ? predictWithModel(selected, feature, obs) : fallbackPrediction(feature, obs);
+      const splitType = split.train.has(feature.month) ? "train" : split.test.has(feature.month) ? "test" : "holdout";
       const demandIndex =
-        baseSales && prediction.sales !== null && baseSales > 0 ? (prediction.sales / baseSales) * 100 : feature.monthlyMedianBsr && feature.monthlyMedianBsr > 0 ? (feature.salesRankReference ?? feature.monthlyMedianBsr) / feature.monthlyMedianBsr * 100 : null;
+        baseRevenue && prediction.revenue !== null && baseRevenue > 0
+          ? (prediction.revenue / baseRevenue) * 100
+          : feature.monthlyMedianBsr && feature.monthlyMedianBsr > 0
+            ? ((feature.salesRankReference ?? feature.monthlyMedianBsr) / feature.monthlyMedianBsr) * 100
+            : null;
 
       if (obs) {
         output.push({
@@ -449,6 +634,7 @@ function buildMonthlyEstimates(
           asin,
           productName: obs.productName,
           month: obs.month,
+          split: splitType,
           kind: "observed_jungle_scout_estimate",
           actualSales: obs.monthlySales,
           actualRevenue: obs.monthlyRevenue,
@@ -470,6 +656,7 @@ function buildMonthlyEstimates(
           asin,
           productName: feature.productName,
           month: feature.month,
+          split: splitType,
           kind: "keepa_backcast_estimate",
           actualSales: null,
           actualRevenue: null,
@@ -491,6 +678,7 @@ function buildMonthlyEstimates(
           asin,
           productName: feature.productName,
           month: feature.month,
+          split: splitType,
           kind: hasObservedMonths ? "model_fitted_estimate" : "keepa_backcast_estimate",
           actualSales: null,
           actualRevenue: null,
@@ -637,7 +825,7 @@ function fitModel(
   rows: CalibrationRow[],
   modelType: "simple_power_law" | "log_linear" | "family_adjusted"
 ): FittedModel {
-  const validRows = rows.filter((row) => row.actualSales !== null && row.actualSales > 0 && row.keepaMedianBsr !== null && row.keepaMedianBsr > 0);
+  const validRows = rows.filter((row) => row.actualRevenue !== null && row.actualRevenue > 0 && row.keepaMedianBsr !== null && row.keepaMedianBsr > 0);
   if (validRows.length < 4) {
     return makeDemandIndexModel(scope, company, productFamily, rows, "Insufficient valid calibration rows");
   }
@@ -654,17 +842,18 @@ function fitModel(
   );
   const coefficients = coefficientsFromNames(["intercept", ...activeFeatures], beta);
   const predictions = design.map((row) => predictFromBeta(row, beta));
-  const actuals = design.map((row) => Math.max(row.actualSales ?? 0, 1));
+  const actuals = design.map((row) => Math.max(row.actualRevenue ?? 0, 1));
   const metrics = calculateMetrics(actuals, predictions);
   const points = validRows.map((row, index) => ({
     company: row.company,
     productFamily: row.productFamily,
     asin: row.asin,
     month: row.month,
+    split: row.split,
     actualSales: row.actualSales,
-    predictedSales: predictions[index],
+    predictedSales: row.keepaAvgPrice && row.keepaAvgPrice > 0 ? predictions[index] / row.keepaAvgPrice : null,
     actualRevenue: row.actualRevenue,
-    predictedRevenue: predictions[index] * (row.keepaAvgPrice ?? row.observedPrice ?? 0),
+    predictedRevenue: predictions[index],
     priceUsedForRevenue: row.keepaAvgPrice ?? row.observedPrice ?? null
   }));
 
@@ -674,12 +863,16 @@ function fitModel(
     company,
     productFamily,
     modelType,
-    targetMetric: "monthlySales",
+    targetMetric: "monthlyRevenue",
     sampleCount: validRows.length,
+    trainSampleCount: validRows.length,
+    testSampleCount: 0,
     selected: false,
     formula: buildFormula(modelType, activeFeatures, scope),
     coefficients,
     metrics,
+    trainMetrics: metrics,
+    testMetrics: undefined,
     confidence: inferConfidence(validRows.length, predictions, metrics.mape),
     notes: [`active_features=${activeFeatures.join(",")}`],
     points
@@ -700,10 +893,11 @@ function makeDemandIndexModel(
     productFamily: row.productFamily,
     asin: row.asin,
     month: row.month,
+    split: row.split,
     actualSales: row.actualSales,
     predictedSales: row.keepaMedianBsr && row.keepaMedianBsr > 0 ? (baseBsr / row.keepaMedianBsr) * 100 : null,
     actualRevenue: row.actualRevenue,
-    predictedRevenue: null,
+    predictedRevenue: row.keepaMedianBsr && row.keepaMedianBsr > 0 ? ((baseBsr / row.keepaMedianBsr) * 100) * (row.keepaAvgPrice ?? row.observedPrice ?? 0) : null,
     priceUsedForRevenue: row.keepaAvgPrice ?? row.observedPrice ?? null
   }));
   return {
@@ -712,26 +906,48 @@ function makeDemandIndexModel(
     company,
     productFamily,
     modelType: "demand_index_only",
-    targetMetric: "monthlySales",
+    targetMetric: "monthlyRevenue",
     sampleCount,
+    trainSampleCount: sampleCount,
+    testSampleCount: 0,
     selected: false,
     formula: "demand_index = base_bsr / current_bsr * 100",
     coefficients: { base_bsr: baseBsr },
     metrics: { mape: null, rmse: null, mae: null, r2: null, spearman: null },
     confidence: sampleCount >= 12 ? "low" : "not_enough_data",
     notes: [reason],
-    points
+    points,
+    trainMetrics: { mape: null, rmse: null, mae: null, r2: null, spearman: null },
+    testMetrics: undefined
   };
 }
 
 function chooseFeatures(rows: CalibrationRow[]) {
-  const candidates = ["log_bsr", "log_price", "buybox_ratio", "rating_avg", "log_review_growth"];
+  const candidates = [
+    "log_bsr",
+    "log_price",
+    "buybox_ratio",
+    "rating_avg",
+    "log_review_growth",
+    "log_price_stddev",
+    "price_trend",
+    "price_range",
+    "log_offer_count",
+    "log_live_offers",
+    "log_buybox_eligible_offer_count_total"
+  ];
   return candidates.filter((key) => {
     if (key === "log_bsr") return rows.some((row) => row.keepaMedianBsr !== null && row.keepaMedianBsr > 0);
     if (key === "log_price") return rows.some((row) => (row.keepaAvgPrice ?? row.observedPrice) !== null && (row.keepaAvgPrice ?? row.observedPrice)! > 0);
     if (key === "buybox_ratio") return rows.some((row) => row.buyboxRatio !== null);
     if (key === "rating_avg") return rows.some((row) => row.ratingAvg !== null);
     if (key === "log_review_growth") return rows.some((row) => row.reviewGrowth !== null);
+    if (key === "log_price_stddev") return rows.some((row) => row.monthlyPriceStdDev !== null);
+    if (key === "price_trend") return rows.some((row) => row.monthlyPriceTrend !== null);
+    if (key === "price_range") return rows.some((row) => row.monthlyPriceRange !== null);
+    if (key === "log_offer_count") return rows.some((row) => row.offerCount !== null);
+    if (key === "log_live_offers") return rows.some((row) => row.liveOffersCount !== null);
+    if (key === "log_buybox_eligible_offer_count_total") return rows.some((row) => row.buyboxEligibleOfferCountTotal !== null);
     return false;
   });
 }
@@ -750,11 +966,23 @@ function buildDesignRow(row: CalibrationRow, activeFeatures: string[]) {
     } else if (feature === "log_review_growth") {
       const value = row.reviewGrowth ?? 0;
       x.push(Math.sign(value) * Math.log1p(Math.abs(value)));
+    } else if (feature === "log_price_stddev") {
+      x.push(Math.log1p(Math.max(0, row.monthlyPriceStdDev ?? 0)));
+    } else if (feature === "price_trend") {
+      x.push(row.monthlyPriceTrend ?? 0);
+    } else if (feature === "price_range") {
+      x.push(Math.log1p(Math.max(0, row.monthlyPriceRange ?? 0)));
+    } else if (feature === "log_offer_count") {
+      x.push(Math.log1p(row.offerCount ?? 0));
+    } else if (feature === "log_live_offers") {
+      x.push(Math.log1p(row.liveOffersCount ?? 0));
+    } else if (feature === "log_buybox_eligible_offer_count_total") {
+      x.push(Math.log1p(row.buyboxEligibleOfferCountTotal ?? 0));
     }
   }
 
   return {
-    y: Math.log1p(row.actualSales ?? 0),
+    y: Math.log1p(row.actualRevenue ?? 0),
     x,
     actualSales: row.actualSales,
     actualRevenue: row.actualRevenue,
@@ -806,15 +1034,28 @@ function predictWithModel(
     else if (key === "log_review_growth") {
       const value = feature.monthlyReviewGrowth ?? 0;
       x.push(Math.sign(value) * Math.log1p(Math.abs(value)));
+    } else if (key === "log_price_stddev") {
+      x.push(Math.log1p(Math.max(0, (feature.monthlyPriceStdDev ?? 0))));
+    } else if (key === "price_trend") {
+      x.push(feature.monthlyPriceTrend ?? 0);
+    } else if (key === "price_range") {
+      x.push(Math.log1p(Math.max(0, feature.monthlyPriceRange ?? 0)));
+    } else if (key === "log_offer_count") {
+      x.push(Math.log1p(feature.offerCount ?? 0));
+    } else if (key === "log_live_offers") {
+      x.push(Math.log1p(feature.liveOffersCount ?? 0));
+    } else if (key === "log_buybox_eligible_offer_count_total") {
+      x.push(Math.log1p(feature.buyboxEligibleOfferCountTotal ?? 0));
     }
   }
   const coefNames = Object.keys(selected.coefficients).filter((name) => name !== "intercept");
   const beta = coefNames.map((name) => selected.coefficients[name] ?? 0);
-  const sales = Math.max(0, Math.expm1((selected.coefficients.intercept ?? 0) + dot(beta, x)));
   const price = feature.monthlyPriceUsedForRevenue ?? obs?.price ?? null;
+  const revenue = Math.max(0, Math.expm1((selected.coefficients.intercept ?? 0) + dot(beta, x)));
+  const sales = price && price > 0 ? revenue / price : null;
   return {
     sales,
-    revenue: price === null ? null : sales * price,
+    revenue,
     priceUsedForRevenue: price,
     demandIndex: null,
     confidence: selected.confidence,
@@ -822,12 +1063,86 @@ function predictWithModel(
   };
 }
 
+function predictCalibrationRow(model: FittedModel, row: CalibrationRow): Prediction {
+  const syntheticFeature: AmazonEstimateLabKeepaMonthlyFeature = {
+    company: row.company,
+    productFamily: row.productFamily,
+    asin: row.asin,
+    productName: row.productName,
+    month: row.month,
+    monthlyMedianBsr: row.keepaMedianBsr ?? row.observedBsr,
+    monthlyAvgBsr: row.keepaMedianBsr ?? row.observedBsr,
+    monthlyBestBsr: row.keepaMedianBsr ?? row.observedBsr,
+    monthlyWorstBsr: row.keepaMedianBsr ?? row.observedBsr,
+    monthlyAvgBuyboxPrice: row.keepaAvgPrice ?? row.observedPrice,
+    monthlyAvgNewPrice: row.keepaAvgPrice ?? row.observedPrice,
+    monthlyAvgAmazonPrice: row.keepaAvgPrice ?? row.observedPrice,
+    monthlyPriceStdDev: row.monthlyPriceStdDev,
+    monthlyPriceTrend: row.monthlyPriceTrend,
+    monthlyPriceRange: row.monthlyPriceRange,
+    monthlyPriceUsedForRevenue: row.keepaAvgPrice ?? row.observedPrice,
+    monthlyReviewCountEnd: null,
+    monthlyReviewGrowth: row.reviewGrowth,
+    monthlyRatingAvg: row.ratingAvg,
+    buyboxAvailableRatio: row.buyboxRatio,
+    offerCount: row.offerCount,
+    offerCsvPointCount: row.offerCsvPointCount,
+    liveOffersCount: row.liveOffersCount,
+    buyboxEligibleOfferCountTotal: row.buyboxEligibleOfferCountTotal,
+    observationCount: 1,
+    salesRankReference: row.salesRankReference,
+    featureWarnings: []
+  };
+  return predictWithModel(
+    {
+      company: model.company ?? row.company,
+      productFamily: model.productFamily ?? row.productFamily,
+      modelKey: model.modelKey,
+      scope: model.scope,
+      modelType: model.modelType,
+      targetMetric: model.targetMetric,
+      sampleCount: model.sampleCount,
+      trainSampleCount: model.trainSampleCount,
+      testSampleCount: model.testSampleCount,
+      confidence: model.confidence,
+      formula: model.formula,
+      coefficients: model.coefficients,
+      metrics: model.metrics,
+      trainMetrics: model.trainMetrics,
+      testMetrics: model.testMetrics,
+      reason: ""
+    },
+    syntheticFeature,
+    {
+      company: row.company,
+      productFamily: row.productFamily,
+      asin: row.asin,
+      productName: row.productName,
+      brand: null,
+      category: null,
+      month: row.month,
+      collectedDate: `${row.month}-01`,
+      monthlySales: row.actualSales,
+      monthlyRevenue: row.actualRevenue,
+      price: row.observedPrice,
+      bsr: row.observedBsr,
+      reviews: null,
+      rating: row.ratingAvg,
+      sellers: null,
+      calculatedRevenue: false,
+      sourceRows: null,
+      sourceFile: path.relative(REPO_ROOT, AMAZON_LABEL_PATH)
+    }
+  );
+}
+
 function fallbackPrediction(feature: AmazonEstimateLabKeepaMonthlyFeature, obs: AmazonEstimateLabJungleScoutObservation | null): Prediction {
   const price = feature.monthlyPriceUsedForRevenue ?? obs?.price ?? null;
   const rank = feature.monthlyMedianBsr ?? feature.salesRankReference ?? null;
+  const sales = rank && rank > 0 ? 100000 / rank : null;
   return {
-    sales: rank && rank > 0 ? 100000 / rank : null,
-    revenue: null,
+    sales,
+    revenue: sales !== null && price !== null ? sales * price : null,
     priceUsedForRevenue: price,
     demandIndex: null,
     confidence: "not_enough_data",
@@ -852,10 +1167,11 @@ function selectPreferredModel(
 }
 
 function modelScore(model: FittedModel) {
-  const mape = model.metrics.mape ?? 999;
+  const mape = model.testMetrics?.mape ?? model.metrics.mape ?? 999;
   const penalty = model.modelType === "demand_index_only" ? 100 : 0;
-  const samplePenalty = Math.max(0, 30 - model.sampleCount);
-  return mape + penalty + samplePenalty;
+  const samplePenalty = Math.max(0, 24 - (model.trainSampleCount ?? model.sampleCount));
+  const trainPenalty = Math.max(0, 24 - (model.trainSampleCount ?? 0)) * 0.25;
+  return mape + penalty + samplePenalty + trainPenalty;
 }
 
 function inferConfidence(sampleCount: number, predictions: Array<number | null>, mape?: number | null): AmazonEstimateLabConfidence {
@@ -909,8 +1225,19 @@ function selectPriceSeries(buybox: number[], newPrices: number[], amazonPrices: 
   const source = buybox.length ? buybox : newPrices.length ? newPrices : amazonPrices;
   return {
     price: source.length ? average(source) : null,
-    source: buybox.length ? "buybox" : newPrices.length ? "new" : amazonPrices.length ? "amazon" : "missing"
+    source: buybox.length ? "buybox" : newPrices.length ? "new" : amazonPrices.length ? "amazon" : "missing",
+    values: source
   };
+}
+
+function summarizePriceSeries(values: number[]) {
+  if (!values.length) return { stdDev: null, trend: null, range: null };
+  const mean = average(values);
+  const variance = average(values.map((value) => Math.pow(value - mean, 2)));
+  const stdDev = Math.sqrt(variance);
+  const range = Math.max(...values) - Math.min(...values);
+  const trend = values.length >= 2 ? values[values.length - 1] - values[0] : 0;
+  return { stdDev, trend, range };
 }
 
 function numericValues(points: Array<Record<string, unknown>>, key: string) {

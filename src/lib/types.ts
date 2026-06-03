@@ -660,11 +660,18 @@ export type AmazonEstimateLabKeepaMonthlyFeature = {
   monthlyAvgBuyboxPrice: number | null;
   monthlyAvgNewPrice: number | null;
   monthlyAvgAmazonPrice: number | null;
+  monthlyPriceStdDev: number | null;
+  monthlyPriceTrend: number | null;
+  monthlyPriceRange: number | null;
   monthlyPriceUsedForRevenue: number | null;
   monthlyReviewCountEnd: number | null;
   monthlyReviewGrowth: number | null;
   monthlyRatingAvg: number | null;
   buyboxAvailableRatio: number | null;
+  offerCount: number | null;
+  offerCsvPointCount: number | null;
+  liveOffersCount: number | null;
+  buyboxEligibleOfferCountTotal: number | null;
   observationCount: number;
   salesRankReference: number | null;
   featureWarnings: string[];
@@ -675,6 +682,7 @@ export type AmazonEstimateLabCalibrationPoint = {
   productFamily: string;
   asin: string;
   month: string;
+  split?: "train" | "test" | "holdout";
   actualSales: number | null;
   predictedSales: number | null;
   actualRevenue: number | null;
@@ -698,10 +706,14 @@ export type AmazonEstimateLabCalibrationResult = {
   modelType: "simple_power_law" | "log_linear" | "family_adjusted" | "demand_index_only";
   targetMetric: "monthlySales" | "monthlyRevenue";
   sampleCount: number;
+  trainSampleCount?: number;
+  testSampleCount?: number;
   selected: boolean;
   formula: string;
   coefficients: Record<string, number>;
   metrics: AmazonEstimateLabMetrics;
+  trainMetrics?: AmazonEstimateLabMetrics;
+  testMetrics?: AmazonEstimateLabMetrics;
   confidence: AmazonEstimateLabConfidence;
   notes: string[];
   points: AmazonEstimateLabCalibrationPoint[];
@@ -715,10 +727,14 @@ export type AmazonEstimateLabSelectedModel = {
   modelType: "simple_power_law" | "log_linear" | "family_adjusted" | "demand_index_only";
   targetMetric: "monthlySales" | "monthlyRevenue";
   sampleCount: number;
+  trainSampleCount?: number;
+  testSampleCount?: number;
   confidence: AmazonEstimateLabConfidence;
   formula: string;
   coefficients: Record<string, number>;
   metrics: AmazonEstimateLabMetrics;
+  trainMetrics?: AmazonEstimateLabMetrics;
+  testMetrics?: AmazonEstimateLabMetrics;
   reason: string;
 };
 
@@ -728,6 +744,7 @@ export type AmazonEstimateLabMonthlyEstimate = {
   asin: string;
   productName: string;
   month: string;
+  split: "train" | "test" | "holdout";
   kind: "observed_jungle_scout_estimate" | "model_fitted_estimate" | "keepa_backcast_estimate";
   actualSales: number | null;
   actualRevenue: number | null;
@@ -794,6 +811,9 @@ export type AmazonEstimateLabData = {
     jungleScoutMatchedAsinCount: number;
     keepaMatchedAsinCount: number;
     calibrationSampleCount: number;
+    trainSampleCount?: number;
+    testSampleCount?: number;
+    labelMonthCount?: number;
     modelCount: number;
     selectedModelCount: number;
     backcastMonthCount: number;

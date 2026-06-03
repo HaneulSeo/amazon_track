@@ -18,10 +18,13 @@ export function CalibrationModelPanel({ selectedModel, calibrationResults }: Cal
   return (
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <MiniStat label="샘플 수" value={formatNumber(selectedModel.sampleCount)} />
+        <MiniStat label="Train" value={formatNumber(selectedModel.trainSampleCount ?? selectedModel.sampleCount)} />
+        <MiniStat label="Test" value={formatNumber(selectedModel.testSampleCount ?? 0)} />
         <MiniStat label="신뢰도" value={selectedModel.confidence} />
-        <MiniStat label="MAPE" value={selected?.metrics.mape === null || selected?.metrics.mape === undefined ? "No data" : `${selected.metrics.mape.toFixed(1)}%`} />
-        <MiniStat label="R²" value={selected?.metrics.r2 === null || selected?.metrics.r2 === undefined ? "No data" : selected.metrics.r2.toFixed(3)} />
+        <MiniStat label="Train MAPE" value={formatMetric(selectedModel.trainMetrics?.mape)} />
+        <MiniStat label="Test MAPE" value={formatMetric(selectedModel.testMetrics?.mape)} />
+        <MiniStat label="Train R²" value={formatMetric(selectedModel.trainMetrics?.r2, 3)} />
+        <MiniStat label="Test R²" value={formatMetric(selectedModel.testMetrics?.r2, 3)} />
       </div>
 
       <div className="rounded-2xl bg-toss-wash p-4">
@@ -48,6 +51,38 @@ export function CalibrationModelPanel({ selectedModel, calibrationResults }: Cal
           </tbody>
         </table>
       </div>
+
+      {selected?.points?.length ? (
+        <details className="rounded-2xl bg-toss-wash p-4">
+          <summary className="cursor-pointer text-sm font-bold text-toss-ink">Training points</summary>
+          <div className="mt-3 overflow-auto rounded-xl ring-1 ring-toss-line">
+            <table className="min-w-[760px] w-full bg-white text-left text-xs">
+              <thead className="bg-toss-wash text-[11px] font-bold uppercase tracking-wide text-toss-gray">
+                <tr>
+                  <th className="px-3 py-2">Month</th>
+                  <th className="px-3 py-2">Split</th>
+                  <th className="px-3 py-2 text-right">Actual rev</th>
+                  <th className="px-3 py-2 text-right">Pred rev</th>
+                  <th className="px-3 py-2 text-right">Actual sales</th>
+                  <th className="px-3 py-2 text-right">Pred sales</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-toss-line">
+                {selected.points.slice(0, 24).map((point) => (
+                  <tr key={`${point.asin}:${point.month}`}>
+                    <td className="px-3 py-2 font-semibold text-toss-ink">{point.month}</td>
+                    <td className="px-3 py-2 text-toss-gray">{point.split ?? "train"}</td>
+                    <td className="px-3 py-2 text-right">{formatMetric(point.actualRevenue)}</td>
+                    <td className="px-3 py-2 text-right">{formatMetric(point.predictedRevenue)}</td>
+                    <td className="px-3 py-2 text-right">{formatMetric(point.actualSales)}</td>
+                    <td className="px-3 py-2 text-right">{formatMetric(point.predictedSales)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+      ) : null}
     </div>
   );
 }
@@ -59,6 +94,11 @@ function MiniStat({ label, value }: { label: string; value: string }) {
       <p className="mt-1 text-lg font-extrabold text-toss-ink">{value}</p>
     </div>
   );
+}
+
+function formatMetric(value: number | null | undefined, digits = 1) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "No data";
+  return digits === 1 ? `${value.toFixed(1)}%` : value.toFixed(digits);
 }
 
 function EmptyState({ title, description }: { title: string; description: string }) {
