@@ -100,17 +100,32 @@ type CalibrationRow = {
   buyboxEligibleOfferCountTotal: number | null;
 };
 
+type TargetTransform = "raw" | "log1p" | "asinh" | "sqrt";
+type FeatureScaleMode = "none" | "zscore" | "robust";
+
+type FeatureStat = {
+  mean: number | null;
+  std: number | null;
+  median: number | null;
+  mad: number | null;
+};
+
 type FittedModel = {
   modelKey: string;
   scope: "global" | "company" | "family";
   company: string | null;
   productFamily: string | null;
-  modelType: "simple_power_law" | "log_linear" | "family_adjusted" | "demand_index_only";
+  modelType: "simple_power_law" | "log_linear" | "family_adjusted" | "demand_index_only" | "ridge_search";
   targetMetric: "monthlySales" | "monthlyRevenue";
   sampleCount: number;
   trainSampleCount: number;
   testSampleCount: number;
   selected: boolean;
+  activeFeatures?: string[];
+  targetTransform?: TargetTransform;
+  featureScaleMode?: FeatureScaleMode;
+  lambda?: number;
+  featureStats?: Record<string, FeatureStat>;
   formula: string;
   coefficients: Record<string, number>;
   metrics: {
@@ -137,6 +152,15 @@ type FittedModel = {
   confidence: AmazonEstimateLabConfidence;
   notes: string[];
   points: AmazonEstimateLabCalibrationPoint[];
+};
+
+type SearchCandidate = {
+  activeFeatures: string[];
+  targetTransform: TargetTransform;
+  featureScaleMode: FeatureScaleMode;
+  lambda: number;
+  score: number;
+  model: FittedModel;
 };
 
 type Prediction = {
@@ -487,28 +511,289 @@ function buildCalibrationRows(
   return rows;
 }
 
-function fitAllModels(trainRows: CalibrationRow[], testRows: CalibrationRow[]): FittedModel[] {
-  const models: FittedModel[] = [];
-  const companies = [...new Set(trainRows.map((row) => row.company))].sort();
-  const companyFamilies = [...new Set(trainRows.map((row) => `${row.company}:${row.productFamily}`))].sort();
+function searchBestCompanyModel(company: string, trainRows: CalibrationRow[], testRows: CalibrationRow[]): FittedModel {
+  const featureCandidates = rankFeatureCandidates(trainRows, [
+    "log_bsr",
+    "log_price",
+    "buybox_ratio",
+    "rating_avg",
+    "log_review_growth",
+    "log_price_stddev",
+    "price_trend",
+    "price_range",
+    "log_offer_count",
+    "log_live_offers",
+    "log_buybox_eligible_offer_count_total"
+  ]);
+  const topFeatures = featureCandidates.slice(0, Math.min(6, featureCandidates.length));
+  const subsets = enumerateFeatureSubsets(topFeatures);
+  const targetTransforms: TargetTransform[] = ["log1p", "asinh", "sqrt", "raw"];
+  const scaleModes: FeatureScaleMode[] = ["none", "zscore", "robust"];
+  const lambdas = [1e-6, 1e-4, 1e-2, 0.1, 1];
 
-  models.push(attachSplitMetrics(fitModel("global", null, null, trainRows, "simple_power_law"), trainRows, testRows));
-  for (const company of companies) {
-    const companyTrainRows = trainRows.filter((row) => row.company === company);
-    models.push(attachSplitMetrics(fitModel("company", company, null, companyTrainRows, "log_linear"), companyTrainRows, testRows.filter((row) => row.company === company)));
+  const validTrainRows = trainRows.filter((row) => row.actualRevenue !== null && Number.isFinite(row.actualRevenue));
+  const validTestRows = testRows.filter((row) => row.actualRevenue !== null && Number.isFinite(row.actualRevenue));
+
+  if (!validTrainRows.length) {
+    return makeDemandIndexModel("company", company, null, trainRows, "No valid revenue rows for company model");
   }
-  for (const key of companyFamilies) {
-    const [company, productFamily] = key.split(":");
-    const familyTrainRows = trainRows.filter((row) => row.company === company && row.productFamily === productFamily);
-    models.push(
-      attachSplitMetrics(
-        fitModel("family", company, productFamily, familyTrainRows, "family_adjusted"),
-        familyTrainRows,
-        testRows.filter((row) => row.company === company && row.productFamily === productFamily)
-      )
-    );
+
+  const candidates: SearchCandidate[] = [];
+  for (const activeFeatures of subsets) {
+    for (const targetTransform of targetTransforms) {
+      for (const featureScaleMode of scaleModes) {
+        for (const lambda of lambdas) {
+          const candidate = fitCandidateCompanyModel(company, trainRows, testRows, activeFeatures, targetTransform, featureScaleMode, lambda);
+          if (candidate) candidates.push(candidate);
+        }
+      }
+    }
   }
-  return models;
+
+  if (!candidates.length) {
+    return makeDemandIndexModel("company", company, null, trainRows, "No candidate fit converged");
+  }
+
+  candidates.sort((a, b) => compareCandidateScore(a, b));
+  return candidates[0].model;
+}
+
+function fitCandidateCompanyModel(
+  company: string,
+  trainRows: CalibrationRow[],
+  testRows: CalibrationRow[],
+  activeFeatures: string[],
+  targetTransform: TargetTransform,
+  featureScaleMode: FeatureScaleMode,
+  lambda: number
+): SearchCandidate | null {
+  const validTrainRows = trainRows.filter((row) => row.actualRevenue !== null && row.actualRevenue > 0);
+  const validTestRows = testRows.filter((row) => row.actualRevenue !== null && row.actualRevenue > 0);
+  if (!activeFeatures.length || !validTrainRows.length) return null;
+
+  const featureStats = computeFeatureStats(validTrainRows, activeFeatures);
+  const trainMatrix = buildTransformedMatrix(validTrainRows, activeFeatures, featureStats, featureScaleMode, targetTransform);
+  if (!trainMatrix.length || !trainMatrix[0]?.x.length) return null;
+
+  const beta = solveLinearSystem(
+    trainMatrix.map((row) => [1, ...row.x]),
+    trainMatrix.map((row) => row.y),
+    lambda
+  );
+  if (!beta.length || beta.some((value) => !Number.isFinite(value))) return null;
+
+  const coefficients = coefficientsFromNames(["intercept", ...activeFeatures], beta);
+  const trainEvalPredictions = validTrainRows.map((row) => {
+    const vector = buildFeatureVector(row, activeFeatures, featureStats, featureScaleMode);
+    const raw = (beta[0] ?? 0) + dot(beta.slice(1), vector);
+    return inverseTransformTarget(raw, targetTransform);
+  });
+  const testEvalPredictions = validTestRows.map((row) => {
+    const vector = buildFeatureVector(row, activeFeatures, featureStats, featureScaleMode);
+    const raw = (beta[0] ?? 0) + dot(beta.slice(1), vector);
+    return inverseTransformTarget(raw, targetTransform);
+  });
+
+  const trainMetrics = calculateMetrics(
+    validTrainRows.map((row) => Math.max(row.actualRevenue ?? 0, 1)),
+    trainEvalPredictions.map((value) => Math.max(value ?? 0, 0))
+  );
+  const testMetrics = calculateMetrics(
+    validTestRows.map((row) => Math.max(row.actualRevenue ?? 0, 1)),
+    testEvalPredictions.map((value) => Math.max(value ?? 0, 0))
+  );
+
+  const allRows = [...validTrainRows, ...validTestRows];
+  const points = allRows.map((row, index) => {
+    const vector = buildFeatureVector(row, activeFeatures, featureStats, featureScaleMode);
+    const rawPrediction = (beta[0] ?? 0) + dot(beta.slice(1), vector);
+    const predictedRevenue = inverseTransformTarget(rawPrediction, targetTransform);
+    return {
+      company: row.company,
+      productFamily: row.productFamily,
+      asin: row.asin,
+      month: row.month,
+      split: row.split,
+      actualSales: row.actualSales,
+      predictedSales: row.keepaAvgPrice && row.keepaAvgPrice > 0 && predictedRevenue !== null ? predictedRevenue / row.keepaAvgPrice : null,
+      actualRevenue: row.actualRevenue,
+      predictedRevenue,
+      priceUsedForRevenue: row.keepaAvgPrice ?? row.observedPrice ?? null
+    };
+  });
+
+  const model = {
+    modelKey: `company:${company}:ridge:${featureScaleMode}:${targetTransform}:lambda${lambda}:${activeFeatures.join("+") || "none"}`,
+    scope: "company" as const,
+    company,
+    productFamily: null,
+    modelType: "ridge_search" as const,
+    targetMetric: "monthlyRevenue" as const,
+    sampleCount: validTrainRows.length,
+    trainSampleCount: validTrainRows.length,
+    testSampleCount: validTestRows.length,
+    selected: false,
+    activeFeatures,
+    targetTransform,
+    featureScaleMode,
+    lambda,
+    featureStats,
+    formula: buildSearchFormula(targetTransform, featureScaleMode, lambda, activeFeatures),
+    coefficients,
+    metrics: trainMetrics,
+    trainMetrics,
+    testMetrics,
+    confidence: inferConfidence(validTrainRows.length, trainEvalPredictions, trainMetrics.mape),
+    notes: [`features=${activeFeatures.join(",") || "none"}`, `target=${targetTransform}`, `scale=${featureScaleMode}`, `lambda=${lambda}`],
+    points
+  } satisfies FittedModel;
+
+  const score = candidateScore(trainMetrics, testMetrics, activeFeatures.length, lambda);
+  return { activeFeatures, targetTransform, featureScaleMode, lambda, score, model };
+}
+
+function compareCandidateScore(a: SearchCandidate, b: SearchCandidate) {
+  if (a.score !== b.score) return a.score - b.score;
+  const aTest = a.model.testMetrics?.mape ?? a.model.metrics.mape ?? Infinity;
+  const bTest = b.model.testMetrics?.mape ?? b.model.metrics.mape ?? Infinity;
+  if (aTest !== bTest) return aTest - bTest;
+  const aR2 = a.model.testMetrics?.r2 ?? a.model.metrics.r2 ?? -Infinity;
+  const bR2 = b.model.testMetrics?.r2 ?? b.model.metrics.r2 ?? -Infinity;
+  if (aR2 !== bR2) return bR2 - aR2;
+  const aSpearman = a.model.testMetrics?.spearman ?? a.model.metrics.spearman ?? -Infinity;
+  const bSpearman = b.model.testMetrics?.spearman ?? b.model.metrics.spearman ?? -Infinity;
+  return bSpearman - aSpearman;
+}
+
+function candidateScore(trainMetrics: AmazonEstimateLabMetrics, testMetrics: AmazonEstimateLabMetrics, featureCount: number, lambda: number) {
+  const testMape = testMetrics.mape ?? 9999;
+  const testR2 = testMetrics.r2 ?? -999;
+  const testSpearman = testMetrics.spearman ?? -1;
+  const trainMape = trainMetrics.mape ?? 9999;
+  const complexityPenalty = featureCount * 0.25 + Math.log10(lambda + 1e-12) * 0.05;
+  const stabilityPenalty = Math.max(0, trainMape - testMape) * 0.01;
+  return testMape + Math.max(0, -testR2) * 25 + Math.max(0, 1 - testSpearman) * 10 + complexityPenalty + stabilityPenalty;
+}
+
+function enumerateFeatureSubsets(features: string[]) {
+  const output: string[][] = [];
+  const total = 1 << features.length;
+  for (let mask = 1; mask < total; mask++) {
+    const subset = features.filter((_, index) => (mask & (1 << index)) !== 0);
+    output.push(subset);
+  }
+  return output;
+}
+
+function rankFeatureCandidates(rows: CalibrationRow[], features: string[]) {
+  const target = rows.map((row) => Math.log1p(Math.max(row.actualRevenue ?? 0, 1)));
+  return [...features]
+    .map((feature) => {
+      const values = rows.map((row) => baseFeatureValue(row, feature));
+      const corr = pearson(values, target);
+      return { feature, score: Math.abs(corr ?? 0) };
+    })
+    .sort((a, b) => b.score - a.score)
+    .map((entry) => entry.feature);
+}
+
+function computeFeatureStats(rows: CalibrationRow[], features: string[]) {
+  const stats: Record<string, FeatureStat> = {};
+  for (const feature of features) {
+    const values = rows.map((row) => baseFeatureValue(row, feature)).filter((value) => Number.isFinite(value));
+    const mean = values.length ? average(values) : null;
+    const med = median(values);
+    const std = values.length ? Math.sqrt(average(values.map((value) => Math.pow(value - (mean ?? 0), 2)))) : null;
+    const mad = values.length ? median(values.map((value) => Math.abs(value - (med ?? 0)))) : null;
+    stats[feature] = {
+      mean,
+      std,
+      median: med,
+      mad
+    };
+  }
+  return stats;
+}
+
+function buildTransformedMatrix(
+  rows: CalibrationRow[],
+  activeFeatures: string[],
+  featureStats: Record<string, FeatureStat>,
+  featureScaleMode: FeatureScaleMode,
+  targetTransform: TargetTransform
+) {
+  const matrix: Array<{ x: number[]; y: number }> = [];
+  for (const row of rows) {
+    const yRaw = row.actualRevenue ?? 0;
+    if (!Number.isFinite(yRaw) || yRaw < 0) continue;
+    const y = transformTarget(yRaw, targetTransform);
+    if (!Number.isFinite(y)) continue;
+    const x = activeFeatures.map((feature) => scaleFeatureValue(baseFeatureValue(row, feature), featureStats[feature], featureScaleMode));
+    matrix.push({ x, y });
+  }
+  return matrix;
+}
+
+function buildFeatureVector(
+  row: CalibrationRow,
+  activeFeatures: string[],
+  featureStats: Record<string, FeatureStat>,
+  featureScaleMode: FeatureScaleMode
+) {
+  return activeFeatures.map((feature) => scaleFeatureValue(baseFeatureValue(row, feature), featureStats[feature], featureScaleMode));
+}
+
+function baseFeatureValue(row: CalibrationRow, feature: string) {
+  if (feature === "log_bsr") return Math.log1p(row.keepaMedianBsr ?? row.observedBsr ?? 0);
+  if (feature === "log_price") return Math.log1p(row.keepaAvgPrice ?? row.observedPrice ?? 0);
+  if (feature === "buybox_ratio") return row.buyboxRatio ?? 0;
+  if (feature === "rating_avg") return row.ratingAvg ?? 0;
+  if (feature === "log_review_growth") {
+    const value = row.reviewGrowth ?? 0;
+    return Math.sign(value) * Math.log1p(Math.abs(value));
+  }
+  if (feature === "log_price_stddev") return Math.log1p(Math.max(0, row.monthlyPriceStdDev ?? 0));
+  if (feature === "price_trend") return row.monthlyPriceTrend ?? 0;
+  if (feature === "price_range") return Math.log1p(Math.max(0, row.monthlyPriceRange ?? 0));
+  if (feature === "log_offer_count") return Math.log1p(row.offerCount ?? 0);
+  if (feature === "log_live_offers") return Math.log1p(row.liveOffersCount ?? 0);
+  if (feature === "log_buybox_eligible_offer_count_total") return Math.log1p(row.buyboxEligibleOfferCountTotal ?? 0);
+  return 0;
+}
+
+function scaleFeatureValue(value: number, stat: FeatureStat | undefined, mode: FeatureScaleMode) {
+  if (mode === "none") return value;
+  if (!stat) return value;
+  if (mode === "zscore") {
+    const std = stat.std && Math.abs(stat.std) > 1e-9 ? stat.std : 1;
+    return ((value - (stat.mean ?? 0)) / std) || 0;
+  }
+  const mad = stat.mad && Math.abs(stat.mad) > 1e-9 ? stat.mad * 1.4826 : 1;
+  return ((value - (stat.median ?? 0)) / mad) || 0;
+}
+
+function transformTarget(value: number, transform: TargetTransform) {
+  if (transform === "raw") return value;
+  if (transform === "asinh") return Math.asinh(value);
+  if (transform === "sqrt") return Math.sqrt(Math.max(0, value));
+  return Math.log1p(Math.max(0, value));
+}
+
+function inverseTransformTarget(value: number, transform: TargetTransform) {
+  if (!Number.isFinite(value)) return null;
+  if (transform === "raw") return Math.max(0, value);
+  if (transform === "asinh") return Math.sinh(value);
+  if (transform === "sqrt") return Math.max(0, value) * Math.max(0, value);
+  return Math.max(0, Math.expm1(value));
+}
+
+function buildSearchFormula(transform: TargetTransform, scaleMode: FeatureScaleMode, lambda: number, activeFeatures: string[]) {
+  return `target=${transform}; scale=${scaleMode}; lambda=${lambda}; features=${activeFeatures.join("+") || "none"}`;
+}
+
+function fitAllModels(trainRows: CalibrationRow[], testRows: CalibrationRow[]): FittedModel[] {
+  const companies = [...new Set(trainRows.map((row) => row.company))].sort();
+  return companies.map((company) => searchBestCompanyModel(company, trainRows.filter((row) => row.company === company), testRows.filter((row) => row.company === company)));
 }
 
 function attachSplitMetrics(model: FittedModel, trainRows: CalibrationRow[], testRows: CalibrationRow[]): FittedModel {
@@ -1021,35 +1306,17 @@ function predictWithModel(
     };
   }
 
-  const x: number[] = [];
-  for (const key of Object.keys(selected.coefficients)) {
-    if (key === "intercept") continue;
-    if (key === "log_bsr") x.push(Math.log1p(feature.monthlyMedianBsr ?? feature.monthlyAvgBsr ?? feature.salesRankReference ?? 0));
-    else if (key === "log_price") x.push(Math.log1p(feature.monthlyPriceUsedForRevenue ?? obs?.price ?? 0));
-    else if (key === "buybox_ratio") x.push(feature.buyboxAvailableRatio ?? 0);
-    else if (key === "rating_avg") x.push(feature.monthlyRatingAvg ?? 0);
-    else if (key === "log_review_growth") {
-      const value = feature.monthlyReviewGrowth ?? 0;
-      x.push(Math.sign(value) * Math.log1p(Math.abs(value)));
-    } else if (key === "log_price_stddev") {
-      x.push(Math.log1p(Math.max(0, (feature.monthlyPriceStdDev ?? 0))));
-    } else if (key === "price_trend") {
-      x.push(feature.monthlyPriceTrend ?? 0);
-    } else if (key === "price_range") {
-      x.push(Math.log1p(Math.max(0, feature.monthlyPriceRange ?? 0)));
-    } else if (key === "log_offer_count") {
-      x.push(Math.log1p(feature.offerCount ?? 0));
-    } else if (key === "log_live_offers") {
-      x.push(Math.log1p(feature.liveOffersCount ?? 0));
-    } else if (key === "log_buybox_eligible_offer_count_total") {
-      x.push(Math.log1p(feature.buyboxEligibleOfferCountTotal ?? 0));
-    }
-  }
-  const coefNames = Object.keys(selected.coefficients).filter((name) => name !== "intercept");
-  const beta = coefNames.map((name) => selected.coefficients[name] ?? 0);
+  const activeFeatures = selected.activeFeatures?.length ? selected.activeFeatures : Object.keys(selected.coefficients).filter((name) => name !== "intercept");
+  const scaleMode = selected.featureScaleMode ?? "none";
+  const targetTransform = selected.targetTransform ?? "log1p";
+  const featureStats = selected.featureStats ?? {};
+  const x = activeFeatures.map((key) =>
+    scaleFeatureValue(getFeatureValueFromKeepa(feature, obs, key), featureStats[key], scaleMode)
+  );
+  const beta = activeFeatures.map((name) => selected.coefficients[name] ?? 0);
   const price = feature.monthlyPriceUsedForRevenue ?? obs?.price ?? null;
-  const revenue = Math.max(0, Math.expm1((selected.coefficients.intercept ?? 0) + dot(beta, x)));
-  const sales = price && price > 0 ? revenue / price : null;
+  const revenue = inverseTransformTarget((selected.coefficients.intercept ?? 0) + dot(beta, x), targetTransform);
+  const sales = price && price > 0 && revenue !== null ? revenue / price : null;
   return {
     sales,
     revenue,
@@ -1058,6 +1325,28 @@ function predictWithModel(
     confidence: selected.confidence,
     notes: []
   };
+}
+
+function getFeatureValueFromKeepa(
+  feature: AmazonEstimateLabKeepaMonthlyFeature,
+  obs: AmazonEstimateLabJungleScoutObservation | null,
+  key: string
+) {
+  if (key === "log_bsr") return Math.log1p(feature.monthlyMedianBsr ?? feature.monthlyAvgBsr ?? feature.salesRankReference ?? obs?.bsr ?? 0);
+  if (key === "log_price") return Math.log1p(feature.monthlyPriceUsedForRevenue ?? obs?.price ?? 0);
+  if (key === "buybox_ratio") return feature.buyboxAvailableRatio ?? 0;
+  if (key === "rating_avg") return feature.monthlyRatingAvg ?? obs?.rating ?? 0;
+  if (key === "log_review_growth") {
+    const value = feature.monthlyReviewGrowth ?? 0;
+    return Math.sign(value) * Math.log1p(Math.abs(value));
+  }
+  if (key === "log_price_stddev") return Math.log1p(Math.max(0, feature.monthlyPriceStdDev ?? 0));
+  if (key === "price_trend") return feature.monthlyPriceTrend ?? 0;
+  if (key === "price_range") return Math.log1p(Math.max(0, feature.monthlyPriceRange ?? 0));
+  if (key === "log_offer_count") return Math.log1p(feature.offerCount ?? 0);
+  if (key === "log_live_offers") return Math.log1p(feature.liveOffersCount ?? 0);
+  if (key === "log_buybox_eligible_offer_count_total") return Math.log1p(feature.buyboxEligibleOfferCountTotal ?? 0);
+  return 0;
 }
 
 function predictCalibrationRow(model: FittedModel, row: CalibrationRow): Prediction {
@@ -1217,6 +1506,11 @@ function flattenModel(row: FittedModel) {
     targetMetric: row.targetMetric,
     sampleCount: row.sampleCount,
     selected: row.selected ? "true" : "false",
+    activeFeatures: row.activeFeatures?.join("|") ?? "",
+    targetTransform: row.targetTransform ?? "",
+    featureScaleMode: row.featureScaleMode ?? "",
+    lambda: row.lambda ?? null,
+    featureStats: row.featureStats ? JSON.stringify(row.featureStats) : "",
     formula: row.formula,
     coefficients: JSON.stringify(row.coefficients),
     mape: row.metrics.mape,
@@ -1301,11 +1595,10 @@ function dot(a: number[], b: number[]) {
   return a.reduce((sumValue, value, index) => sumValue + value * (b[index] ?? 0), 0);
 }
 
-function solveLinearSystem(xRows: number[][], y: number[]) {
+function solveLinearSystem(xRows: number[][], y: number[], lambda = 1e-6) {
   const n = xRows.length;
   if (!n) return [0];
   const p = xRows[0].length;
-  const lambda = 1e-6;
   const xtx = Array.from({ length: p }, () => Array.from({ length: p }, () => 0));
   const xty = Array.from({ length: p }, () => 0);
   for (let i = 0; i < n; i++) {

@@ -31,6 +31,12 @@ export function CalibrationModelPanel({ selectedModel, calibrationResults }: Cal
         <p className="text-xs font-bold uppercase tracking-wide text-toss-gray">Model formula</p>
         <p className="mt-2 text-sm font-semibold leading-6 text-toss-ink">{selectedModel.formula}</p>
         {selectedModel.reason ? <p className="mt-2 text-sm leading-6 text-toss-ink2">{selectedModel.reason}</p> : null}
+        <div className="mt-3 grid gap-2 text-xs font-semibold text-toss-ink2 sm:grid-cols-2 xl:grid-cols-4">
+          <Chip label="Target" value={selectedModel.targetTransform ?? "log1p"} />
+          <Chip label="Scale" value={selectedModel.featureScaleMode ?? "none"} />
+          <Chip label="Lambda" value={selectedModel.lambda !== undefined ? selectedModel.lambda.toString() : "n/a"} />
+          <Chip label="Features" value={selectedModel.activeFeatures?.length ? selectedModel.activeFeatures.join(", ") : "none"} />
+        </div>
       </div>
 
       <div className="overflow-auto rounded-2xl ring-1 ring-toss-line">
@@ -92,6 +98,15 @@ function MiniStat({ label, value }: { label: string; value: string }) {
     <div className="rounded-2xl bg-white p-4 ring-1 ring-toss-line">
       <p className="text-xs font-bold uppercase tracking-wide text-toss-gray">{label}</p>
       <p className="mt-1 text-lg font-extrabold text-toss-ink">{value}</p>
+    </div>
+  );
+}
+
+function Chip({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-white px-3 py-2 ring-1 ring-toss-line">
+      <span className="block text-[11px] font-bold uppercase tracking-wide text-toss-gray">{label}</span>
+      <span className="mt-1 block truncate text-xs font-semibold text-toss-ink">{value}</span>
     </div>
   );
 }

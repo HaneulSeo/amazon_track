@@ -188,6 +188,11 @@ function normalizeCalibrationResult(row: Partial<AmazonEstimateLabCalibrationRes
     trainSampleCount: toNumber((row as Record<string, unknown>).trainSampleCount) ?? undefined,
     testSampleCount: toNumber((row as Record<string, unknown>).testSampleCount) ?? undefined,
     selected: Boolean(row.selected),
+    activeFeatures: Array.isArray((row as Record<string, unknown>).activeFeatures) ? ((row as Record<string, unknown>).activeFeatures as unknown[]).map(String) : undefined,
+    targetTransform: toTargetTransform((row as Record<string, unknown>).targetTransform),
+    featureScaleMode: toFeatureScaleMode((row as Record<string, unknown>).featureScaleMode),
+    lambda: toNullableNumber((row as Record<string, unknown>).lambda) ?? undefined,
+    featureStats: normalizeFeatureStats((row as Record<string, unknown>).featureStats),
     formula: typeof row.formula === "string" ? row.formula : "",
     coefficients: typeof row.coefficients === "object" && row.coefficients ? { ...(row.coefficients as Record<string, number>) } : {},
     metrics: normalizeMetrics(row.metrics),
@@ -229,6 +234,11 @@ function normalizeSelectedModel(row: Partial<AmazonEstimateLabSelectedModel> | n
     trainSampleCount: toNumber((row as Record<string, unknown>).trainSampleCount) ?? undefined,
     testSampleCount: toNumber((row as Record<string, unknown>).testSampleCount) ?? undefined,
     confidence: row.confidence ?? "not_enough_data",
+    activeFeatures: Array.isArray((row as Record<string, unknown>).activeFeatures) ? ((row as Record<string, unknown>).activeFeatures as unknown[]).map(String) : undefined,
+    targetTransform: toTargetTransform((row as Record<string, unknown>).targetTransform),
+    featureScaleMode: toFeatureScaleMode((row as Record<string, unknown>).featureScaleMode),
+    lambda: toNullableNumber((row as Record<string, unknown>).lambda) ?? undefined,
+    featureStats: normalizeFeatureStats((row as Record<string, unknown>).featureStats),
     formula: typeof row.formula === "string" ? row.formula : "",
     coefficients: typeof row.coefficients === "object" && row.coefficients ? { ...(row.coefficients as Record<string, number>) } : {},
     metrics: normalizeMetrics(row.metrics),
@@ -236,6 +246,30 @@ function normalizeSelectedModel(row: Partial<AmazonEstimateLabSelectedModel> | n
     testMetrics: row && typeof row === "object" && (row as Record<string, unknown>).testMetrics ? normalizeMetrics((row as Record<string, unknown>).testMetrics) : undefined,
     reason: typeof row.reason === "string" ? row.reason : ""
   };
+}
+
+function normalizeFeatureStats(value: unknown) {
+  if (!value || typeof value !== "object") return undefined;
+  const record = value as Record<string, unknown>;
+  const out: Record<string, { mean: number | null; std: number | null; median: number | null; mad: number | null }> = {};
+  for (const [key, raw] of Object.entries(record)) {
+    const stat = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+    out[key] = {
+      mean: toNullableNumber(stat.mean),
+      std: toNullableNumber(stat.std),
+      median: toNullableNumber(stat.median),
+      mad: toNullableNumber(stat.mad)
+    };
+  }
+  return out;
+}
+
+function toTargetTransform(value: unknown): "raw" | "log1p" | "asinh" | "sqrt" | undefined {
+  return value === "raw" || value === "log1p" || value === "asinh" || value === "sqrt" ? value : undefined;
+}
+
+function toFeatureScaleMode(value: unknown): "none" | "zscore" | "robust" | undefined {
+  return value === "none" || value === "zscore" || value === "robust" ? value : undefined;
 }
 
 function normalizeMonthlyEstimate(row: Partial<AmazonEstimateLabMonthlyEstimate> | null | undefined) {
