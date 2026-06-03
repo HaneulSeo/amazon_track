@@ -1148,11 +1148,30 @@ function fallbackPrediction(feature: AmazonEstimateLabKeepaMonthlyFeature, obs: 
 }
 
 function selectPreferredCompanyModel(companyModel: FittedModel | undefined, globalModel: FittedModel | undefined, companyCount: number, globalCount: number) {
-  const options: FittedModel[] = [];
-  if (companyModel && companyCount >= 12) options.push(companyModel);
-  if (globalModel && globalCount >= 20) options.push(globalModel);
-  const scored = options.length ? [...options].sort((a, b) => modelScore(a) - modelScore(b)) : [companyModel, globalModel].filter(Boolean) as FittedModel[];
-  return scored[0] ?? (globalModel ?? companyModel)!;
+  if (companyModel) return companyModel;
+  if (globalModel) return globalModel;
+  return makeFallbackSelectedModel(companyCount, globalCount);
+}
+
+function makeFallbackSelectedModel(companyCount: number, globalCount: number): FittedModel {
+  return {
+    modelKey: `fallback:company:${companyCount}:global:${globalCount}`,
+    scope: "global",
+    company: null,
+    productFamily: null,
+    modelType: "demand_index_only",
+    targetMetric: "monthlyRevenue",
+    sampleCount: 0,
+    trainSampleCount: 0,
+    testSampleCount: 0,
+    selected: false,
+    formula: "No calibrated model available",
+    coefficients: {},
+    metrics: { mape: null, rmse: null, mae: null, r2: null, spearman: null },
+    confidence: "not_enough_data",
+    notes: ["no_company_model_available", `company_count=${companyCount}`, `global_count=${globalCount}`],
+    points: []
+  };
 }
 
 function modelScore(model: FittedModel) {
