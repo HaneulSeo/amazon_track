@@ -12,7 +12,7 @@ type ViewMode = "index" | "amount";
 const METRICS: Array<{ key: MetricKey; label: string; defaultSelected: boolean; kind: "money" | "count" | "index" }> = [
   { key: "actualRevenue", label: "Observed revenue", defaultSelected: true, kind: "money" },
   { key: "predictedRevenue", label: "Modeled revenue", defaultSelected: true, kind: "money" },
-  { key: "actualSales", label: "Observed units", defaultSelected: false, kind: "count" },
+  { key: "actualSales", label: "Observed units", defaultSelected: true, kind: "count" },
   { key: "predictedSales", label: "Modeled units", defaultSelected: false, kind: "count" },
   { key: "demandIndex", label: "Demand index", defaultSelected: true, kind: "index" }
 ];
@@ -37,7 +37,7 @@ export function BackcastRevenueChart({ rows, currency, usdKrw }: BackcastRevenue
     return set;
   }, [rows]);
 
-  const visibleMetrics = selectedMetrics.filter((metric) => availableMetrics.has(metric));
+  const visibleMetrics = selectedMetrics.filter((metric) => availableMetrics.has(metric)).filter((metric) => viewMode === "index" || metric !== "demandIndex");
   const chartData = useMemo(() => buildChartData(rows, viewMode, visibleMetrics), [rows, viewMode, visibleMetrics]);
 
   return (
@@ -99,13 +99,28 @@ export function BackcastRevenueChart({ rows, currency, usdKrw }: BackcastRevenue
               <LineChart data={chartData} margin={{ top: 8, right: 16, bottom: 8, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e8eb" />
                 <XAxis dataKey="month" tickLine={false} axisLine={false} minTickGap={24} />
-                <YAxis
-                  tickLine={false}
-                  axisLine={false}
-                  width={viewMode === "index" ? 52 : 72}
-                  tickFormatter={(value) => (viewMode === "index" ? String(Math.round(Number(value))) : formatMoneyFromUsd(Number(value), currency, usdKrw))}
-                />
-              <Tooltip content={<EstimateTooltip currency={currency} usdKrw={usdKrw} viewMode={viewMode} />} />
+                {viewMode === "index" ? (
+                  <YAxis yAxisId="index" tickLine={false} axisLine={false} width={52} tickFormatter={(value) => String(Math.round(Number(value)))} />
+                ) : (
+                  <>
+                    <YAxis
+                      yAxisId="left"
+                      tickLine={false}
+                      axisLine={false}
+                      width={78}
+                      tickFormatter={(value) => formatMoneyFromUsd(Number(value), currency, usdKrw)}
+                    />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      tickLine={false}
+                      axisLine={false}
+                      width={56}
+                      tickFormatter={(value) => formatNumber(Number(value))}
+                    />
+                  </>
+                )}
+                <Tooltip content={<EstimateTooltip currency={currency} usdKrw={usdKrw} viewMode={viewMode} />} />
                 <Legend />
                 {visibleMetrics.map((metric, index) => (
                   <Line
@@ -114,8 +129,10 @@ export function BackcastRevenueChart({ rows, currency, usdKrw }: BackcastRevenue
                     dataKey={viewMode === "index" ? `${metric}Index` : metric}
                     name={METRICS.find((item) => item.key === metric)?.label ?? metric}
                     stroke={COLORS[index % COLORS.length]}
-                    strokeWidth={2.5}
+                    strokeWidth={metric === "actualRevenue" || metric === "actualSales" ? 3.2 : 2.5}
                     dot={false}
+                    strokeDasharray={metric === "actualRevenue" || metric === "actualSales" ? undefined : metric === "predictedRevenue" || metric === "predictedSales" ? "4 3" : undefined}
+                    yAxisId={viewMode === "index" ? "index" : metric === "actualRevenue" || metric === "predictedRevenue" ? "left" : metric === "actualSales" || metric === "predictedSales" ? "right" : "left"}
                     connectNulls
                   />
                 ))}
@@ -145,6 +162,7 @@ function buildChartData(rows: AmazonEstimateLabMonthlyEstimate[], viewMode: View
       const value = typeof row[metric] === "number" ? (row[metric] as number) : null;
       item[metric] = value;
       item[`${metric}Index`] = viewMode === "index" && value !== null && baseValues.get(metric) ? (value / (baseValues.get(metric) ?? 1)) * 100 : null;
+      if (viewMode === "amount" && metric === "actualSales") item[metric] = value;
     }
     return item;
   });
