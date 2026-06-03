@@ -149,9 +149,9 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
                 <tr>
                   <th className="px-4 py-3">Month</th>
                   <th className="px-4 py-3">Kind</th>
-                  <th className="px-4 py-3 text-right">Observed sales</th>
+                  <th className="px-4 py-3 text-right">Jungle Scout units</th>
                   <th className="px-4 py-3 text-right">Predicted sales</th>
-                  <th className="px-4 py-3 text-right">Observed revenue</th>
+                  <th className="px-4 py-3 text-right">Jungle Scout revenue</th>
                   <th className="px-4 py-3 text-right">Predicted revenue</th>
                   <th className="px-4 py-3 text-right">Demand index</th>
                   <th className="px-4 py-3">Confidence</th>

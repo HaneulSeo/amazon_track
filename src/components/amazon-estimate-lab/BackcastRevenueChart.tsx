@@ -10,9 +10,9 @@ type MetricKey = "actualRevenue" | "predictedRevenue" | "actualSales" | "predict
 type ViewMode = "index" | "amount";
 
 const METRICS: Array<{ key: MetricKey; label: string; defaultSelected: boolean; kind: "money" | "count" | "index" }> = [
-  { key: "actualRevenue", label: "Observed revenue", defaultSelected: true, kind: "money" },
+  { key: "actualRevenue", label: "Jungle Scout revenue", defaultSelected: true, kind: "money" },
   { key: "predictedRevenue", label: "Modeled revenue", defaultSelected: true, kind: "money" },
-  { key: "actualSales", label: "Observed units", defaultSelected: true, kind: "count" },
+  { key: "actualSales", label: "Jungle Scout units", defaultSelected: true, kind: "count" },
   { key: "predictedSales", label: "Modeled units", defaultSelected: false, kind: "count" },
   { key: "demandIndex", label: "Demand index", defaultSelected: true, kind: "index" }
 ];
@@ -44,7 +44,7 @@ export function BackcastRevenueChart({ rows, currency, usdKrw }: BackcastRevenue
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-toss-wash p-4">
         <p className="text-sm leading-6 text-toss-ink2">
-          선택한 ASIN의 실제 관측값과 모델 백캐스트를 함께 봅니다. 지수 모드에서는 시작점을 100으로 맞춰 추세만 비교합니다.
+          선택한 ASIN의 Jungle Scout 관측값(actual revenue / units)과 모델 백캐스트를 함께 봅니다. 지수 모드에서는 시작점을 100으로 맞춰 추세만 비교합니다.
         </p>
         <div className="flex items-center rounded-lg bg-white p-1 ring-1 ring-toss-line">
           {(["index", "amount"] as ViewMode[]).map((mode) => (
