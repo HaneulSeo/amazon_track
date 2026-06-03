@@ -55,6 +55,8 @@ async function loadApiKey() {
 async function main() {
   const apiKey = await loadApiKey();
   const trackedAsins = await loadTrackedAsins();
+  const limit = parseLimit(process.env.KEEPAMORE_LIMIT);
+  const limitedAsins = typeof limit === "number" ? trackedAsins.slice(0, limit) : trackedAsins;
 
   if (!trackedAsins.length) {
     throw new Error("기존 Amazon Tracking에서 ASIN을 찾지 못했습니다. public/data/dashboard_data.json 또는 data/processed/amazon_us_monthly.csv를 확인하세요.");
@@ -66,17 +68,20 @@ async function main() {
 
   const tokenInfo = await requestJson(`${BASE_URL}/token`, apiKey);
   console.log(formatTokenSummary(tokenInfo));
+  if (typeof limit === "number") {
+    console.log(`KEEPAMORE_LIMIT=${limit} 적용: ${limitedAsins.length}/${trackedAsins.length} ASIN만 수집합니다.`);
+  }
 
   const errors: KeepamoreErrorEntry[] = [];
   let successCount = 0;
 
-  for (let index = 0; index < trackedAsins.length; index += BATCH_SIZE) {
-    const batch = trackedAsins.slice(index, index + BATCH_SIZE);
+  for (let index = 0; index < limitedAsins.length; index += BATCH_SIZE) {
+    const batch = limitedAsins.slice(index, index + BATCH_SIZE);
     const batchResult = await fetchBatch(batch, apiKey, today, rawRoot);
     successCount += batchResult.successCount;
     errors.push(...batchResult.errors);
 
-    if (index + BATCH_SIZE < trackedAsins.length) {
+    if (index + BATCH_SIZE < limitedAsins.length) {
       await sleep(BATCH_DELAY_MS);
     }
   }
@@ -89,7 +94,7 @@ async function main() {
         generatedAt: new Date().toISOString(),
         source: "keepamore_api",
         summary: {
-          asinCount: trackedAsins.length,
+          asinCount: limitedAsins.length,
           successCount,
           errorCount: errors.length
         },
@@ -101,7 +106,7 @@ async function main() {
   );
 
   console.log(`wrote ${errorPath} (${errors.length} errors)`);
-  console.log(`fetched ${successCount}/${trackedAsins.length} ASINs to data/raw/keepamore_lab/${today}`);
+  console.log(`fetched ${successCount}/${limitedAsins.length} ASINs to data/raw/keepamore_lab/${today}`);
 }
 
 async function fetchBatch(batch: TrackedAsin[], apiKey: string, today: string, rawRoot: string) {
@@ -251,6 +256,12 @@ function extractProducts(response: unknown): unknown[] {
   if (Array.isArray(record.products)) return record.products;
   if (Array.isArray(record.product)) return record.product;
   if (record.product && typeof record.product === "object") return [record.product];
+  if (record.data && typeof record.data === "object") {
+    const data = record.data as Record<string, unknown>;
+    if (Array.isArray(data.products)) return data.products;
+    if (Array.isArray(data.product)) return data.product;
+    if (data.product && typeof data.product === "object") return [data.product];
+  }
   if ("asin" in record) return [record];
   return [];
 }
@@ -385,6 +396,13 @@ function parseEnvFile(content: string) {
     env[key] = value;
   }
   return env;
+}
+
+function parseLimit(value: string | undefined) {
+  if (!value) return null;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) return null;
+  return Math.floor(parsed);
 }
 
 main().catch((error) => {

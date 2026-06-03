@@ -174,7 +174,14 @@ function normalizeResponsePayload(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object") {
     return {};
   }
-  return value as Record<string, unknown>;
+  const record = value as Record<string, unknown>;
+  if (record.data && typeof record.data === "object") {
+    const data = record.data as Record<string, unknown>;
+    if (Array.isArray(data.products)) return { ...data, products: data.products };
+    if (Array.isArray(data.product)) return { ...data, products: data.product };
+    if (data.product && typeof data.product === "object") return { ...data, product: data.product };
+  }
+  return record;
 }
 
 function extractProductObject(response: Record<string, unknown>) {

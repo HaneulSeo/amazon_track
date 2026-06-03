@@ -1,12 +1,513 @@
 {
-  "generatedAt": null,
+  "generatedAt": "2026-06-03T10:32:16.718Z",
   "source": "keepamore_api",
   "summary": {
-    "asinCount": 0,
-    "successCount": 0,
+    "asinCount": 20,
+    "successCount": 20,
     "errorCount": 0,
-    "companyCount": 0
+    "companyCount": 1
   },
-  "products": [],
+  "products": [
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B0078OMNN8",
+      "title": "Cuckoo CRP-HS0657F 6 Cup Pressure Rice Cooker, 110V, Black",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "Cuckoo CRP-HS0657F 6 Cup Pressure Rice Cooker, 110V, Black",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": null
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B0078OMNN8.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B00CCVNX0O",
+      "title": "CUCKOO Micom Rice Cooker 3 Cup Uncooked / 6 Cup Cooked, Korean Fuzzy Logic Rice Cooker Small with Delay Timer & Keep Warm Setting, Versatile Food Steamer with Non-Stick Inner Pot, Red (CR-0351F)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO Micom Rice Cooker 3 Cup Uncooked / 6 Cup Cooked, Korean Fuzzy Logic Rice Cooker Small with Delay Timer & Keep Warm Setting, Versatile Food Steamer with Non-Stick Inner Pot, Red (CR-0351F)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": 50
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B00CCVNX0O.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B00E4XYQNG",
+      "title": "CUCKOO CRP-HY1083F | 10-Cup (Uncooked) Induction Heating Pressure Rice Cooker | 13 Menu Options, Auto-Clean, Voice Navigation, Stainless Steel Inner Pot, Made in Korea | Black",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO CRP-HY1083F | 10-Cup (Uncooked) Induction Heating Pressure Rice Cooker | 13 Menu Options, Auto-Clean, Voice Navigation, Stainless Steel Inner Pot, Made in Korea | Black",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": null
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B00E4XYQNG.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B00HUWBDHU",
+      "title": "Cuckoo Pressure Cover Packing Replacement Ring | CCP-06 by Cuckoo",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "Cuckoo Pressure Cover Packing Replacement Ring | CCP-06 by Cuckoo",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": null
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B00HUWBDHU.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B00NJ12KAU",
+      "title": "CUCKOO High Pressure Rice Cooker 6-Cup Uncooked / 12-Cup Cooked with Induction Heating Technology, Versatile Rice Maker with 16 Menu Options and Steam Plate, Voice Guide, White (CRP-BHSS0609F)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO High Pressure Rice Cooker 6-Cup Uncooked / 12-Cup Cooked with Induction Heating Technology, Versatile Rice Maker with 16 Menu Options and Steam Plate, Voice Guide, White (CRP-BHSS0609F)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": null
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B00NJ12KAU.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B00NUB6ARI",
+      "title": "CUCKOO High Pressure Rice Cooker 10-Cup Uncooked / 20-Cup Cooked with Induction Heating Technology, Large Rice Maker with 17 Menu Options and Steam Plate, Voice Guide, Silver (CRP-CHSS1009FN)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO High Pressure Rice Cooker 10-Cup Uncooked / 20-Cup Cooked with Induction Heating Technology, Large Rice Maker with 17 Menu Options and Steam Plate, Voice Guide, Silver (CRP-CHSS1009FN)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": null
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B00NUB6ARI.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B00PGBUK0I",
+      "title": "CUCKOO Replacement Dual Motion Rubber Packing for 10-Cup IH Cooker Models | CCP-DH10",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO Replacement Dual Motion Rubber Packing for 10-Cup IH Cooker Models | CCP-DH10",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": 100
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B00PGBUK0I.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B00PGC9R42",
+      "title": "CUCKOO Replacement Dual Motion Rubber Packing for 6-Cup IH Cooker Models | CCP-DH06",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO Replacement Dual Motion Rubber Packing for 6-Cup IH Cooker Models | CCP-DH06",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": null
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B00PGC9R42.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B00U1XN4L8",
+      "title": "CUCKOO Commercial Rice Cooker & Warmer, Extra Large Rice Cooker 30-Cup Uncooked / 60-Cup Cooked, Professional Industrial Grain Cooker with Large Capacity, Easy One-Touch Operation, Silver (CR-3032)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO Commercial Rice Cooker & Warmer, Extra Large Rice Cooker 30-Cup Uncooked / 60-Cup Cooked, Professional Industrial Grain Cooker with Large Capacity, Easy One-Touch Operation, Silver (CR-3032)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": 200
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B00U1XN4L8.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B00XQEM2BM",
+      "title": "CUCKOO High Pressure Rice Cooker 10-Cup Uncooked / 20-Cup Cooked with Nonstick Inner Pot, Large Rice Maker with 13 Menu Options and Steam Plate, Fuzzy Logic Tech, Voice Guide, White (CRP-P1009SW)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO High Pressure Rice Cooker 10-Cup Uncooked / 20-Cup Cooked with Nonstick Inner Pot, Large Rice Maker with 13 Menu Options and Steam Plate, Fuzzy Logic Tech, Voice Guide, White (CRP-P1009SW)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": 200
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B00XQEM2BM.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B00XQEM2E4",
+      "title": "CUCKOO High Pressure Rice Cooker 10-Cup Uncooked / 20-Cup Cooked with Nonstick Inner Pot, Large Rice Maker with 13 Menu Options and Steam Plate, Fuzzy Logic Tech, Voice Guide, Black (CRP-P1009SB)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO High Pressure Rice Cooker 10-Cup Uncooked / 20-Cup Cooked with Nonstick Inner Pot, Large Rice Maker with 13 Menu Options and Steam Plate, Fuzzy Logic Tech, Voice Guide, Black (CRP-P1009SB)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": 200
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B00XQEM2E4.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B019486ADO",
+      "title": "Cuckoo Electric Heating Rice Cooker CR-0671V (Violet/White)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "Cuckoo Electric Heating Rice Cooker CR-0671V (Violet/White)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": null
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B019486ADO.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B01JRTZVVM",
+      "title": "CUCKOO High Pressure Rice Cooker 6-Cup Uncooked / 12-Cup Cooked with Nonstick Inner Pot, Versatile Rice Maker with 12 Menu Options and Steam Plate, Fuzzy Logic Tech, Voice Guide, Black (CRP-P0609S)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO High Pressure Rice Cooker 6-Cup Uncooked / 12-Cup Cooked with Nonstick Inner Pot, Versatile Rice Maker with 12 Menu Options and Steam Plate, Fuzzy Logic Tech, Voice Guide, Black (CRP-P0609S)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": 100
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B01JRTZVVM.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B01LYLW8P6",
+      "title": "CUCKOO Basic Rice Cooker 6-Cup Uncooked / 12-Cup Cooked, Versatile Rice Maker with Non-Stick Inner Pot, Easy to Use, Auto Keep Warm, White/Purple (CR-0671V)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO Basic Rice Cooker 6-Cup Uncooked / 12-Cup Cooked, Versatile Rice Maker with Non-Stick Inner Pot, Easy to Use, Auto Keep Warm, White/Purple (CR-0671V)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": 50
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B01LYLW8P6.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B01MQWFGKG",
+      "title": "CUCKOO Micom Rice Cooker 6 Cup Uncooked / 12 Cup Cooked, Fuzzy Logic Rice Maker with Delay Timer & Keep Warm Setting, Versatile Food Steamer for Cooking, Non-Stick Inner Pot, Red (CR-0655F)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO Micom Rice Cooker 6 Cup Uncooked / 12 Cup Cooked, Fuzzy Logic Rice Maker with Delay Timer & Keep Warm Setting, Versatile Food Steamer for Cooking, Non-Stick Inner Pot, Red (CR-0655F)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": 300
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B01MQWFGKG.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B01N21414D",
+      "title": "Cuckoo CRP-HY1083F 10 Cup Pressure Rice Cooker, 110V, Black by Cuckoo",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "Cuckoo CRP-HY1083F 10 Cup Pressure Rice Cooker, 110V, Black by Cuckoo",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": null
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B01N21414D.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B071H1FXFC",
+      "title": "CUCKOO CRP-HS0657FW 6-Cup (Uncooked) 12-Cup (Cooked) Induction Heating Pressure Rice Cooker with Nonstick Inner Pot & 16 Menu Modes (White/Silver, Made in Korea)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO CRP-HS0657FW 6-Cup (Uncooked) 12-Cup (Cooked) Induction Heating Pressure Rice Cooker with Nonstick Inner Pot & 16 Menu Modes (White/Silver, Made in Korea)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": null
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B071H1FXFC.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B0721ZMW8K",
+      "title": "CUCKOO High Pressure Rice Cooker 6-Cup Uncooked / 12-Cup Cooked with Induction Heating Technology, Versatile Rice Maker with 13 Menu Options and Steam Plate, Voice Guide, Dark Gray (CRP-DHSR0609FD)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO High Pressure Rice Cooker 6-Cup Uncooked / 12-Cup Cooked with Induction Heating Technology, Versatile Rice Maker with 13 Menu Options and Steam Plate, Voice Guide, Dark Gray (CRP-DHSR0609FD)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": null
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B0721ZMW8K.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B072NFGLSV",
+      "title": "CUCKOO High Pressure Rice Cooker 3-Cup Uncooked / 6-Cup Cooked with Induction Heating Technology, Small Rice Maker with 16 Menu Options and Steam Plate, Voice Guide, Gold (CRP-EHSS0309F)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO High Pressure Rice Cooker 3-Cup Uncooked / 6-Cup Cooked with Induction Heating Technology, Small Rice Maker with 16 Menu Options and Steam Plate, Voice Guide, Gold (CRP-EHSS0309F)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": null
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B072NFGLSV.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    },
+    {
+      "company": "coway",
+      "productFamily": "Other",
+      "asin": "B075R7VL2Z",
+      "title": "CUCKOO Electric Pressure Cooker 5QT, Versatile Slow Cooker with 10 Menu Options, High Pressure Food Steamer for Cooking, Instant Multicooker with Stainless Steel Non-Stick Inner Pot (CMC-QSB501S)",
+      "brand": "CUCKOO",
+      "latest": {
+        "title": "CUCKOO Electric Pressure Cooker 5QT, Versatile Slow Cooker with 10 Menu Options, High Pressure Food Steamer for Cooking, Instant Multicooker with Stainless Steel Non-Stick Inner Pot (CMC-QSB501S)",
+        "brand": "CUCKOO",
+        "buyBoxPrice": null,
+        "amazonPrice": null,
+        "newPrice": null,
+        "salesRank": null,
+        "reviews": null,
+        "rating": null,
+        "revenueEstimate": null,
+        "unitsEstimate": null
+      },
+      "series": [],
+      "rawPath": "data/raw/keepamore_lab/2026-06-03/coway/B075R7VL2Z.json",
+      "warnings": [
+        "no_history_available",
+        "csv_missing"
+      ]
+    }
+  ],
   "errors": []
 }
