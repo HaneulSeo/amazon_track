@@ -10,7 +10,7 @@ type CalibrationModelPanelProps = {
 
 export function CalibrationModelPanel({ selectedModel, calibrationResults }: CalibrationModelPanelProps) {
   if (!selectedModel) {
-    return <EmptyState title="선택된 모델이 없습니다" description="회사와 제품군을 고르면 캘리브레이션 결과가 표시됩니다." />;
+    return <EmptyState title="선택된 모델이 없습니다" description="회사를 고르면 공통 company model의 캘리브레이션 결과가 표시됩니다." />;
   }
 
   const selected = calibrationResults.find((row) => row.modelKey === selectedModel.modelKey) ?? null;

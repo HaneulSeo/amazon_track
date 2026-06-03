@@ -721,7 +721,7 @@ export type AmazonEstimateLabCalibrationResult = {
 
 export type AmazonEstimateLabSelectedModel = {
   company: string;
-  productFamily: string;
+  productFamily: string | null;
   modelKey: string;
   scope: "global" | "company" | "family";
   modelType: "simple_power_law" | "log_linear" | "family_adjusted" | "demand_index_only";
@@ -823,6 +823,7 @@ export type AmazonEstimateLabData = {
   jungleScoutObservations: AmazonEstimateLabJungleScoutObservation[];
   keepaMonthlyFeatures: AmazonEstimateLabKeepaMonthlyFeature[];
   calibrationResults: AmazonEstimateLabCalibrationResult[];
+  selectedModelByCompany: AmazonEstimateLabSelectedModel[];
   selectedModelByCompanyFamily: AmazonEstimateLabSelectedModel[];
   monthlyEstimates: AmazonEstimateLabMonthlyEstimate[];
   quarterlyCompanyEstimates: AmazonEstimateLabQuarterlyEstimate[];

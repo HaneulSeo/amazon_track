@@ -173,15 +173,15 @@ async function main() {
   const trainRows = calibrationRows.filter((row) => row.split === "train");
   const testRows = calibrationRows.filter((row) => row.split === "test");
   const modelCatalog = fitAllModels(trainRows, testRows);
-  const selectedModelByCompanyFamily = chooseSelectedModels(modelCatalog, trainRows, testRows, catalog);
-  const selectedKeys = new Set(selectedModelByCompanyFamily.map((row) => row.modelKey));
+  const selectedModelByCompany = chooseSelectedCompanyModels(modelCatalog, trainRows, testRows, catalog);
+  const selectedKeys = new Set(selectedModelByCompany.map((row) => row.modelKey));
   const calibrationResults = modelCatalog.map((row) => ({ ...row, selected: selectedKeys.has(row.modelKey) }));
-  const selectedModelMap = new Map(selectedModelByCompanyFamily.map((row) => [`${row.company}:${row.productFamily}`, row]));
+  const selectedModelMap = new Map(selectedModelByCompany.map((row) => [row.company, row]));
 
   const monthlyEstimates = buildMonthlyEstimates(jungleScoutObservations, keepaMonthlyFeatures, selectedModelMap, observationsByAsinMonth, split);
   const quarterlyCompanyEstimates = buildQuarterlyCompanyEstimates(monthlyEstimates);
   const dartComparison = buildDartComparison(quarterlyCompanyEstimates, dartRows);
-  const warnings = buildWarnings(catalog, jungleScoutObservations, keepaMonthlyFeatures, selectedModelByCompanyFamily, dartComparison);
+  const warnings = buildWarnings(catalog, jungleScoutObservations, keepaMonthlyFeatures, selectedModelByCompany, dartComparison);
   const errors: AmazonEstimateLabError[] = [];
 
   const summary = {
@@ -195,7 +195,7 @@ async function main() {
     testSampleCount: testRows.length,
     labelMonthCount: split.all.length,
     modelCount: calibrationResults.length,
-    selectedModelCount: selectedModelByCompanyFamily.length,
+    selectedModelCount: selectedModelByCompany.length,
     backcastMonthCount: new Set(monthlyEstimates.filter((row) => row.kind === "keepa_backcast_estimate").map((row) => row.month)).size,
     latestMonth: getLatestMonth(jungleScoutObservations)
   };
@@ -209,7 +209,8 @@ async function main() {
     jungleScoutObservations,
     keepaMonthlyFeatures,
     calibrationResults,
-    selectedModelByCompanyFamily,
+    selectedModelByCompany,
+    selectedModelByCompanyFamily: selectedModelByCompany,
     monthlyEstimates,
     quarterlyCompanyEstimates,
     dartComparison,
@@ -226,7 +227,8 @@ async function main() {
   await writeCsv(path.join(OUTPUT_DIR, "keepa_monthly_features.csv"), keepaMonthlyFeatures);
   await writeCsv(path.join(OUTPUT_DIR, "calibration_results.csv"), calibrationResults.map(flattenModel));
   await writeCsv(path.join(OUTPUT_DIR, "calibration_points.csv"), calibrationResults.flatMap((row) => row.points.map((point) => ({ modelKey: row.modelKey, ...point }))));
-  await writeCsv(path.join(OUTPUT_DIR, "selected_model_by_company_family.csv"), selectedModelByCompanyFamily);
+  await writeCsv(path.join(OUTPUT_DIR, "selected_model_by_company.csv"), selectedModelByCompany);
+  await writeCsv(path.join(OUTPUT_DIR, "selected_model_by_company_family.csv"), selectedModelByCompany);
   await writeCsv(path.join(OUTPUT_DIR, "monthly_estimates.csv"), monthlyEstimates);
   await writeCsv(path.join(OUTPUT_DIR, "quarterly_company_estimates.csv"), quarterlyCompanyEstimates);
   await writeCsv(path.join(OUTPUT_DIR, "dart_comparison.csv"), dartComparison);
@@ -549,20 +551,17 @@ function evaluateModel(model: FittedModel, rows: CalibrationRow[]): AmazonEstima
   return { mape, rmse, mae, r2, spearman };
 }
 
-function chooseSelectedModels(models: FittedModel[], trainRows: CalibrationRow[], testRows: CalibrationRow[], catalog: CatalogRow[]): AmazonEstimateLabSelectedModel[] {
-  const pairs = [...new Set(catalog.map((row) => `${row.company}:${row.productFamily}`))].sort();
+function chooseSelectedCompanyModels(models: FittedModel[], trainRows: CalibrationRow[], testRows: CalibrationRow[], catalog: CatalogRow[]): AmazonEstimateLabSelectedModel[] {
+  const companies = [...new Set(catalog.map((row) => row.company))].sort();
   const selected: AmazonEstimateLabSelectedModel[] = [];
-  for (const key of pairs) {
-    const [company, productFamily] = key.split(":");
-    const familyTrainRows = trainRows.filter((row) => row.company === company && row.productFamily === productFamily);
+  for (const company of companies) {
     const companyTrainRows = trainRows.filter((row) => row.company === company);
-    const familyModel = models.find((model) => model.scope === "family" && model.company === company && model.productFamily === productFamily);
     const companyModel = models.find((model) => model.scope === "company" && model.company === company);
     const globalModel = models.find((model) => model.scope === "global");
-    const preferred = selectPreferredModel(familyModel, companyModel, globalModel, familyTrainRows.length, companyTrainRows.length, trainRows.length);
+    const preferred = selectPreferredCompanyModel(companyModel, globalModel, companyTrainRows.length, trainRows.length);
     selected.push({
       company,
-      productFamily,
+      productFamily: null,
       modelKey: preferred.modelKey,
       scope: preferred.scope,
       modelType: preferred.modelType,
@@ -578,12 +577,10 @@ function chooseSelectedModels(models: FittedModel[], trainRows: CalibrationRow[]
       testMetrics: preferred.testMetrics,
       reason:
         preferred.modelType === "demand_index_only"
-          ? "Insufficient sample for a calibrated fit; using demand index fallback."
-          : preferred.scope === "family"
-            ? "Selected family model because family sample size was sufficient."
-            : preferred.scope === "company"
-              ? "Selected company model because family coverage was thin."
-              : "Selected global model because company coverage was thin."
+          ? "Insufficient company sample for a calibrated fit; using demand index fallback."
+          : preferred.scope === "company"
+            ? "Selected company-wide model so all products share one feature set."
+            : "Selected global model because company coverage was too thin."
     });
   }
   return selected;
@@ -605,7 +602,7 @@ function buildMonthlyEstimates(
     const asinObservations = [...(obsByAsin.get(asin) ?? [])].sort((a, b) => a.month.localeCompare(b.month));
     const firstObservedMonth = asinObservations[0]?.month ?? null;
     const hasObservedMonths = asinObservations.length > 0;
-    const selected = selectedModelMap.get(`${sortedFeatures[0].company}:${sortedFeatures[0].productFamily}`) ?? null;
+    const selected = selectedModelMap.get(sortedFeatures[0].company) ?? null;
     const baseRevenue = selected
       ? median(
           sortedFeatures.map((feature) => {
@@ -1150,20 +1147,12 @@ function fallbackPrediction(feature: AmazonEstimateLabKeepaMonthlyFeature, obs: 
   };
 }
 
-function selectPreferredModel(
-  familyModel: FittedModel | undefined,
-  companyModel: FittedModel | undefined,
-  globalModel: FittedModel | undefined,
-  familyCount: number,
-  companyCount: number,
-  globalCount: number
-) {
+function selectPreferredCompanyModel(companyModel: FittedModel | undefined, globalModel: FittedModel | undefined, companyCount: number, globalCount: number) {
   const options: FittedModel[] = [];
-  if (familyModel && familyCount >= 8) options.push(familyModel);
   if (companyModel && companyCount >= 12) options.push(companyModel);
   if (globalModel && globalCount >= 20) options.push(globalModel);
-  const scored = options.length ? [...options].sort((a, b) => modelScore(a) - modelScore(b)) : [familyModel, companyModel, globalModel].filter(Boolean) as FittedModel[];
-  return scored[0] ?? (globalModel ?? companyModel ?? familyModel)!;
+  const scored = options.length ? [...options].sort((a, b) => modelScore(a) - modelScore(b)) : [companyModel, globalModel].filter(Boolean) as FittedModel[];
+  return scored[0] ?? (globalModel ?? companyModel)!;
 }
 
 function modelScore(model: FittedModel) {

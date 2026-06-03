@@ -35,6 +35,7 @@ const fallbackData: AmazonEstimateLabData = {
   jungleScoutObservations: [],
   keepaMonthlyFeatures: [],
   calibrationResults: [],
+  selectedModelByCompany: [],
   selectedModelByCompanyFamily: [],
   monthlyEstimates: [],
   quarterlyCompanyEstimates: [],
@@ -56,6 +57,9 @@ function normalizeAmazonEstimateLab(input: Partial<AmazonEstimateLabData> | null
     : [];
   const selected = Array.isArray(input?.selectedModelByCompanyFamily)
     ? input.selectedModelByCompanyFamily.map(normalizeSelectedModel).filter(Boolean) as AmazonEstimateLabSelectedModel[]
+    : [];
+  const selectedByCompany = Array.isArray(input?.selectedModelByCompany)
+    ? input.selectedModelByCompany.map(normalizeSelectedModel).filter(Boolean) as AmazonEstimateLabSelectedModel[]
     : [];
   const monthlyEstimates = Array.isArray(input?.monthlyEstimates)
     ? input.monthlyEstimates.map(normalizeMonthlyEstimate).filter(Boolean) as AmazonEstimateLabMonthlyEstimate[]
@@ -91,6 +95,7 @@ function normalizeAmazonEstimateLab(input: Partial<AmazonEstimateLabData> | null
     jungleScoutObservations: observations,
     keepaMonthlyFeatures: keepa,
     calibrationResults,
+    selectedModelByCompany: selectedByCompany.length ? selectedByCompany : selected,
     selectedModelByCompanyFamily: selected,
     monthlyEstimates,
     quarterlyCompanyEstimates: quarterly,
@@ -215,7 +220,7 @@ function normalizeSelectedModel(row: Partial<AmazonEstimateLabSelectedModel> | n
   if (!row || typeof row.modelKey !== "string") return null;
   return {
     company: typeof row.company === "string" ? row.company : "unknown",
-    productFamily: typeof row.productFamily === "string" ? row.productFamily : "Other",
+    productFamily: typeof row.productFamily === "string" ? row.productFamily : null,
     modelKey: row.modelKey,
     scope: row.scope ?? "global",
     modelType: row.modelType ?? "demand_index_only",
@@ -350,7 +355,11 @@ export function getAmazonEstimateAsins(company: string, productFamily?: string |
 }
 
 export function getAmazonEstimateModel(company: string, productFamily: string) {
-  return amazonEstimateLabData.selectedModelByCompanyFamily.find((row) => row.company === company && row.productFamily === productFamily) ?? null;
+  return (
+    amazonEstimateLabData.selectedModelByCompany.find((row) => row.company === company) ??
+    amazonEstimateLabData.selectedModelByCompanyFamily.find((row) => row.company === company && row.productFamily === productFamily) ??
+    null
+  );
 }
 
 export function getAmazonEstimateMonthly(company: string, productFamily: string, asin: string) {
