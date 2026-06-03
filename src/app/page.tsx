@@ -36,6 +36,7 @@ import { ProductFamilyToggle } from "@/components/products/ProductFamilyToggle";
 import { RevenueModelExplorer } from "@/components/model/RevenueModelExplorer";
 import { DemandSignalPanel } from "@/components/model/DemandSignalPanel";
 import { KeepamoreLab } from "@/components/keepamore-lab/KeepamoreLab";
+import { AmazonEstimateLab } from "@/components/amazon-estimate-lab/AmazonEstimateLab";
 import {
   companies,
   companyCoverageScore,
@@ -63,6 +64,7 @@ import {
   revenueModels,
   toBrandTrend
 } from "@/lib/dashboard-data";
+import { amazonEstimateLabData } from "@/lib/amazon-estimate-lab-data";
 import { keepamoreLabData } from "@/lib/keepamore-lab-data";
 import { type DisplayCurrency, formatMoneyFromKrw, formatMoneyFromUsd, formatNumber, formatPercent, productLabel, trendTone } from "@/lib/format";
 import type { LucideIcon } from "lucide-react";
@@ -78,7 +80,7 @@ import type {
   StockMonthlyRow
 } from "@/lib/types";
 
-type Workspace = "home" | "amazon" | "keepaLab";
+type Workspace = "home" | "amazon" | "keepaLab" | "amazonEstimateLab";
 type DetailTab = "overview" | "products" | "benchmark" | "model" | "data";
 
 const tabs: Array<{ id: DetailTab; label: string; icon: typeof LineChart }> = [
@@ -134,6 +136,11 @@ export default function App() {
             setActiveIndustry(null);
             setSelectedCompany(null);
           }}
+          onOpenEstimateLab={() => {
+            setWorkspace("amazonEstimateLab");
+            setActiveIndustry(null);
+            setSelectedCompany(null);
+          }}
         />
       </Shell>
     );
@@ -155,6 +162,26 @@ export default function App() {
         sidebar={<KeepaSidebar onBackHome={() => setWorkspace("home")} />}
       >
         <KeepamoreLab currency={currency} usdKrw={usdKrw} />
+      </Shell>
+    );
+  }
+
+  if (workspace === "amazonEstimateLab") {
+    return (
+      <Shell
+        currency={currency}
+        fxAsOf={fxAsOf}
+        setCurrency={setCurrency}
+        usdKrw={usdKrw}
+        appName="Amazon Estimate Lab"
+        onHome={() => {
+          setWorkspace("home");
+          setActiveIndustry(null);
+          setSelectedCompany(null);
+        }}
+        sidebar={<AmazonEstimateLabSidebar onBackHome={() => setWorkspace("home")} />}
+      >
+        <AmazonEstimateLab currency={currency} usdKrw={usdKrw} />
       </Shell>
     );
   }
@@ -353,6 +380,15 @@ const MINI_APPS: MiniApp[] = [
     status: "live"
   },
   {
+    id: "amazonEstimateLab",
+    name: "Amazon Estimate Lab",
+    tagline: "BSR 기반 백캐스트",
+    description: "Jungle Scout-like 월별 매출 관측값과 Keepa/Keepamore 시계열을 맞춰보고 DART 분기 매출과 따로 비교합니다.",
+    icon: BarChart3,
+    accent: "from-[#3182f6] to-[#00a661]",
+    status: "live"
+  },
+  {
     id: "trade",
     name: "무역 데이터",
     tagline: "수출입 통관 흐름",
@@ -385,12 +421,14 @@ function Launcher({
   currency,
   usdKrw,
   onOpenAmazon,
-  onOpenKeepa
+  onOpenKeepa,
+  onOpenEstimateLab
 }: {
   currency: DisplayCurrency;
   usdKrw: number;
   onOpenAmazon: () => void;
   onOpenKeepa: () => void;
+  onOpenEstimateLab: () => void;
 }) {
   const heroStats = [
     { label: "추적 기업", value: String(overview.tracked_company_count), icon: Store },
@@ -411,6 +449,13 @@ function Launcher({
     { label: "성공", value: formatNumber(keepamoreLabData.summary.successCount) },
     { label: "실패", value: formatNumber(keepamoreLabData.summary.errorCount) },
     { label: "회사", value: formatNumber(keepamoreLabData.summary.companyCount) }
+  ];
+
+  const estimateStats = [
+    { label: "ASIN", value: formatNumber(amazonEstimateLabData.summary.catalogAsinCount) },
+    { label: "회사", value: formatNumber(amazonEstimateLabData.summary.companyCount) },
+    { label: "모델", value: formatNumber(amazonEstimateLabData.summary.modelCount) },
+    { label: "백캐스트", value: formatNumber(amazonEstimateLabData.summary.backcastMonthCount) }
   ];
 
   return (
@@ -447,8 +492,10 @@ function Launcher({
             <AppTile
               key={app.id}
               app={app}
-              stats={app.id === "amazon" ? amazonStats : app.id === "keepaLab" ? keepaStats : undefined}
-              onOpen={app.id === "amazon" ? onOpenAmazon : app.id === "keepaLab" ? onOpenKeepa : undefined}
+              stats={app.id === "amazon" ? amazonStats : app.id === "keepaLab" ? keepaStats : app.id === "amazonEstimateLab" ? estimateStats : undefined}
+              onOpen={
+                app.id === "amazon" ? onOpenAmazon : app.id === "keepaLab" ? onOpenKeepa : app.id === "amazonEstimateLab" ? onOpenEstimateLab : undefined
+              }
             />
           ))}
         </div>
@@ -626,6 +673,42 @@ function KeepaSidebar({ onBackHome }: { onBackHome: () => void }) {
       <div className="mt-4 rounded-xl bg-toss-wash p-4">
         <p className="text-sm font-bold">데이터 범위</p>
         <p className="mt-2 text-sm leading-6 text-toss-ink2">가격 · 랭킹 · 리뷰 · Buy Box · 추정 매출/판매량이 있으면 함께 표시합니다.</p>
+      </div>
+    </aside>
+  );
+}
+
+function AmazonEstimateLabSidebar({ onBackHome }: { onBackHome: () => void }) {
+  return (
+    <aside className="hidden w-72 shrink-0 border-r border-toss-line bg-white px-5 py-6 lg:block">
+      <div className="flex items-center gap-3">
+        <div className="grid h-11 w-11 place-items-center rounded-lg bg-gradient-to-br from-[#3182f6] to-[#00a661] text-white">
+          <BarChart3 size={22} />
+        </div>
+        <div>
+          <p className="text-lg font-extrabold">Amazon Estimate Lab</p>
+          <p className="text-xs font-semibold text-toss-gray">백캐스트 실험 공간</p>
+        </div>
+      </div>
+
+      <button className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-toss-gray hover:text-toss-blue" type="button" onClick={onBackHome}>
+        <Home size={16} />
+        메인으로
+      </button>
+
+      <div className="mt-8 rounded-xl bg-toss-wash p-4">
+        <p className="text-sm font-bold">실험실 안내</p>
+        <p className="mt-2 text-sm leading-6 text-toss-ink2">
+          Jungle Scout 관측값과 Keepa BSR 프록시를 로컬 데이터로 맞춰보고, 백캐스트와 DART 비교를 따로 봅니다.
+        </p>
+      </div>
+
+      <div className="mt-4 rounded-xl bg-toss-wash p-4">
+        <p className="text-sm font-bold">데이터 범위</p>
+        <p className="mt-2 text-sm leading-6 text-toss-ink2">
+          ASIN {formatNumber(amazonEstimateLabData.summary.catalogAsinCount)}개 · 모델 {formatNumber(amazonEstimateLabData.summary.modelCount)}개 · 백캐스트 월{" "}
+          {formatNumber(amazonEstimateLabData.summary.backcastMonthCount)}개
+        </p>
       </div>
     </aside>
   );

@@ -1,0 +1,451 @@
+company,productFamily,asin,productName,brand,category,month,collectedDate,monthlySales,monthlyRevenue,price,bsr,reviews,rating,sellers,calculatedRevenue,sourceRows,sourceFile
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,7782,93148.55,10.26,2,144237,4.6,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,7542,85499.17,11.32,2,145502,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,9405,95504.69,10.4,2,146751,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,9065,108503.42,11.97,1,148029,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,9063,108489.7,11.97,1,148806,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,9362,118239.93,12.63,3,165457,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,9099,117127.77,12.87,2,168615,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,10675,138316.34,12.95,2,169582,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,10112,131354.04,12.99,1,170418,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,9583,120027.14,12.53,1,171196,4.6,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,8991,116794.77,12.99,2,171818,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,9694,125923.76,12.99,1,172643,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,9822,127584.85,12.99,1,173580,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,11196,145434.74,12.99,1,174448,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,12253,159171.5,12.99,2,175425,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,10594,137618.16,12.99,1,176411,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,10799,140281.61,12.99,1,176862,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,9055,111758.15,12.29,3,178132,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,9741,116191.64,11.99,3,178339,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,9186,118429.63,12.9,5,179973,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,7604,93723.4,12.49,5,180998,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,7222,93815.64,12.99,5,181817,4.6,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,8347,87415.68,10.39,4,182439,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,9602,120251.15,12.47,3,183189,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B074PVTPBW,Mighty Patch B074PVTPBW,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,9756,126726.65,12.99,4,183487,4.6,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,1975,42396.9,18.42,93,24548,4.8,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,2288,43311.6,18.96,72,24814,4.8,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,3574,62225.41,16.69,58,25059,4.8,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,2648,45531.48,17.35,57,25349,4.8,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,2803,37398.27,13.47,50,25506,4.8,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,7900,142968.26,17.69,17,165416,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,9270,183629.46,19.83,2,168636,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,10870,235463.51,21.62,1,169417,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,10168,223397.34,21.97,1,170297,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,9522,201797.59,21.19,1,171063,4.6,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,8944,183172.39,20.55,2,171788,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,9461,207861.1,21.97,1,172536,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,9500,208720.67,21.97,1,173518,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,11260,247377.07,21.97,1,174368,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,12256,261199.91,21.26,2,175456,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,10659,216511.47,20.37,1,176445,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,10799,237258.42,21.97,1,177050,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,9051,177388.65,19.56,3,178132,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,9741,190588.21,19.59,3,178407,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,9186,181998.82,19.75,5,179973,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,7604,148675.46,19.71,5,181012,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,7222,158670.48,21.97,5,181633,4.6,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,8360,178237.17,21.4,4,182401,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,9622,204545.83,21.24,3,183193,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07B4KQVK6,Mighty Patch B07B4KQVK6,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,9732,213818.45,21.97,4,183558,4.6,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,862,15389.37,15.31,461,10745,4.7,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,903,14757.58,16.38,433,10861,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,1056,16066.05,14.86,594,10989,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,933,16638.39,17.84,423,11100,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,992,17060.39,17.25,399,11175,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,1502,26802.01,17.84,296,11263,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,1020,15151.43,16.21,721,11329,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,661,8655.98,10.71,2945,11409,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,1032,18409.15,17.84,445,11520,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,1379,22835.2,16.57,304,11560,4.7,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,1171,20883.16,17.84,404,11659,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,1253,21698.2,17.25,383,11759,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,1320,23540.74,17.84,341,11886,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,1356,24185.09,17.84,356,12040,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,1575,26545.34,17.26,356,12217,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,1381,23145.05,16.68,303,12376,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,1659,27619.86,16.64,219,12549,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,1945,32662.3,16.91,197,12764,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,1961,33258.79,17.09,203,12893,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,1910,27840.17,14.58,246,13092,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,1966,27430.59,13.93,188,13040,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,1849,17890.37,9.25,304,13194,4.7,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,2247,29280.4,13,215,13367,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,2420,34820.44,14.39,220,13525,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJS13PK,Mighty Patch B07KJS13PK,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,2335,33599.45,14.39,244,13597,4.7,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,647,9661.25,12.84,717,21471,4.6,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,629,11209.42,17.82,766,21586,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,841,12446.28,13.84,735,21712,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,689,12318.13,17.89,674,21812,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,686,12272.54,17.89,713,21889,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,828,13984.79,17.31,713,21963,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,625,10138.04,16.82,1152,22018,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,722,12626.13,17.52,1061,22058,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,676,11375.15,16.74,851,22136,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,694,11977.36,17.25,920,22273,4.6,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,640,11443.25,17.89,1006,22306,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,622,11128.77,17.89,1074,22346,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,624,11170.86,17.89,1088,22410,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,695,12064.06,17.34,1007,22452,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,762,13693.22,17.98,1020,22505,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,681,12238.72,17.97,914,22565,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,747,13428.98,17.97,824,22620,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,708,12385.06,17.62,1081,22683,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,675,10444.64,15.7,1074,22732,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,634,9265.65,14.59,1291,22761,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,644,10125.73,15.76,1150,22831,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,652,11307.62,17.33,1574,22879,4.6,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,745,12721.18,17.26,1456,22928,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,861,15349.42,17.85,1369,22973,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B07KJXFJHF,Mighty Patch B07KJXFJHF,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,713,11183.33,14.98,1970,22972,4.6,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,247,3360.22,11.69,2643,3477,4.7,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,271,3684.97,13.52,2426,3534,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,346,4120.37,10.88,2692,3609,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,251,3513.75,13.99,2758,3682,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,236,3301.17,13.99,2931,3721,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,295,3942.47,13.54,2761,3761,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,521,6760.15,13.06,1481,3785,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,207,2818.43,13.81,6455,3840,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,218,3045.76,13.99,3620,3883,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,217,2811.49,12.99,3865,3931,4.7,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,174,2438.77,13.99,4882,3966,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,317,4429.7,13.99,2977,4033,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,304,4251.15,13.99,2723,4073,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,288,4035.65,13.99,3033,4129,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,354,4948.68,13.97,2761,4234,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,475,6242.34,13.07,1526,4341,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,529,6946.82,13.04,1364,4387,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,535,7290.79,13.7,1591,4459,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,506,6475.79,12.92,1574,4542,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,453,6285.42,13.86,2042,4642,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,466,5405.57,11.63,1803,4771,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,521,7052.36,13.47,2090,4862,4.7,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,601,7960.36,13.43,1932,4936,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,492,6797.46,13.88,2806,4986,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B085P3TYPS,Mighty Patch B085P3TYPS,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,491,6854.61,13.97,2889,5036,4.7,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,685,11339.51,14.19,658,12191,4.4,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,668,10667.47,15.96,698,12340,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,1177,17110,13.15,566,12505,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,853,14192.89,16.66,519,12661,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,784,12975.2,16.55,584,12781,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,1133,17452.24,16.02,510,12879,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,1144,17341.75,15.56,443,12940,4.3,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,1053,16965.57,16.23,621,12996,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,896,14361.66,16.02,559,13173,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,888,13111.74,14.78,636,13295,4.3,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,738,11799.08,16.02,831,13386,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,677,11209.87,16.55,957,13490,4.3,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,670,11085.3,16.55,982,13644,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,656,10962.96,16.71,1097,13746,4.3,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,805,13194.64,16.31,991,13786,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,643,10840.53,16.85,999,13963,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,622,10165.61,16.29,1081,14027,4.3,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,627,9901.49,15.98,1263,14126,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,591,9068.12,15.53,1278,14183,4.3,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,425,7095.07,16.73,2414,14254,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,487,7895.69,16.2,1744,14364,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,674,11047.35,16.39,1508,14460,4.3,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,664,10514.4,16.03,1681,14528,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,691,11290.06,16.29,1838,14588,4.3,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B09NNF2DXX,Mighty Patch B09NNF2DXX,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,556,8977.54,16.15,2489,14605,4.3,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,170,3144.47,15.83,4067,2600,4.4,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,182,3276.42,17.95,3845,2648,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,200,2129.07,12.15,4582,2706,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,196,3907.85,19.93,3767,2762,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,218,4363.82,19.99,3220,2788,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,261,4683.38,18.69,3148,2817,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,219,3954.96,18.57,4178,2840,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,270,5300.61,19.69,3689,2855,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,228,4560.6,19.98,3412,2884,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,240,4605.39,19.27,3451,2945,4.4,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,206,4114.59,19.98,4073,2993,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,206,4120.54,19.98,4305,3034,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,206,3988.91,19.34,4198,3064,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,211,4221.11,19.98,4246,3098,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,231,4385.93,19.34,4273,3140,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,240,4666.52,19.33,3430,3198,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,223,3910.13,17.31,3844,3214,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,202,3661.31,18.3,4836,3357,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,213,3633.43,17.14,4411,3413,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,194,3836.11,19.81,5456,3432,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,174,3211.09,18.55,5723,3483,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,159,3165.96,19.97,7267,3527,4.4,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,169,3250.6,19.33,7229,3579,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,155,2992.17,19.3,8844,3605,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0B16VD9RQ,Mighty Patch B0B16VD9RQ,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,182,3481.44,19.14,7860,3617,4.4,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,150,2695.5,15.42,4700,,,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,165,2872.8,17.38,4314,936,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,234,3757.12,14.27,4478,981,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,212,3806.54,17.98,3255,1026,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,213,3831.54,17.98,3293,1060,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,249,3983.44,16.82,3579,1093,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,286,5148.27,17.98,2882,1117,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,205,3687.06,17.98,5083,1137,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,170,2969.02,17.4,4703,1192,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,172,2856.25,16.7,4941,1217,4.6,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,157,2743.4,17.4,5441,1236,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,153,2751.54,17.98,5711,1261,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,142,2558.38,17.98,6206,1289,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,155,2782.7,17.98,5833,1319,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,186,3337.32,17.98,5427,1404,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,163,2745.14,16.82,5178,1422,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,147,2471.02,16.77,5859,1443,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,158,2665.91,17.04,6266,1460,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,163,2491.54,15.43,5837,1490,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,135,2399.5,17.83,7932,1505,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,140,2411.23,17.28,6933,1559,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,142,2391.29,16.69,8013,1577,4.6,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,146,2617.24,17.97,8237,1603,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,155,2787.75,17.97,8642,1615,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BMM44HBF,Mighty Patch B0BMM44HBF,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,169,3031.69,17.97,8445,1621,4.6,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,1007,11796.95,10.04,353,2356,4.5,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,1021,11176.45,10.92,351,2509,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,1257,12211.5,8.46,437,2731,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,1088,12906.74,11.86,326,2895,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,1098,13027.42,11.86,337,3015,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,1119,11455.99,10.33,513,3107,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,1406,15900.78,11.42,296,3174,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,1473,17225.89,11.7,361,3282,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,1178,13967.64,11.86,357,3393,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,1211,13818.17,11.44,384,3466,4.5,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,1072,11888.31,11.09,463,3621,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,1079,12797.73,11.86,474,3789,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,1087,12887.61,11.86,478,3957,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,1006,12363.09,12.38,630,4084,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,1155,14980.77,12.97,556,4170,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,1063,12898.04,12.13,465,4239,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,1142,14805.26,12.97,423,4284,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,1133,12927.74,11.38,517,4462,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,1096,11292.54,10.27,524,4548,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,898,11549.24,12.87,785,4631,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,1058,11228.98,10.61,542,4789,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,1357,14368.35,10.58,527,4888,4.5,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,1477,15974.37,10.82,503,5047,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,1213,12538.34,10.24,880,5123,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BPDBYRTZ,Mighty Patch B0BPDBYRTZ,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,1201,11373.07,9.45,884,5174,4.5,,false,24,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,171,1050.9,5.28,4072,839,4,,false,7,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,162,1245.27,7.73,4444,876,4,,false,30,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,235,2354.46,8.5,4057,935,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,222,2885.75,12.98,3067,987,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,226,2933.48,12.98,3085,1034,4,,false,30,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,258,3175.49,12.56,3189,1080,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,204,2649.65,12.98,4536,1104,4,,false,30,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,226,2928.46,12.98,4576,1126,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,264,3431.74,12.98,2908,1198,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,313,3928.3,12.52,2540,1248,4,,false,28,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,277,3599.23,12.98,2922,1304,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,254,3294.76,12.98,3283,1366,4,,false,30,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,244,3163.77,12.98,3476,1422,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,203,2631.17,12.98,4675,1451,4,,false,30,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,242,3135.39,12.97,4115,1487,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,283,3668.42,12.97,2843,1524,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,259,3359.23,12.97,3244,1585,4,,false,30,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,243,2985.73,12.3,3991,1620,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,231,2569.97,11.16,3993,1628,3.9,,false,30,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,213,2249.76,10.53,4912,1702,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,252,2281.23,9.13,3814,1733,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,292,2990.11,10.19,4015,1758,4,,false,28,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,318,3461.67,10.9,3936,1798,4,,false,31,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,323,3538.92,10.97,4410,1847,4,,false,30,public/data/monthly_product_trend.json
+tnl,Adjacent patch,B0BS49YW8Z,Mighty Patch B0BS49YW8Z,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,358,3922.69,10.97,4101,1881,4,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,1017,23772.43,20.05,347,2356,4.5,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,1021,22724.23,22.27,352,2527,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,1263,25656.1,18.2,426,2731,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,1095,26267.5,23.99,323,2895,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,1102,24748.08,22.39,335,3015,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,1116,26771.29,23.99,507,3107,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,1402,33643.58,23.99,297,3174,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,1466,35179.4,23.99,364,3282,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,1160,27819.11,23.99,367,3411,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,1242,27434.87,22.14,369,3466,4.5,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,1099,26097.92,23.74,445,3602,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,1076,25535.54,23.74,477,3776,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,1086,25770.92,23.74,479,3941,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,1006,23887.98,23.74,630,4072,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,1156,26670.74,22.97,555,4111,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,1057,24271.47,22.97,470,4245,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,1147,26267.52,22.95,420,4324,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,1136,26314.21,23.28,513,4462,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,1096,22236.53,20.42,524,4539,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,898,16326.93,18.18,785,4619,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,1058,19035.16,17.99,542,4781,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,1357,24411.79,17.99,527,4884,4.5,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,1476,26552.73,17.99,504,5047,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,1205,20007.88,16.79,893,5127,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0BWL2J93X,Mighty Patch B0BWL2J93X,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,1208,21738.67,17.99,865,5175,4.5,,false,24,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,67,952.33,12.21,10796,137,4.3,,false,7,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,70,1000.83,14.49,10540,164,4.3,,false,30,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,91,1093.28,10.93,10917,187,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,58,868.94,14.99,12875,206,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,56,839.94,14.99,13432,225,4.3,,false,30,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,103,1475.79,14.51,8478,240,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,176,2620.63,14.92,5556,257,4.3,,false,30,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,252,3751.68,14.88,4122,293,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,204,3029.28,14.88,3860,350,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,225,3227.37,14.35,3729,390,4.4,,false,28,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,204,3036.96,14.88,4125,413,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,180,2680.38,14.88,4795,451,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,196,2916.48,14.88,4419,499,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,188,2792.48,14.88,4804,552,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,243,3618.24,14.88,4203,616,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,215,2882.4,13.44,3872,655,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,214,3096.53,14.38,3986,681,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,236,3291.59,14.11,4209,749,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,292,3784.98,13.27,3332,785,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,240,3528.72,14.76,4599,817,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,265,3938.4,14.88,3593,875,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,314,4338.58,13.82,3704,908,4.5,,false,28,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,363,5137.56,14.3,3419,948,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,378,5230.99,13.89,3781,1001,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Low-confidence Hero product,B0CGMC8WS9,Mighty Patch B0CGMC8WS9,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,510,6855.96,13.64,2864,1024,4.4,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,79,1418.21,15.42,9134,103,4.6,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,80,1398.42,17.39,9100,127,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,117,1878.94,14.86,8015,149,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,98,450.33,4.64,7425,160,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,99,1789.41,17.99,7506,173,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,130,2042.74,16.25,6619,186,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,172,3087.08,17.99,5181,192,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,149,2676.45,17.99,7111,211,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,120,2151.84,17.99,6667,259,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,118,2036.08,17.35,7208,292,4.6,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,106,1784.49,16.83,8087,354,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,101,1810.99,17.99,8704,378,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,101,1810.03,17.99,8727,409,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,105,1893.15,17.99,8422,431,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,128,2311.42,17.99,7730,463,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,132,2383.38,17.99,6411,487,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,132,2371.68,17.99,6564,503,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,125,2178.9,17.64,7832,525,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,124,1967.74,16.04,7634,547,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,105,1871.83,17.84,10001,568,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,104,1734.29,16.7,9138,594,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,119,1660.87,14.03,9487,605,4.6,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,115,1666.31,14.51,10131,629,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,139,2078.11,14.99,9517,644,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0CMDGP48L,Mighty Patch B0CMDGP48L,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,148,2217.27,14.99,9439,660,4.6,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,0,0,0,,,,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,191,2675.59,1.87,3665,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,334,4675.82,13.99,2651,32,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,408,5444.95,13.49,1766,74,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,560,7833,13.99,959,125,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,676,8952.7,13.54,960,198,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,864,11604.64,13.06,911,250,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,566,7514.28,13.32,1609,315,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,509,7112.98,13.97,1271,418,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,459,6181.73,13.47,1591,468,4.7,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,388,5420.36,13.97,1944,520,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,379,5296.96,13.97,2036,619,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,344,4801.17,13.97,2323,697,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,378,5108.36,13.5,2218,815,4.8,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,375,4913.38,13.07,2491,843,4.8,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,436,5708.77,13.07,1680,970,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,516,6704.67,13.04,1391,1002,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,591,7477.7,13.09,1574,1134,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,509,5801.22,11.44,1544,1184,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,646,8570.19,13.25,1269,1300,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,469,5935.9,12.61,1786,1485,4.8,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,553,7032.1,12.75,1966,1568,4.8,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,541,6866.18,12.74,2170,1647,4.8,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,540,7134.83,13.22,2482,1691,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0D38DMBPQ,Mighty Patch B0D38DMBPQ,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,529,6988.42,13.22,2644,1714,4.8,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,0,0,0,,,,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,0,0,0,,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,0,0,0,,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,0,0,0,,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,48,726.04,11.12,17054,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,74,1113.54,14.99,11073,27,4.2,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,64,956.46,14.99,12932,46,4.3,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,63,937.37,14.99,13492,70,4.5,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,66,992.24,14.99,12891,102,4.5,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,62,931.38,14.99,13535,149,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,71,1067.67,14.99,13171,179,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,63,874.62,14.01,12931,201,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,65,885.23,13.47,12472,205,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,52,735.19,14.29,16885,276,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,38,464.58,10.28,25475,308,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,29,414.33,12.56,38398,321,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,67,964.6,14.39,13542,343,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,56,838.85,14.97,17841,371,4.4,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,71,789.06,11.11,15187,394,4.4,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,71,1002.49,13.97,16446,409,4.4,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch face/body extensions,B0DLLDXQ18,Mighty Patch B0DLLDXQ18,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,95,1419.03,14.97,13689,414,4.4,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,0,0,0,,,,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,0,0,0,,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,0,0,0,,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,0,0,0,,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,0,0,0,,,,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,9571,169659.31,16.03,1,172643,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,9444,216265.38,22.9,2,173601,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,11260,257848.66,22.9,1,174485,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,12315,282024.58,22.9,2,175425,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,10426,223467.8,21.42,1,176445,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,10732,245761.27,22.9,1,177120,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,9090,178875.43,19.59,3,178132,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,9741,196284.59,20.23,3,178341,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,9186,145976.89,15.33,5,179862,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,7623,22504.79,2.22,5,181007,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,7238,6185.45,0.82,5,181634,4.6,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,8357,39291.23,4.43,4,182438,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,9606,218425.69,22.74,3,183214,4.6,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DNR8RF83,Mighty Patch B0DNR8RF83,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,9732,222869.48,22.9,4,183576,4.6,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,0,0,0,,,,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,0,0,0,,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,0,0,0,,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,0,0,0,,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,2,0,0.68,185426,,,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,70,1326.85,18.38,15714,20,4.6,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,296,5615.98,18.99,3426,4025,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,299,5678.62,18.99,2796,4066,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,289,5482.41,18.99,3030,4145,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,355,6560.13,18.38,2752,4227,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,475,8724.99,18.38,1527,4337,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,534,9792.51,18.36,1343,4390,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,536,9937.52,18.62,1585,4458,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,506,7123.97,14.56,1574,4537,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,453,7305.64,15.93,2042,4616,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,465,8566.94,18.38,1807,4768,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,521,9900.57,18.99,2089,4860,4.7,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,597,10674.98,18.13,1941,4918,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,495,9402.58,18.99,2783,4982,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVHVB9DY,Mighty Patch B0DVHVB9DY,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,489,9290.86,18.99,2899,5041,4.7,,false,24,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2024-05,2024-05-01,0,0,0,,,,,false,7,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2024-06,2024-06-01,0,0,0,,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2024-07,2024-07-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2024-08,2024-08-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2024-09,2024-09-01,0,0,0,,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2024-10,2024-10-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2024-11,2024-11-01,0,0,0,,,,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2024-12,2024-12-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2025-01,2025-01-01,0,0,0,,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2025-02,2025-02-01,0,0,0,,,,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2025-03,2025-03-01,89,2654.77,22.25,12775,,,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2025-04,2025-04-01,948,28425.52,29.99,1628,25,4.8,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2025-05,2025-05-01,1316,39480.38,29.99,343,11827,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2025-06,2025-06-01,1356,40659.44,29.99,356,12072,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2025-07,2025-07-01,1577,47280.69,29.99,354,12111,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2025-08,2025-08-01,1384,40186.58,29.01,301,12376,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2025-09,2025-09-01,1657,49658.29,29.97,219,12550,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2025-10,2025-10-01,1956,52533.75,26.93,194,12764,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2025-11,2025-11-01,1962,51204.18,26.33,203,12925,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2025-12,2025-12-01,1910,54853.67,28.73,246,13073,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2026-01,2026-01-01,1970,54264.36,27.56,187,13035,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2026-02,2026-02-01,1840,55152.29,29.97,308,13178,4.7,,false,28,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2026-03,2026-03-01,2272,63082.46,27.84,210,13348,4.7,,false,31,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2026-04,2026-04-01,2422,72123.53,29.77,219,13504,4.7,,false,30,public/data/monthly_product_trend.json
+tnl,Mighty Patch core,B0DVJ7BLQ7,Mighty Patch B0DVJ7BLQ7,Mighty Patch,Beauty & Personal Care,2026-05,2026-05-01,2335,69966.21,29.97,244,13610,4.7,,false,24,public/data/monthly_product_trend.json

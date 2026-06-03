@@ -613,3 +613,200 @@ export type DashboardData = {
     company_stock_monthly?: StockMonthlyRow[];
   };
 };
+
+export type AmazonEstimateLabConfidence = "high" | "medium" | "low" | "not_enough_data";
+
+export type AmazonEstimateLabCatalogRow = {
+  company: string;
+  productFamily: string;
+  asin: string;
+  productName: string;
+  brand: string | null;
+  category: string | null;
+  sourceFolder: string | null;
+};
+
+export type AmazonEstimateLabJungleScoutObservation = {
+  company: string;
+  productFamily: string;
+  asin: string;
+  productName: string;
+  brand: string | null;
+  category: string | null;
+  month: string;
+  collectedDate: string;
+  monthlySales: number | null;
+  monthlyRevenue: number | null;
+  price: number | null;
+  bsr: number | null;
+  reviews: number | null;
+  rating: number | null;
+  sellers: number | null;
+  calculatedRevenue: boolean;
+  sourceRows: number | null;
+  sourceFile: string | null;
+};
+
+export type AmazonEstimateLabKeepaMonthlyFeature = {
+  company: string;
+  productFamily: string;
+  asin: string;
+  productName: string;
+  month: string;
+  monthlyMedianBsr: number | null;
+  monthlyAvgBsr: number | null;
+  monthlyBestBsr: number | null;
+  monthlyWorstBsr: number | null;
+  monthlyAvgBuyboxPrice: number | null;
+  monthlyAvgNewPrice: number | null;
+  monthlyAvgAmazonPrice: number | null;
+  monthlyPriceUsedForRevenue: number | null;
+  monthlyReviewCountEnd: number | null;
+  monthlyReviewGrowth: number | null;
+  monthlyRatingAvg: number | null;
+  buyboxAvailableRatio: number | null;
+  observationCount: number;
+  salesRankReference: number | null;
+  featureWarnings: string[];
+};
+
+export type AmazonEstimateLabCalibrationPoint = {
+  company: string;
+  productFamily: string;
+  asin: string;
+  month: string;
+  actualSales: number | null;
+  predictedSales: number | null;
+  actualRevenue: number | null;
+  predictedRevenue: number | null;
+  priceUsedForRevenue: number | null;
+};
+
+export type AmazonEstimateLabMetrics = {
+  mape: number | null;
+  rmse: number | null;
+  mae: number | null;
+  r2: number | null;
+  spearman: number | null;
+};
+
+export type AmazonEstimateLabCalibrationResult = {
+  modelKey: string;
+  scope: "global" | "company" | "family";
+  company: string | null;
+  productFamily: string | null;
+  modelType: "simple_power_law" | "log_linear" | "family_adjusted" | "demand_index_only";
+  targetMetric: "monthlySales" | "monthlyRevenue";
+  sampleCount: number;
+  selected: boolean;
+  formula: string;
+  coefficients: Record<string, number>;
+  metrics: AmazonEstimateLabMetrics;
+  confidence: AmazonEstimateLabConfidence;
+  notes: string[];
+  points: AmazonEstimateLabCalibrationPoint[];
+};
+
+export type AmazonEstimateLabSelectedModel = {
+  company: string;
+  productFamily: string;
+  modelKey: string;
+  scope: "global" | "company" | "family";
+  modelType: "simple_power_law" | "log_linear" | "family_adjusted" | "demand_index_only";
+  targetMetric: "monthlySales" | "monthlyRevenue";
+  sampleCount: number;
+  confidence: AmazonEstimateLabConfidence;
+  formula: string;
+  coefficients: Record<string, number>;
+  metrics: AmazonEstimateLabMetrics;
+  reason: string;
+};
+
+export type AmazonEstimateLabMonthlyEstimate = {
+  company: string;
+  productFamily: string;
+  asin: string;
+  productName: string;
+  month: string;
+  kind: "observed_jungle_scout_estimate" | "model_fitted_estimate" | "keepa_backcast_estimate";
+  actualSales: number | null;
+  actualRevenue: number | null;
+  observedPrice: number | null;
+  observedBsr: number | null;
+  predictedSales: number | null;
+  predictedRevenue: number | null;
+  demandIndex: number | null;
+  priceUsedForRevenue: number | null;
+  confidence: AmazonEstimateLabConfidence;
+  modelKey: string | null;
+  modelType: string | null;
+  notes: string[];
+};
+
+export type AmazonEstimateLabQuarterlyEstimate = {
+  company: string;
+  quarter: string;
+  estimatedAmazonRevenueUsd: number | null;
+  estimatedAmazonSalesUnits: number | null;
+  backcastEstimatedRevenueUsd: number | null;
+  fittedEstimatedRevenueUsd: number | null;
+  observedJungleScoutRevenueUsd: number | null;
+  monthsPresent: number;
+  confidence: AmazonEstimateLabConfidence;
+};
+
+export type AmazonEstimateLabDartComparison = {
+  company: string;
+  quarter: string;
+  estimatedAmazonRevenueUsd: number | null;
+  estimatedAmazonRevenueKrw: number | null;
+  dartRevenueKrw: number | null;
+  estimatedIndex: number | null;
+  dartIndex: number | null;
+  indexGap: number | null;
+  revenueRatio: number | null;
+  monthsPresent: number;
+  confidence: AmazonEstimateLabConfidence;
+};
+
+export type AmazonEstimateLabWarning = {
+  company: string | null;
+  productFamily: string | null;
+  asin: string | null;
+  month: string | null;
+  message: string;
+};
+
+export type AmazonEstimateLabError = {
+  company: string | null;
+  productFamily: string | null;
+  asin: string | null;
+  message: string;
+};
+
+export type AmazonEstimateLabData = {
+  generatedAt: string;
+  sourceNote: string;
+  summary: {
+    catalogAsinCount: number;
+    companyCount: number;
+    productFamilyCount: number;
+    jungleScoutMatchedAsinCount: number;
+    keepaMatchedAsinCount: number;
+    calibrationSampleCount: number;
+    modelCount: number;
+    selectedModelCount: number;
+    backcastMonthCount: number;
+    latestMonth: string | null;
+  };
+  asinCatalog: AmazonEstimateLabCatalogRow[];
+  jungleScoutObservations: AmazonEstimateLabJungleScoutObservation[];
+  keepaMonthlyFeatures: AmazonEstimateLabKeepaMonthlyFeature[];
+  calibrationResults: AmazonEstimateLabCalibrationResult[];
+  selectedModelByCompanyFamily: AmazonEstimateLabSelectedModel[];
+  monthlyEstimates: AmazonEstimateLabMonthlyEstimate[];
+  quarterlyCompanyEstimates: AmazonEstimateLabQuarterlyEstimate[];
+  dartComparison: AmazonEstimateLabDartComparison[];
+  warnings: AmazonEstimateLabWarning[];
+  errors: AmazonEstimateLabError[];
+};
