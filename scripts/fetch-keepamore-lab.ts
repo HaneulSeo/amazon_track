@@ -33,7 +33,7 @@ const REPO_ROOT = process.cwd();
 const BASE_URL = "https://mcp.keepamore.com/api";
 const REQUEST_TIMEOUT_MS = 180_000;
 const BATCH_SIZE = 20;
-const BATCH_DELAY_MS = 1_500;
+const BATCH_DELAY_MS = 60_000;
 
 async function loadApiKey() {
   const direct = process.env.KEEPAMORE_API_KEY?.trim();
@@ -55,8 +55,10 @@ async function loadApiKey() {
 async function main() {
   const apiKey = await loadApiKey();
   const trackedAsins = await loadTrackedAsins();
+  const existingAsins = await loadExistingFetchedAsins(path.join(REPO_ROOT, "data", "raw", "keepamore_lab"));
+  const missingAsins = trackedAsins.filter((item) => !existingAsins.has(`${item.company}:${item.asin}`));
   const limit = parseLimit(process.env.KEEPAMORE_LIMIT);
-  const limitedAsins = typeof limit === "number" ? trackedAsins.slice(0, limit) : trackedAsins;
+  const limitedAsins = typeof limit === "number" ? missingAsins.slice(0, limit) : missingAsins;
 
   if (!trackedAsins.length) {
     throw new Error("기존 Amazon Tracking에서 ASIN을 찾지 못했습니다. public/data/dashboard_data.json 또는 data/processed/amazon_us_monthly.csv를 확인하세요.");
@@ -68,8 +70,9 @@ async function main() {
 
   const tokenInfo = await requestJson(`${BASE_URL}/token`, apiKey);
   console.log(formatTokenSummary(tokenInfo));
+  console.log(`기존 수집 ASIN ${existingAsins.size}개를 제외하고 ${limitedAsins.length}/${missingAsins.length} ASIN을 수집합니다.`);
   if (typeof limit === "number") {
-    console.log(`KEEPAMORE_LIMIT=${limit} 적용: ${limitedAsins.length}/${trackedAsins.length} ASIN만 수집합니다.`);
+    console.log(`KEEPAMORE_LIMIT=${limit} 적용: ${limitedAsins.length}/${missingAsins.length} ASIN만 수집합니다.`);
   }
 
   const errors: KeepamoreErrorEntry[] = [];
@@ -403,6 +406,45 @@ function parseLimit(value: string | undefined) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed <= 0) return null;
   return Math.floor(parsed);
+}
+
+async function loadExistingFetchedAsins(root: string) {
+  const asins = new Set<string>();
+  const files = await collectJsonFiles(root);
+  for (const filePath of files) {
+    try {
+      const content = await fs.readFile(filePath, "utf8");
+      const parsed = JSON.parse(content) as { asin?: string; company?: string };
+      if (typeof parsed?.asin === "string" && parsed.asin) {
+        asins.add(`${typeof parsed.company === "string" ? parsed.company : "unknown"}:${parsed.asin}`);
+      }
+    } catch {
+      continue;
+    }
+  }
+  return asins;
+}
+
+async function collectJsonFiles(root: string) {
+  const out: string[] = [];
+  await walk(root, out);
+  return out.filter((file) => file.endsWith(".json"));
+}
+
+async function walk(dir: string, out: string[]) {
+  try {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await walk(fullPath, out);
+      } else {
+        out.push(fullPath);
+      }
+    }
+  } catch {
+    return;
+  }
 }
 
 main().catch((error) => {
