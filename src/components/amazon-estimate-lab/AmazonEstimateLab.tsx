@@ -36,27 +36,30 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
     const baseRows = getAmazonEstimateAsins(selectedCompany, selectedFamily);
     const statsByAsin = new Map<
       string,
-      { totalCount: number; actualCount: number; latestActualMonth: string | null }
+      { totalCount: number; actualCount: number; positiveActualCount: number; latestActualMonth: string | null }
     >();
     for (const row of amazonEstimateLabData.monthlyEstimates) {
       if (row.company !== selectedCompany || row.productFamily !== selectedFamily) continue;
-      const current = statsByAsin.get(row.asin) ?? { totalCount: 0, actualCount: 0, latestActualMonth: null };
+      const current = statsByAsin.get(row.asin) ?? { totalCount: 0, actualCount: 0, positiveActualCount: 0, latestActualMonth: null };
       current.totalCount += 1;
       if (row.actualRevenue !== null || row.actualSales !== null) {
         current.actualCount += 1;
         if (!current.latestActualMonth || row.month > current.latestActualMonth) current.latestActualMonth = row.month;
       }
+      if ((row.actualRevenue ?? 0) > 0 || (row.actualSales ?? 0) > 0) current.positiveActualCount += 1;
       statsByAsin.set(row.asin, current);
     }
     return baseRows
       .map((row) => ({
         ...row,
         actualCount: statsByAsin.get(row.asin)?.actualCount ?? 0,
+        positiveActualCount: statsByAsin.get(row.asin)?.positiveActualCount ?? 0,
         totalCount: statsByAsin.get(row.asin)?.totalCount ?? 0,
         latestActualMonth: statsByAsin.get(row.asin)?.latestActualMonth ?? null
       }))
       .sort(
         (a, b) =>
+          b.positiveActualCount - a.positiveActualCount ||
           b.actualCount - a.actualCount ||
           b.totalCount - a.totalCount ||
           String(b.latestActualMonth ?? "").localeCompare(String(a.latestActualMonth ?? "")) ||
@@ -90,7 +93,7 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
       setSelectedAsin("");
       return;
     }
-    const bestAsin = asinRows[0]?.asin ?? nextAsins[0].asin;
+    const bestAsin = asinRows.find((row) => row.positiveActualCount > 0)?.asin ?? asinRows[0]?.asin ?? nextAsins[0].asin;
     if (!selectedAsin || !nextAsins.some((row) => row.asin === selectedAsin)) {
       setSelectedAsin(bestAsin);
     }
@@ -161,7 +164,7 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
             value={selectedAsin}
             options={asinRows.map((row) => ({
               value: row.asin,
-              label: `${row.productName || row.asin} · JS ${row.actualCount}m${row.latestActualMonth ? ` · ${row.latestActualMonth}` : ""}`,
+              label: `${row.productName || row.asin} · JS ${row.positiveActualCount}m${row.latestActualMonth ? ` · ${row.latestActualMonth}` : ""}`,
               hint: row.asin
             }))}
             onChange={setSelectedAsin}
@@ -169,7 +172,8 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
           <SelectField label="Window" value={window} options={["all", "24M", "12M", "6M"]} onChange={(value) => setWindow(value as TimeWindow)} />
         </div>
         <p className="mt-3 text-xs font-semibold text-toss-gray">
-          Jungle Scout 관측치가 가장 많은 ASIN을 우선 선택합니다. 현재 선택 ASIN 관측치: {selectedAsinStats ? `${selectedAsinStats.actualCount}개월` : "No data"}
+          Jungle Scout 0초과 관측치가 가장 많은 ASIN을 우선 선택합니다. 현재 선택 ASIN 관측치:{" "}
+          {selectedAsinStats ? `${selectedAsinStats.positiveActualCount}개월` : "No data"}
           {selectedAsinStats?.latestActualMonth ? ` · 최신 관측: ${selectedAsinStats.latestActualMonth}` : ""}
         </p>
       </SectionCard>
