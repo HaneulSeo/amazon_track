@@ -881,6 +881,7 @@ function buildMonthlyEstimates(
   const output: AmazonEstimateLabMonthlyEstimate[] = [];
   const keepaByAsin = groupBy(keepaFeatures, (row) => row.asin);
   const obsByAsin = groupBy(observations, (row) => row.asin);
+  const currentMonth = new Date().toISOString().slice(0, 7);
 
   for (const [asin, featureRows] of keepaByAsin.entries()) {
     const sortedFeatures = [...featureRows].sort((a, b) => a.month.localeCompare(b.month));
@@ -953,6 +954,8 @@ function buildMonthlyEstimates(
           modelType: selected?.modelType ?? null,
           notes: prediction.notes
         });
+      } else if (feature.month === currentMonth) {
+        continue;
       } else {
         output.push({
           company: feature.company,
