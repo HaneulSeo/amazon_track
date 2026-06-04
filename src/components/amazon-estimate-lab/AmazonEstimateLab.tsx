@@ -32,7 +32,37 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
   const [selectedCompany, setSelectedCompany] = useState<string>(companies[0] ?? "");
   const families = useMemo(() => getAmazonEstimateFamilies(selectedCompany), [selectedCompany]);
   const [selectedFamily, setSelectedFamily] = useState<string>(families[0] ?? "");
-  const asinRows = useMemo(() => getAmazonEstimateAsins(selectedCompany, selectedFamily), [selectedCompany, selectedFamily]);
+  const asinRows = useMemo(() => {
+    const baseRows = getAmazonEstimateAsins(selectedCompany, selectedFamily);
+    const statsByAsin = new Map<
+      string,
+      { totalCount: number; actualCount: number; latestActualMonth: string | null }
+    >();
+    for (const row of amazonEstimateLabData.monthlyEstimates) {
+      if (row.company !== selectedCompany || row.productFamily !== selectedFamily) continue;
+      const current = statsByAsin.get(row.asin) ?? { totalCount: 0, actualCount: 0, latestActualMonth: null };
+      current.totalCount += 1;
+      if (row.actualRevenue !== null || row.actualSales !== null) {
+        current.actualCount += 1;
+        if (!current.latestActualMonth || row.month > current.latestActualMonth) current.latestActualMonth = row.month;
+      }
+      statsByAsin.set(row.asin, current);
+    }
+    return baseRows
+      .map((row) => ({
+        ...row,
+        actualCount: statsByAsin.get(row.asin)?.actualCount ?? 0,
+        totalCount: statsByAsin.get(row.asin)?.totalCount ?? 0,
+        latestActualMonth: statsByAsin.get(row.asin)?.latestActualMonth ?? null
+      }))
+      .sort(
+        (a, b) =>
+          b.actualCount - a.actualCount ||
+          b.totalCount - a.totalCount ||
+          String(b.latestActualMonth ?? "").localeCompare(String(a.latestActualMonth ?? "")) ||
+          a.asin.localeCompare(b.asin)
+      );
+  }, [selectedCompany, selectedFamily]);
   const [selectedAsin, setSelectedAsin] = useState<string>(asinRows[0]?.asin ?? "");
   const [window, setWindow] = useState<TimeWindow>("24M");
 
@@ -60,10 +90,11 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
       setSelectedAsin("");
       return;
     }
+    const bestAsin = asinRows[0]?.asin ?? nextAsins[0].asin;
     if (!selectedAsin || !nextAsins.some((row) => row.asin === selectedAsin)) {
-      setSelectedAsin(nextAsins[0].asin);
+      setSelectedAsin(bestAsin);
     }
-  }, [selectedCompany, selectedFamily, selectedAsin]);
+  }, [asinRows, selectedCompany, selectedFamily, selectedAsin]);
 
   const selectedModel = selectedCompany && selectedFamily ? getAmazonEstimateModel(selectedCompany, selectedFamily) : null;
   const monthlyRows = useMemo(
@@ -73,6 +104,7 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
   const visibleMonthlyRows = useMemo(() => filterMonthlyRows(monthlyRows, window), [monthlyRows, window]);
   const quarterlyRows = selectedCompany ? getAmazonEstimateQuarterlyByCompany(selectedCompany) : [];
   const dartRows = selectedCompany ? getAmazonEstimateDartComparison(selectedCompany) : [];
+  const selectedAsinStats = useMemo(() => asinRows.find((row) => row.asin === selectedAsin) ?? null, [asinRows, selectedAsin]);
 
   const summaryCards = [
     { label: "ASIN", value: formatNumber(amazonEstimateLabData.summary.catalogAsinCount), icon: Package },
@@ -124,9 +156,22 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
               onChange={setSelectedFamily}
             />
           </div>
-          <SelectField label="ASIN" value={selectedAsin} options={asinRows.map((row) => row.asin)} onChange={setSelectedAsin} />
+          <SelectField
+            label="ASIN"
+            value={selectedAsin}
+            options={asinRows.map((row) => ({
+              value: row.asin,
+              label: `${row.productName || row.asin} · JS ${row.actualCount}m${row.latestActualMonth ? ` · ${row.latestActualMonth}` : ""}`,
+              hint: row.asin
+            }))}
+            onChange={setSelectedAsin}
+          />
           <SelectField label="Window" value={window} options={["all", "24M", "12M", "6M"]} onChange={(value) => setWindow(value as TimeWindow)} />
         </div>
+        <p className="mt-3 text-xs font-semibold text-toss-gray">
+          Jungle Scout 관측치가 가장 많은 ASIN을 우선 선택합니다. 현재 선택 ASIN 관측치: {selectedAsinStats ? `${selectedAsinStats.actualCount}개월` : "No data"}
+          {selectedAsinStats?.latestActualMonth ? ` · 최신 관측: ${selectedAsinStats.latestActualMonth}` : ""}
+        </p>
       </SectionCard>
 
       <SectionCard eyebrow="Calibration" title="Keepa proxy calibration">
@@ -218,7 +263,7 @@ function SelectField({
 }: {
   label: string;
   value: string;
-  options: string[];
+  options: Array<string | { value: string; label: string; hint?: string }>;
   onChange: (value: string) => void;
 }) {
   return (
@@ -229,11 +274,14 @@ function SelectField({
         onChange={(event) => onChange(event.target.value)}
         className="h-11 w-full rounded-lg border-0 bg-white px-3 text-sm font-semibold text-toss-ink ring-1 ring-toss-line outline-none transition focus:ring-2 focus:ring-toss-blue"
       >
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
+        {options.map((option) => {
+          const opt = typeof option === "string" ? { value: option, label: option } : option;
+          return (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          );
+        })}
       </select>
     </label>
   );
