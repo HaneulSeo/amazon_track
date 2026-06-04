@@ -98,6 +98,12 @@ type CalibrationRow = {
   offerCsvPointCount: number | null;
   liveOffersCount: number | null;
   buyboxEligibleOfferCountTotal: number | null;
+  asinTrainMedianRevenue: number | null;
+  asinTrainMedianSales: number | null;
+  asinTrainPositiveRevenueMonths: number | null;
+  monthIndex: number | null;
+  monthSin: number | null;
+  monthCos: number | null;
 };
 
 type TargetTransform = "raw" | "log1p" | "asinh" | "sqrt";
@@ -189,10 +195,10 @@ async function main() {
   const catalogByAsin = new Map(catalog.map((row) => [row.asin, row]));
 
   const jungleScoutObservations = buildJungleScoutObservations(amazonLabels, catalogByAsin);
-  const keepaMonthlyFeatures = buildKeepaMonthlyFeatures(keepaPublic.products ?? [], keepaRawIndex, catalogByAsin);
-  const observationsByAsinMonth = new Map(jungleScoutObservations.map((row) => [`${row.asin}:${row.month}`, row]));
-
   const split = splitMonths(jungleScoutObservations.map((row) => row.month));
+  const asinBaselines = buildAsinBaselines(jungleScoutObservations, split);
+  const keepaMonthlyFeatures = buildKeepaMonthlyFeatures(keepaPublic.products ?? [], keepaRawIndex, catalogByAsin, asinBaselines);
+  const observationsByAsinMonth = new Map(jungleScoutObservations.map((row) => [`${row.asin}:${row.month}`, row]));
   const calibrationRows = buildCalibrationRows(jungleScoutObservations, keepaMonthlyFeatures, split);
   const trainRows = calibrationRows.filter((row) => row.split === "train");
   const testRows = calibrationRows.filter((row) => row.split === "test");
@@ -201,8 +207,9 @@ async function main() {
   const selectedKeys = new Set(selectedModelByCompany.map((row) => row.modelKey));
   const calibrationResults = modelCatalog.map((row) => ({ ...row, selected: selectedKeys.has(row.modelKey) }));
   const selectedModelMap = new Map(selectedModelByCompany.map((row) => [row.company, row]));
+  const seasonalAdjustmentMap = buildSeasonalAdjustmentMap(keepaMonthlyFeatures, selectedModelMap, observationsByAsinMonth, split);
 
-  const monthlyEstimates = buildMonthlyEstimates(jungleScoutObservations, keepaMonthlyFeatures, selectedModelMap, observationsByAsinMonth, split);
+  const monthlyEstimates = buildMonthlyEstimates(jungleScoutObservations, keepaMonthlyFeatures, selectedModelMap, observationsByAsinMonth, split, seasonalAdjustmentMap);
   const quarterlyCompanyEstimates = buildQuarterlyCompanyEstimates(monthlyEstimates);
   const dartComparison = buildDartComparison(quarterlyCompanyEstimates, dartRows);
   const warnings = buildWarnings(catalog, jungleScoutObservations, keepaMonthlyFeatures, selectedModelByCompany, dartComparison);
@@ -409,7 +416,15 @@ function buildKeepaMonthlyFeatures(
       lastUpdate: number | null;
     }
   >,
-  catalogByAsin: Map<string, CatalogRow>
+  catalogByAsin: Map<string, CatalogRow>,
+  asinBaselines: Map<
+    string,
+    {
+      medianRevenue: number | null;
+      medianSales: number | null;
+      positiveRevenueMonths: number | null;
+    }
+  >
 ): AmazonEstimateLabKeepaMonthlyFeature[] {
   const output: AmazonEstimateLabKeepaMonthlyFeature[] = [];
   for (const product of keepaPublicProducts ?? []) {
@@ -444,6 +459,9 @@ function buildKeepaMonthlyFeatures(
         asin,
         productName: stringFrom(record.title) ?? stringFrom(record.productName) ?? rawMeta?.title ?? catalog?.productName ?? asin,
         month,
+        asinTrainMedianRevenue: asinBaselines.get(asin)?.medianRevenue ?? null,
+        asinTrainMedianSales: asinBaselines.get(asin)?.medianSales ?? null,
+        asinTrainPositiveRevenueMonths: asinBaselines.get(asin)?.positiveRevenueMonths ?? null,
         monthlyMedianBsr: salesRankReference,
         monthlyAvgBsr: salesRankReference,
         monthlyBestBsr: salesRankReference,
@@ -478,10 +496,43 @@ function buildCalibrationRows(
   split: SplitPlan
 ): CalibrationRow[] {
   const featuresByAsinMonth = new Map(keepaFeatures.map((row) => [`${row.asin}:${row.month}`, row]));
+  const trainRevenueByAsin = new Map<string, number[]>();
+  const trainSalesByAsin = new Map<string, number[]>();
+  for (const obs of observations) {
+    const splitType = split.train.has(obs.month) ? "train" : split.test.has(obs.month) ? "test" : "holdout";
+    if (splitType !== "train") continue;
+    if ((obs.monthlyRevenue ?? 0) > 0) {
+      if (!trainRevenueByAsin.has(obs.asin)) trainRevenueByAsin.set(obs.asin, []);
+      trainRevenueByAsin.get(obs.asin)!.push(obs.monthlyRevenue ?? 0);
+    }
+    if ((obs.monthlySales ?? 0) > 0) {
+      if (!trainSalesByAsin.has(obs.asin)) trainSalesByAsin.set(obs.asin, []);
+      trainSalesByAsin.get(obs.asin)!.push(obs.monthlySales ?? 0);
+    }
+  }
+  const asinSummary = new Map<
+    string,
+    {
+      medianRevenue: number | null;
+      medianSales: number | null;
+      positiveRevenueMonths: number | null;
+    }
+  >();
+  for (const obs of observations) {
+    if (!asinSummary.has(obs.asin)) {
+      asinSummary.set(obs.asin, {
+        medianRevenue: median(trainRevenueByAsin.get(obs.asin) ?? []),
+        medianSales: median(trainSalesByAsin.get(obs.asin) ?? []),
+        positiveRevenueMonths: (trainRevenueByAsin.get(obs.asin) ?? []).length
+      });
+    }
+  }
   const rows: CalibrationRow[] = [];
   for (const obs of observations) {
     const feature = featuresByAsinMonth.get(`${obs.asin}:${obs.month}`);
     const splitType = split.train.has(obs.month) ? "train" : split.test.has(obs.month) ? "test" : "holdout";
+    const asinStats = asinSummary.get(obs.asin) ?? { medianRevenue: null, medianSales: null, positiveRevenueMonths: null };
+    const monthSeasonality = monthSeasonalityFromMonth(obs.month);
     rows.push({
       company: obs.company,
       productFamily: obs.productFamily,
@@ -493,6 +544,9 @@ function buildCalibrationRows(
       actualRevenue: obs.monthlyRevenue,
       observedPrice: obs.price,
       observedBsr: obs.bsr,
+      monthIndex: monthIndexFromMonth(obs.month),
+      monthSin: monthSeasonality.sin,
+      monthCos: monthSeasonality.cos,
       keepaMedianBsr: obs.bsr ?? feature?.monthlyMedianBsr ?? null,
       keepaAvgPrice: obs.price ?? feature?.monthlyPriceUsedForRevenue ?? null,
       monthlyPriceStdDev: feature?.monthlyPriceStdDev ?? null,
@@ -505,10 +559,48 @@ function buildCalibrationRows(
       offerCount: feature?.offerCount ?? null,
       offerCsvPointCount: feature?.offerCsvPointCount ?? null,
       liveOffersCount: feature?.liveOffersCount ?? null,
-      buyboxEligibleOfferCountTotal: feature?.buyboxEligibleOfferCountTotal ?? null
+      buyboxEligibleOfferCountTotal: feature?.buyboxEligibleOfferCountTotal ?? null,
+      asinTrainMedianRevenue: asinStats.medianRevenue,
+      asinTrainMedianSales: asinStats.medianSales,
+      asinTrainPositiveRevenueMonths: asinStats.positiveRevenueMonths
     });
   }
   return rows;
+}
+
+function buildAsinBaselines(
+  observations: AmazonEstimateLabJungleScoutObservation[],
+  split: SplitPlan
+): Map<
+  string,
+  {
+    medianRevenue: number | null;
+    medianSales: number | null;
+    positiveRevenueMonths: number | null;
+  }
+> {
+  const grouped = new Map<string, AmazonEstimateLabJungleScoutObservation[]>();
+  for (const obs of observations) {
+    if (!split.train.has(obs.month)) continue;
+    if (!grouped.has(obs.asin)) grouped.set(obs.asin, []);
+    grouped.get(obs.asin)!.push(obs);
+  }
+  const baselines = new Map<
+    string,
+    {
+      medianRevenue: number | null;
+      medianSales: number | null;
+      positiveRevenueMonths: number | null;
+    }
+  >();
+  for (const [asin, rows] of grouped.entries()) {
+    baselines.set(asin, {
+      medianRevenue: median(rows.map((row) => row.monthlyRevenue ?? 0).filter((value) => value > 0)),
+      medianSales: median(rows.map((row) => row.monthlySales ?? 0).filter((value) => value > 0)),
+      positiveRevenueMonths: rows.filter((row) => (row.monthlyRevenue ?? 0) > 0).length
+    });
+  }
+  return baselines;
 }
 
 function searchBestCompanyModel(company: string, trainRows: CalibrationRow[], testRows: CalibrationRow[]): FittedModel {
@@ -523,9 +615,13 @@ function searchBestCompanyModel(company: string, trainRows: CalibrationRow[], te
     "price_range",
     "log_offer_count",
     "log_live_offers",
-    "log_buybox_eligible_offer_count_total"
+    "log_buybox_eligible_offer_count_total",
+    "month_index",
+    "month_sin",
+    "month_cos"
   ]);
-  const topFeatures = featureCandidates.slice(0, Math.min(6, featureCandidates.length));
+  const priorityFeatures = ["log_asin_train_median_revenue", "log_asin_train_median_sales", "month_sin", "month_cos"];
+  const topFeatures = [...new Set([...priorityFeatures, ...featureCandidates.slice(0, Math.min(6, featureCandidates.length))])];
   const subsets = enumerateFeatureSubsets(topFeatures);
   const targetTransforms: TargetTransform[] = ["log1p", "asinh", "sqrt", "raw"];
   const scaleModes: FeatureScaleMode[] = ["none", "zscore", "robust"];
@@ -538,24 +634,26 @@ function searchBestCompanyModel(company: string, trainRows: CalibrationRow[], te
     return makeDemandIndexModel("company", company, null, trainRows, "No valid revenue rows for company model");
   }
 
-  const candidates: SearchCandidate[] = [];
+  let bestCandidate: SearchCandidate | null = null;
   for (const activeFeatures of subsets) {
     for (const targetTransform of targetTransforms) {
       for (const featureScaleMode of scaleModes) {
         for (const lambda of lambdas) {
           const candidate = fitCandidateCompanyModel(company, trainRows, testRows, activeFeatures, targetTransform, featureScaleMode, lambda);
-          if (candidate) candidates.push(candidate);
+          if (!candidate) continue;
+          if (!bestCandidate || compareCandidateScore(candidate, bestCandidate) < 0) {
+            bestCandidate = candidate;
+          }
         }
       }
     }
   }
 
-  if (!candidates.length) {
+  if (!bestCandidate) {
     return makeDemandIndexModel("company", company, null, trainRows, "No candidate fit converged");
   }
 
-  candidates.sort((a, b) => compareCandidateScore(a, b));
-  return candidates[0].model;
+  return bestCandidate.model;
 }
 
 function fitCandidateCompanyModel(
@@ -744,6 +842,8 @@ function buildFeatureVector(
 }
 
 function baseFeatureValue(row: CalibrationRow, feature: string) {
+  if (feature === "log_asin_train_median_revenue") return Math.log1p(row.asinTrainMedianRevenue ?? 0);
+  if (feature === "log_asin_train_median_sales") return Math.log1p(row.asinTrainMedianSales ?? 0);
   if (feature === "log_bsr") return Math.log1p(row.keepaMedianBsr ?? row.observedBsr ?? 0);
   if (feature === "log_price") return Math.log1p(row.keepaAvgPrice ?? row.observedPrice ?? 0);
   if (feature === "buybox_ratio") return row.buyboxRatio ?? 0;
@@ -876,7 +976,8 @@ function buildMonthlyEstimates(
   keepaFeatures: AmazonEstimateLabKeepaMonthlyFeature[],
   selectedModelMap: Map<string, AmazonEstimateLabSelectedModel>,
   observationsByAsinMonth: Map<string, AmazonEstimateLabJungleScoutObservation>,
-  split: SplitPlan
+  split: SplitPlan,
+  seasonalAdjustmentMap: Map<string, number>
 ): AmazonEstimateLabMonthlyEstimate[] {
   const output: AmazonEstimateLabMonthlyEstimate[] = [];
   const keepaByAsin = groupBy(keepaFeatures, (row) => row.asin);
@@ -894,7 +995,8 @@ function buildMonthlyEstimates(
           sortedFeatures.map((feature) => {
             const obs = observationsByAsinMonth.get(`${asin}:${feature.month}`) ?? null;
             const prediction = selected ? predictWithModel(selected, feature, obs) : fallbackPrediction(feature, obs);
-            return prediction.revenue;
+            const seasonalFactor = seasonalAdjustmentMap.get(`${feature.company}:${monthOfYear(feature.month)}`) ?? 1;
+            return prediction.revenue === null ? null : prediction.revenue * seasonalFactor;
           })
         )
       : null;
@@ -902,10 +1004,13 @@ function buildMonthlyEstimates(
     for (const feature of sortedFeatures) {
       const obs = observationsByAsinMonth.get(`${asin}:${feature.month}`) ?? null;
       const prediction = selected ? predictWithModel(selected, feature, obs) : fallbackPrediction(feature, obs);
+      const seasonalFactor = seasonalAdjustmentMap.get(`${feature.company}:${monthOfYear(feature.month)}`) ?? 1;
+      const adjustedRevenue = prediction.revenue === null ? null : prediction.revenue * seasonalFactor;
+      const adjustedSales = prediction.sales === null ? null : prediction.sales * seasonalFactor;
       const splitType = split.train.has(feature.month) ? "train" : split.test.has(feature.month) ? "test" : "holdout";
       const demandIndex =
-        baseRevenue && prediction.revenue !== null && baseRevenue > 0
-          ? (prediction.revenue / baseRevenue) * 100
+        baseRevenue && adjustedRevenue !== null && baseRevenue > 0
+          ? (adjustedRevenue / baseRevenue) * 100
           : feature.monthlyMedianBsr && feature.monthlyMedianBsr > 0
             ? ((feature.salesRankReference ?? feature.monthlyMedianBsr) / feature.monthlyMedianBsr) * 100
             : null;
@@ -923,8 +1028,11 @@ function buildMonthlyEstimates(
           actualRevenue: obs.monthlyRevenue,
           observedPrice: obs.price,
           observedBsr: obs.bsr,
-          predictedSales: prediction.sales,
-          predictedRevenue: prediction.revenue,
+          rawPredictedSales: prediction.sales,
+          rawPredictedRevenue: prediction.revenue,
+          predictedSales: adjustedSales,
+          predictedRevenue: adjustedRevenue,
+          seasonalAdjustmentFactor: seasonalFactor,
           demandIndex,
           priceUsedForRevenue: prediction.priceUsedForRevenue,
           confidence: prediction.confidence,
@@ -969,8 +1077,11 @@ function buildMonthlyEstimates(
           actualRevenue: null,
           observedPrice: feature.monthlyPriceUsedForRevenue,
           observedBsr: feature.monthlyMedianBsr,
-          predictedSales: prediction.sales,
-          predictedRevenue: prediction.revenue,
+          rawPredictedSales: prediction.sales,
+          rawPredictedRevenue: prediction.revenue,
+          predictedSales: adjustedSales,
+          predictedRevenue: adjustedRevenue,
+          seasonalAdjustmentFactor: seasonalFactor,
           demandIndex,
           priceUsedForRevenue: prediction.priceUsedForRevenue,
           confidence: prediction.confidence,
@@ -983,6 +1094,39 @@ function buildMonthlyEstimates(
   }
 
   return output.sort((a, b) => a.company.localeCompare(b.company) || a.asin.localeCompare(b.asin) || a.month.localeCompare(b.month) || a.kind.localeCompare(b.kind));
+}
+
+function buildSeasonalAdjustmentMap(
+  keepaFeatures: AmazonEstimateLabKeepaMonthlyFeature[],
+  selectedModelMap: Map<string, AmazonEstimateLabSelectedModel>,
+  observationsByAsinMonth: Map<string, AmazonEstimateLabJungleScoutObservation>,
+  split: SplitPlan
+) {
+  const sums = new Map<string, number[]>();
+  const keepaByAsin = groupBy(keepaFeatures, (row) => row.asin);
+  for (const [asin, featureRows] of keepaByAsin.entries()) {
+    const selected = selectedModelMap.get(featureRows[0].company) ?? null;
+    if (!selected) continue;
+    for (const feature of featureRows) {
+      const obs = observationsByAsinMonth.get(`${asin}:${feature.month}`) ?? null;
+      if (!obs || !split.train.has(feature.month)) continue;
+      const prediction = predictWithModel(selected, feature, obs);
+      if (prediction.revenue === null || !Number.isFinite(prediction.revenue) || prediction.revenue <= 0) continue;
+      if (obs.monthlyRevenue === null || !Number.isFinite(obs.monthlyRevenue) || obs.monthlyRevenue <= 0) continue;
+      const key = `${feature.company}:${monthOfYear(feature.month)}`;
+      if (!sums.has(key)) sums.set(key, []);
+      sums.get(key)!.push(obs.monthlyRevenue / prediction.revenue);
+    }
+  }
+
+  const adjustment = new Map<string, number>();
+  for (const [key, values] of sums.entries()) {
+    const med = median(values);
+    if (med !== null && Number.isFinite(med)) {
+      adjustment.set(key, clamp(med, 0.45, 2.5));
+    }
+  }
+  return adjustment;
 }
 
 function buildQuarterlyCompanyEstimates(rows: AmazonEstimateLabMonthlyEstimate[]): AmazonEstimateLabQuarterlyEstimate[] {
@@ -1209,6 +1353,8 @@ function makeDemandIndexModel(
 
 function chooseFeatures(rows: CalibrationRow[]) {
   const candidates = [
+    "log_asin_train_median_revenue",
+    "log_asin_train_median_sales",
     "log_bsr",
     "log_price",
     "buybox_ratio",
@@ -1219,9 +1365,14 @@ function chooseFeatures(rows: CalibrationRow[]) {
     "price_range",
     "log_offer_count",
     "log_live_offers",
-    "log_buybox_eligible_offer_count_total"
+    "log_buybox_eligible_offer_count_total",
+    "month_index",
+    "month_sin",
+    "month_cos"
   ];
   return candidates.filter((key) => {
+    if (key === "log_asin_train_median_revenue") return rows.some((row) => row.asinTrainMedianRevenue !== null && row.asinTrainMedianRevenue > 0);
+    if (key === "log_asin_train_median_sales") return rows.some((row) => row.asinTrainMedianSales !== null && row.asinTrainMedianSales > 0);
     if (key === "log_bsr") return rows.some((row) => row.keepaMedianBsr !== null && row.keepaMedianBsr > 0);
     if (key === "log_price") return rows.some((row) => (row.keepaAvgPrice ?? row.observedPrice) !== null && (row.keepaAvgPrice ?? row.observedPrice)! > 0);
     if (key === "buybox_ratio") return rows.some((row) => row.buyboxRatio !== null);
@@ -1233,6 +1384,9 @@ function chooseFeatures(rows: CalibrationRow[]) {
     if (key === "log_offer_count") return rows.some((row) => row.offerCount !== null);
     if (key === "log_live_offers") return rows.some((row) => row.liveOffersCount !== null);
     if (key === "log_buybox_eligible_offer_count_total") return rows.some((row) => row.buyboxEligibleOfferCountTotal !== null);
+    if (key === "month_index") return rows.some((row) => row.monthIndex !== null);
+    if (key === "month_sin") return rows.some((row) => row.monthSin !== null);
+    if (key === "month_cos") return rows.some((row) => row.monthCos !== null);
     return false;
   });
 }
@@ -1240,7 +1394,11 @@ function chooseFeatures(rows: CalibrationRow[]) {
 function buildDesignRow(row: CalibrationRow, activeFeatures: string[]) {
   const x: number[] = [];
   for (const feature of activeFeatures) {
-    if (feature === "log_bsr") {
+    if (feature === "log_asin_train_median_revenue") {
+      x.push(Math.log1p(row.asinTrainMedianRevenue ?? 0));
+    } else if (feature === "log_asin_train_median_sales") {
+      x.push(Math.log1p(row.asinTrainMedianSales ?? 0));
+    } else if (feature === "log_bsr") {
       x.push(Math.log1p(row.keepaMedianBsr ?? row.observedBsr ?? 0));
     } else if (feature === "log_price") {
       x.push(Math.log1p(row.keepaAvgPrice ?? row.observedPrice ?? 0));
@@ -1263,6 +1421,12 @@ function buildDesignRow(row: CalibrationRow, activeFeatures: string[]) {
       x.push(Math.log1p(row.liveOffersCount ?? 0));
     } else if (feature === "log_buybox_eligible_offer_count_total") {
       x.push(Math.log1p(row.buyboxEligibleOfferCountTotal ?? 0));
+    } else if (feature === "month_index") {
+      x.push(row.monthIndex ?? 0);
+    } else if (feature === "month_sin") {
+      x.push(row.monthSin ?? 0);
+    } else if (feature === "month_cos") {
+      x.push(row.monthCos ?? 0);
     }
   }
 
@@ -1335,6 +1499,8 @@ function getFeatureValueFromKeepa(
   obs: AmazonEstimateLabJungleScoutObservation | null,
   key: string
 ) {
+  if (key === "log_asin_train_median_revenue") return Math.log1p(feature.asinTrainMedianRevenue ?? 0);
+  if (key === "log_asin_train_median_sales") return Math.log1p(feature.asinTrainMedianSales ?? 0);
   if (key === "log_bsr") return Math.log1p(feature.monthlyMedianBsr ?? feature.monthlyAvgBsr ?? feature.salesRankReference ?? obs?.bsr ?? 0);
   if (key === "log_price") return Math.log1p(feature.monthlyPriceUsedForRevenue ?? obs?.price ?? 0);
   if (key === "buybox_ratio") return feature.buyboxAvailableRatio ?? 0;
@@ -1349,6 +1515,9 @@ function getFeatureValueFromKeepa(
   if (key === "log_offer_count") return Math.log1p(feature.offerCount ?? 0);
   if (key === "log_live_offers") return Math.log1p(feature.liveOffersCount ?? 0);
   if (key === "log_buybox_eligible_offer_count_total") return Math.log1p(feature.buyboxEligibleOfferCountTotal ?? 0);
+  if (key === "month_index") return monthIndexFromMonth(feature.month);
+  if (key === "month_sin") return monthSeasonalityFromMonth(feature.month).sin;
+  if (key === "month_cos") return monthSeasonalityFromMonth(feature.month).cos;
   return 0;
 }
 
@@ -1565,6 +1734,33 @@ function monthToQuarter(month: string) {
   return `${year}-Q${quarter}`;
 }
 
+function monthOfYear(month: string) {
+  const match = month.match(/^(\d{4})-(\d{2})/);
+  if (!match) return "unknown";
+  return match[2];
+}
+
+function monthIndexFromMonth(month: string) {
+  const match = month.match(/^(\d{4})-(\d{2})/);
+  if (!match) return 0;
+  const year = Number(match[1]);
+  const monthNumber = Number(match[2]);
+  if (!Number.isFinite(year) || !Number.isFinite(monthNumber)) return 0;
+  return year * 12 + monthNumber;
+}
+
+function monthSeasonalityFromMonth(month: string) {
+  const match = month.match(/^(\d{4})-(\d{2})/);
+  if (!match) return { sin: 0, cos: 1 };
+  const monthNumber = Number(match[2]);
+  if (!Number.isFinite(monthNumber)) return { sin: 0, cos: 1 };
+  const angle = ((monthNumber - 1) / 12) * Math.PI * 2;
+  return {
+    sin: Math.sin(angle),
+    cos: Math.cos(angle)
+  };
+}
+
 function stringFrom(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
@@ -1580,6 +1776,10 @@ function toNumber(value: unknown): number | null {
 
 function average(values: number[]) {
   return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }
 
 function median(values: Array<number | null>) {

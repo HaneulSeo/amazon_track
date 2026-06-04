@@ -669,6 +669,9 @@ export type AmazonEstimateLabKeepaMonthlyFeature = {
   asin: string;
   productName: string;
   month: string;
+  asinTrainMedianRevenue?: number | null;
+  asinTrainMedianSales?: number | null;
+  asinTrainPositiveRevenueMonths?: number | null;
   monthlyMedianBsr: number | null;
   monthlyAvgBsr: number | null;
   monthlyBestBsr: number | null;
@@ -776,8 +779,11 @@ export type AmazonEstimateLabMonthlyEstimate = {
   actualRevenue: number | null;
   observedPrice: number | null;
   observedBsr: number | null;
+  rawPredictedSales?: number | null;
+  rawPredictedRevenue?: number | null;
   predictedSales: number | null;
   predictedRevenue: number | null;
+  seasonalAdjustmentFactor?: number | null;
   demandIndex: number | null;
   priceUsedForRevenue: number | null;
   confidence: AmazonEstimateLabConfidence;
