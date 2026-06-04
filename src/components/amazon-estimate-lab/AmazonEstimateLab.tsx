@@ -34,7 +34,7 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
   const [selectedFamily, setSelectedFamily] = useState<string>(families[0] ?? "");
   const asinRows = useMemo(() => getAmazonEstimateAsins(selectedCompany, selectedFamily), [selectedCompany, selectedFamily]);
   const [selectedAsin, setSelectedAsin] = useState<string>(asinRows[0]?.asin ?? "");
-  const [window, setWindow] = useState<TimeWindow>("all");
+  const [window, setWindow] = useState<TimeWindow>("24M");
 
   useEffect(() => {
     if (!companies.length) return;

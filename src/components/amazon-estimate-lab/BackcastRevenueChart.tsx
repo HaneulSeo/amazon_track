@@ -24,7 +24,7 @@ type BackcastRevenueChartProps = {
 };
 
 export function BackcastRevenueChart({ rows, currency, usdKrw }: BackcastRevenueChartProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>("index");
+  const [viewMode, setViewMode] = useState<ViewMode>("amount");
   const [selectedMetrics, setSelectedMetrics] = useState<MetricKey[]>(
     METRICS.filter((metric) => metric.defaultSelected).map((metric) => metric.key)
   );
@@ -39,6 +39,12 @@ export function BackcastRevenueChart({ rows, currency, usdKrw }: BackcastRevenue
 
   const visibleMetrics = selectedMetrics.filter((metric) => availableMetrics.has(metric)).filter((metric) => viewMode === "index" || metric !== "demandIndex");
   const chartData = useMemo(() => buildChartData(rows, viewMode, visibleMetrics), [rows, viewMode, visibleMetrics]);
+  const latestObserved = useMemo(() => {
+    return [...rows]
+      .filter((row) => row.actualRevenue !== null || row.actualSales !== null)
+      .sort((a, b) => a.month.localeCompare(b.month))
+      .at(-1);
+  }, [rows]);
 
   return (
     <div className="space-y-4">
@@ -57,6 +63,29 @@ export function BackcastRevenueChart({ rows, currency, usdKrw }: BackcastRevenue
               {mode === "index" ? "지수" : "실제 값"}
             </button>
           ))}
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <div className="rounded-2xl bg-white p-4 ring-1 ring-toss-line">
+          <p className="text-xs font-bold uppercase tracking-wide text-toss-gray">Latest Jungle Scout month</p>
+          <p className="mt-2 text-lg font-extrabold text-toss-ink">{latestObserved?.month ?? "No data"}</p>
+        </div>
+        <div className="rounded-2xl bg-white p-4 ring-1 ring-toss-line">
+          <p className="text-xs font-bold uppercase tracking-wide text-toss-gray">Jungle Scout revenue</p>
+          <p className="mt-2 text-lg font-extrabold text-toss-ink">
+            {latestObserved?.actualRevenue === null || latestObserved?.actualRevenue === undefined
+              ? "No data"
+              : formatTooltipValue("actualRevenue", Number(latestObserved.actualRevenue), "amount", currency, usdKrw)}
+          </p>
+        </div>
+        <div className="rounded-2xl bg-white p-4 ring-1 ring-toss-line">
+          <p className="text-xs font-bold uppercase tracking-wide text-toss-gray">Jungle Scout units</p>
+          <p className="mt-2 text-lg font-extrabold text-toss-ink">
+            {latestObserved?.actualSales === null || latestObserved?.actualSales === undefined
+              ? "No data"
+              : formatTooltipValue("actualSales", Number(latestObserved.actualSales), "amount", currency, usdKrw)}
+          </p>
         </div>
       </div>
 
@@ -150,9 +179,15 @@ function buildChartData(rows: AmazonEstimateLabMonthlyEstimate[], viewMode: View
   const baseValues = new Map<MetricKey, number>();
   if (viewMode === "index") {
     for (const metric of metrics) {
-      const first = sorted.find((row) => typeof row[metric] === "number");
-      const value = typeof first?.[metric] === "number" ? (first[metric] as number) : null;
-      if (value !== null && value !== 0) baseValues.set(metric, value);
+      const firstPositive = sorted.find((row) => typeof row[metric] === "number" && Number(row[metric]) > 0);
+      const firstNumeric = sorted.find((row) => typeof row[metric] === "number");
+      const value =
+        typeof firstPositive?.[metric] === "number"
+          ? (firstPositive[metric] as number)
+          : typeof firstNumeric?.[metric] === "number"
+            ? (firstNumeric[metric] as number)
+            : null;
+      if (value !== null && Number.isFinite(value)) baseValues.set(metric, value === 0 ? 1 : value);
     }
   }
 
