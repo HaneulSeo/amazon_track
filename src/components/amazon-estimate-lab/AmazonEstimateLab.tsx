@@ -8,6 +8,7 @@ import { formatNumber } from "@/lib/format";
 import type { DisplayCurrency } from "@/lib/format";
 import {
   amazonEstimateLabData,
+  getAmazonEstimateAsinCoverage,
   getAmazonEstimateAsins,
   getAmazonEstimateCompanies,
   getAmazonEstimateDartComparison,
@@ -26,46 +27,24 @@ type AmazonEstimateLabProps = {
 };
 
 type TimeWindow = "all" | "24M" | "12M" | "6M";
+type CoverageMode = "all" | "fullRevenue25" | "fullSales25" | "fullBoth25";
 
 export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) {
   const companies = getAmazonEstimateCompanies();
   const [selectedCompany, setSelectedCompany] = useState<string>(companies[0] ?? "");
   const families = useMemo(() => getAmazonEstimateFamilies(selectedCompany), [selectedCompany]);
   const [selectedFamily, setSelectedFamily] = useState<string>(families[0] ?? "");
+  const [coverageMode, setCoverageMode] = useState<CoverageMode>("fullRevenue25");
+  const asinCoverageRows = useMemo(() => getAmazonEstimateAsinCoverage(selectedCompany, selectedFamily), [selectedCompany, selectedFamily]);
   const asinRows = useMemo(() => {
-    const baseRows = getAmazonEstimateAsins(selectedCompany, selectedFamily);
-    const statsByAsin = new Map<
-      string,
-      { totalCount: number; actualCount: number; positiveActualCount: number; latestActualMonth: string | null }
-    >();
-    for (const row of amazonEstimateLabData.monthlyEstimates) {
-      if (row.company !== selectedCompany || row.productFamily !== selectedFamily) continue;
-      const current = statsByAsin.get(row.asin) ?? { totalCount: 0, actualCount: 0, positiveActualCount: 0, latestActualMonth: null };
-      current.totalCount += 1;
-      if (row.actualRevenue !== null || row.actualSales !== null) {
-        current.actualCount += 1;
-        if (!current.latestActualMonth || row.month > current.latestActualMonth) current.latestActualMonth = row.month;
-      }
-      if ((row.actualRevenue ?? 0) > 0 || (row.actualSales ?? 0) > 0) current.positiveActualCount += 1;
-      statsByAsin.set(row.asin, current);
-    }
-    return baseRows
-      .map((row) => ({
-        ...row,
-        actualCount: statsByAsin.get(row.asin)?.actualCount ?? 0,
-        positiveActualCount: statsByAsin.get(row.asin)?.positiveActualCount ?? 0,
-        totalCount: statsByAsin.get(row.asin)?.totalCount ?? 0,
-        latestActualMonth: statsByAsin.get(row.asin)?.latestActualMonth ?? null
-      }))
-      .sort(
-        (a, b) =>
-          b.positiveActualCount - a.positiveActualCount ||
-          b.actualCount - a.actualCount ||
-          b.totalCount - a.totalCount ||
-          String(b.latestActualMonth ?? "").localeCompare(String(a.latestActualMonth ?? "")) ||
-          a.asin.localeCompare(b.asin)
-      );
-  }, [selectedCompany, selectedFamily]);
+    const filtered = asinCoverageRows.filter((row) => {
+      if (coverageMode === "all") return true;
+      if (coverageMode === "fullRevenue25") return row.fullRevenueCoverage;
+      if (coverageMode === "fullSales25") return row.fullSalesCoverage;
+      return row.fullBothCoverage;
+    });
+    return filtered.length ? filtered : asinCoverageRows;
+  }, [asinCoverageRows, coverageMode]);
   const [selectedAsin, setSelectedAsin] = useState<string>(asinRows[0]?.asin ?? "");
   const [window, setWindow] = useState<TimeWindow>("24M");
 
@@ -88,12 +67,12 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
   }, [selectedCompany, selectedFamily]);
 
   useEffect(() => {
-    const nextAsins = getAmazonEstimateAsins(selectedCompany, selectedFamily);
+    const nextAsins = asinRows;
     if (!nextAsins.length) {
       setSelectedAsin("");
       return;
     }
-    const bestAsin = asinRows.find((row) => row.positiveActualCount > 0)?.asin ?? asinRows[0]?.asin ?? nextAsins[0].asin;
+    const bestAsin = asinRows[0]?.asin ?? nextAsins[0].asin;
     if (!selectedAsin || !nextAsins.some((row) => row.asin === selectedAsin)) {
       setSelectedAsin(bestAsin);
     }
@@ -108,6 +87,9 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
   const quarterlyRows = selectedCompany ? getAmazonEstimateQuarterlyByCompany(selectedCompany) : [];
   const dartRows = selectedCompany ? getAmazonEstimateDartComparison(selectedCompany) : [];
   const selectedAsinStats = useMemo(() => asinRows.find((row) => row.asin === selectedAsin) ?? null, [asinRows, selectedAsin]);
+  const fullRevenueCount = asinCoverageRows.filter((row) => row.fullRevenueCoverage).length;
+  const fullSalesCount = asinCoverageRows.filter((row) => row.fullSalesCoverage).length;
+  const fullBothCount = asinCoverageRows.filter((row) => row.fullBothCoverage).length;
 
   const summaryCards = [
     { label: "ASIN", value: formatNumber(amazonEstimateLabData.summary.catalogAsinCount), icon: Package },
@@ -145,7 +127,7 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
       </section>
 
       <SectionCard eyebrow="Filters" title="Company / Family / ASIN / Window">
-        <div className="grid gap-3 lg:grid-cols-4">
+          <div className="grid gap-3 lg:grid-cols-4">
           <SelectField label="Company" value={selectedCompany} options={companies} onChange={setSelectedCompany} />
           <div>
             <p className="mb-2 text-xs font-bold uppercase tracking-wide text-toss-gray">Product family</p>
@@ -159,12 +141,34 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
               onChange={setSelectedFamily}
             />
           </div>
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-toss-gray">Coverage</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: "fullRevenue25" as CoverageMode, label: `Revenue 25M (${fullRevenueCount})` },
+                { id: "fullSales25" as CoverageMode, label: `Units 25M (${fullSalesCount})` },
+                { id: "fullBoth25" as CoverageMode, label: `Both 25M (${fullBothCount})` },
+                { id: "all" as CoverageMode, label: `All (${asinCoverageRows.length})` }
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setCoverageMode(item.id)}
+                  className={`rounded-full px-3 py-2 text-xs font-bold transition ${
+                    coverageMode === item.id ? "bg-toss-ink text-white" : "bg-white text-toss-ink2 ring-1 ring-toss-line hover:text-toss-ink"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <SelectField
             label="ASIN"
             value={selectedAsin}
             options={asinRows.map((row) => ({
               value: row.asin,
-              label: `${row.productName || row.asin} · JS ${row.positiveActualCount}m${row.latestActualMonth ? ` · ${row.latestActualMonth}` : ""}`,
+              label: `${row.productName || row.asin} · JS ${row.positiveRevenueMonths}m${row.latestPositiveRevenueMonth ? ` · ${row.latestPositiveRevenueMonth}` : ""}`,
               hint: row.asin
             }))}
             onChange={setSelectedAsin}
@@ -172,9 +176,9 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
           <SelectField label="Window" value={window} options={["all", "24M", "12M", "6M"]} onChange={(value) => setWindow(value as TimeWindow)} />
         </div>
         <p className="mt-3 text-xs font-semibold text-toss-gray">
-          Jungle Scout 0초과 관측치가 가장 많은 ASIN을 우선 선택합니다. 현재 선택 ASIN 관측치:{" "}
-          {selectedAsinStats ? `${selectedAsinStats.positiveActualCount}개월` : "No data"}
-          {selectedAsinStats?.latestActualMonth ? ` · 최신 관측: ${selectedAsinStats.latestActualMonth}` : ""}
+          Jungle Scout 원본 25개월 시계열에서 revenue/sales가 25개월 모두 양수인 ASIN을 따로 모아 보여줍니다. 현재 선택 ASIN:{" "}
+          {selectedAsinStats ? `${selectedAsinStats.positiveRevenueMonths}개월 revenue / ${selectedAsinStats.positiveSalesMonths}개월 units` : "No data"}
+          {selectedAsinStats?.latestPositiveRevenueMonth ? ` · 최신 양수 관측: ${selectedAsinStats.latestPositiveRevenueMonth}` : ""}
         </p>
       </SectionCard>
 

@@ -647,6 +647,22 @@ export type AmazonEstimateLabJungleScoutObservation = {
   sourceFile: string | null;
 };
 
+export type AmazonEstimateLabAsinCoverage = {
+  company: string;
+  productFamily: string;
+  asin: string;
+  productName: string;
+  totalMonths: number;
+  positiveRevenueMonths: number;
+  positiveSalesMonths: number;
+  latestMonth: string | null;
+  latestPositiveRevenueMonth: string | null;
+  latestPositiveSalesMonth: string | null;
+  fullRevenueCoverage: boolean;
+  fullSalesCoverage: boolean;
+  fullBothCoverage: boolean;
+};
+
 export type AmazonEstimateLabKeepaMonthlyFeature = {
   company: string;
   productFamily: string;

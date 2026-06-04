@@ -1,5 +1,6 @@
 import amazonEstimateLabJson from "../../public/data/amazon_estimate_lab.json";
 import type {
+  AmazonEstimateLabAsinCoverage,
   AmazonEstimateLabCalibrationResult,
   AmazonEstimateLabData,
   AmazonEstimateLabDartComparison,
@@ -386,6 +387,70 @@ export function getAmazonEstimateAsins(company: string, productFamily?: string |
   return amazonEstimateLabData.asinCatalog
     .filter((row) => row.company === company && (productFamily ? row.productFamily === productFamily : true))
     .sort((a, b) => a.asin.localeCompare(b.asin));
+}
+
+export function getAmazonEstimateAsinCoverage(company: string, productFamily?: string | null): AmazonEstimateLabAsinCoverage[] {
+  const stats = new Map<
+    string,
+    {
+      company: string;
+      productFamily: string;
+      asin: string;
+      productName: string;
+      totalMonths: number;
+      positiveRevenueMonths: number;
+      positiveSalesMonths: number;
+      latestMonth: string | null;
+      latestPositiveRevenueMonth: string | null;
+      latestPositiveSalesMonth: string | null;
+    }
+  >();
+
+  for (const row of amazonEstimateLabData.jungleScoutObservations) {
+    if (row.company !== company) continue;
+    if (productFamily && row.productFamily !== productFamily) continue;
+    const current =
+      stats.get(row.asin) ?? {
+        company: row.company,
+        productFamily: row.productFamily,
+        asin: row.asin,
+        productName: row.productName,
+        totalMonths: 0,
+        positiveRevenueMonths: 0,
+        positiveSalesMonths: 0,
+        latestMonth: null,
+        latestPositiveRevenueMonth: null,
+        latestPositiveSalesMonth: null
+      };
+    current.totalMonths += 1;
+    current.latestMonth = !current.latestMonth || row.month > current.latestMonth ? row.month : current.latestMonth;
+    if ((row.monthlyRevenue ?? 0) > 0) {
+      current.positiveRevenueMonths += 1;
+      current.latestPositiveRevenueMonth = !current.latestPositiveRevenueMonth || row.month > current.latestPositiveRevenueMonth ? row.month : current.latestPositiveRevenueMonth;
+    }
+    if ((row.monthlySales ?? 0) > 0) {
+      current.positiveSalesMonths += 1;
+      current.latestPositiveSalesMonth = !current.latestPositiveSalesMonth || row.month > current.latestPositiveSalesMonth ? row.month : current.latestPositiveSalesMonth;
+    }
+    stats.set(row.asin, current);
+  }
+
+  return [...stats.values()]
+    .map((row) => ({
+      ...row,
+      fullRevenueCoverage: row.totalMonths >= 25 && row.positiveRevenueMonths === 25,
+      fullSalesCoverage: row.totalMonths >= 25 && row.positiveSalesMonths === 25,
+      fullBothCoverage: row.totalMonths >= 25 && row.positiveRevenueMonths === 25 && row.positiveSalesMonths === 25
+    }))
+    .sort(
+      (a, b) =>
+        Number(b.fullRevenueCoverage) - Number(a.fullRevenueCoverage) ||
+        Number(b.fullSalesCoverage) - Number(a.fullSalesCoverage) ||
+        b.positiveRevenueMonths - a.positiveRevenueMonths ||
+        b.positiveSalesMonths - a.positiveSalesMonths ||
+        b.totalMonths - a.totalMonths ||
+        a.asin.localeCompare(b.asin)
+    );
 }
 
 export function getAmazonEstimateModel(company: string, productFamily: string) {
