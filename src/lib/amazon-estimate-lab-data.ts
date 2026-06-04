@@ -2,6 +2,7 @@ import amazonEstimateLabJson from "../../public/data/amazon_estimate_lab.json";
 import type {
   AmazonEstimateLabAsinCoverage,
   AmazonEstimateLabCalibrationResult,
+  AmazonEstimateLabAsinPerformance,
   AmazonEstimateLabData,
   AmazonEstimateLabDartComparison,
   AmazonEstimateLabJungleScoutObservation,
@@ -477,4 +478,146 @@ export function getAmazonEstimateQuarterlyByCompany(company: string) {
 
 export function getAmazonEstimateDartComparison(company: string) {
   return amazonEstimateLabData.dartComparison.filter((row) => row.company === company).sort((a, b) => a.quarter.localeCompare(b.quarter));
+}
+
+export function getAmazonEstimateAsinPerformance(company: string, productFamily?: string | null): AmazonEstimateLabAsinPerformance[] {
+  const grouped = new Map<
+    string,
+    {
+      company: string;
+      productFamily: string;
+      asin: string;
+      productName: string;
+      rows: AmazonEstimateLabMonthlyEstimate[];
+    }
+  >();
+
+  for (const row of amazonEstimateLabData.monthlyEstimates) {
+    if (row.company !== company) continue;
+    if (productFamily && row.productFamily !== productFamily) continue;
+    if (row.kind !== "observed_jungle_scout_estimate") continue;
+    const current =
+      grouped.get(row.asin) ?? {
+        company: row.company,
+        productFamily: row.productFamily,
+        asin: row.asin,
+        productName: row.productName,
+        rows: []
+      };
+    current.rows.push(row);
+    grouped.set(row.asin, current);
+  }
+
+  return [...grouped.values()]
+    .map((group) => {
+      const sorted = [...group.rows].sort((a, b) => a.month.localeCompare(b.month));
+      const revenuePairs = sorted
+        .map((row) => ({
+          actual: row.actualRevenue,
+          predicted: row.predictedRevenue
+        }))
+        .filter((pair): pair is { actual: number; predicted: number } => isFinitePair(pair.actual, pair.predicted));
+      const salesPairs = sorted
+        .map((row) => ({
+          actual: row.actualSales,
+          predicted: row.predictedSales
+        }))
+        .filter((pair): pair is { actual: number; predicted: number } => isFinitePair(pair.actual, pair.predicted));
+      const revenueMetrics = calculateMetrics(
+        revenuePairs.map((pair) => pair.actual),
+        revenuePairs.map((pair) => pair.predicted)
+      );
+      const salesMetrics = calculateMetrics(
+        salesPairs.map((pair) => pair.actual),
+        salesPairs.map((pair) => pair.predicted)
+      );
+      const latest = sorted[sorted.length - 1] ?? null;
+      const positiveMonths = sorted.filter((row) => (row.actualRevenue ?? 0) > 0).length;
+      return {
+        company: group.company,
+        productFamily: group.productFamily,
+        asin: group.asin,
+        productName: group.productName,
+        months: sorted.length,
+        positiveMonths,
+        latestMonth: latest?.month ?? null,
+        latestObservedRevenue: latest?.actualRevenue ?? null,
+        latestPredictedRevenue: latest?.predictedRevenue ?? null,
+        latestObservedSales: latest?.actualSales ?? null,
+        latestPredictedSales: latest?.predictedSales ?? null,
+        revenueMetrics,
+        salesMetrics,
+        confidence: inferConfidence(sorted.length, sorted.map((row) => row.predictedRevenue), revenueMetrics.mape)
+      } satisfies AmazonEstimateLabAsinPerformance;
+    })
+    .sort((a, b) => {
+      const aScore = a.revenueMetrics.mape ?? Number.POSITIVE_INFINITY;
+      const bScore = b.revenueMetrics.mape ?? Number.POSITIVE_INFINITY;
+      return aScore - bScore || b.positiveMonths - a.positiveMonths || b.months - a.months || a.asin.localeCompare(b.asin);
+    });
+}
+
+function isFinitePair(actual: number | null, predicted: number | null) {
+  return typeof actual === "number" && Number.isFinite(actual) && typeof predicted === "number" && Number.isFinite(predicted);
+}
+
+function calculateMetrics(actuals: number[], predictions: number[]): AmazonEstimateLabMetrics {
+  const pairs = actuals.map((actual, index) => ({ actual, predicted: predictions[index] })).filter((pair) => Number.isFinite(pair.actual) && Number.isFinite(pair.predicted));
+  if (!pairs.length) return { mape: null, rmse: null, mae: null, r2: null, spearman: null };
+  const mape = average(pairs.map((pair) => Math.abs((pair.predicted - pair.actual) / Math.max(pair.actual, 1)))) * 100;
+  const mae = average(pairs.map((pair) => Math.abs(pair.predicted - pair.actual)));
+  const rmse = Math.sqrt(average(pairs.map((pair) => Math.pow(pair.predicted - pair.actual, 2))));
+  const meanActual = average(pairs.map((pair) => pair.actual));
+  const sst = pairs.reduce((sum, pair) => sum + Math.pow(pair.actual - meanActual, 2), 0);
+  const sse = pairs.reduce((sum, pair) => sum + Math.pow(pair.predicted - pair.actual, 2), 0);
+  const r2 = sst === 0 ? null : 1 - sse / sst;
+  const spearman = spearmanCorrelation(
+    pairs.map((pair) => pair.actual),
+    pairs.map((pair) => pair.predicted)
+  );
+  return { mape, rmse, mae, r2, spearman };
+}
+
+function inferConfidence(sampleCount: number, predictions: Array<number | null>, mape?: number | null): AmazonEstimateLabAsinPerformance["confidence"] {
+  const valid = predictions.filter((value): value is number => typeof value === "number" && Number.isFinite(value));
+  if (sampleCount < 4 || !valid.length) return "not_enough_data";
+  if (sampleCount >= 30 && (mape ?? 999) < 35) return "high";
+  if (sampleCount >= 12 && (mape ?? 999) < 55) return "medium";
+  return "low";
+}
+
+function average(values: number[]) {
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+}
+
+function spearmanCorrelation(x: number[], y: number[]) {
+  if (x.length < 3 || x.length !== y.length) return null;
+  const ranksX = rank(x);
+  const ranksY = rank(y);
+  return pearson(ranksX, ranksY);
+}
+
+function rank(values: number[]) {
+  return values
+    .map((value, index) => ({ value, index }))
+    .sort((a, b) => a.value - b.value)
+    .map((entry, rankIndex) => ({ ...entry, rank: rankIndex + 1 }))
+    .sort((a, b) => a.index - b.index)
+    .map((entry) => entry.rank);
+}
+
+function pearson(x: number[], y: number[]) {
+  if (x.length !== y.length || x.length < 2) return null;
+  const meanX = average(x);
+  const meanY = average(y);
+  let numerator = 0;
+  let denomX = 0;
+  let denomY = 0;
+  for (let i = 0; i < x.length; i++) {
+    numerator += (x[i] - meanX) * (y[i] - meanY);
+    denomX += Math.pow(x[i] - meanX, 2);
+    denomY += Math.pow(y[i] - meanY, 2);
+  }
+  const denom = Math.sqrt(denomX * denomY);
+  return denom === 0 ? null : numerator / denom;
 }

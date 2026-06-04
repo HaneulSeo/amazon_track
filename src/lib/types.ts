@@ -792,6 +792,23 @@ export type AmazonEstimateLabMonthlyEstimate = {
   notes: string[];
 };
 
+export type AmazonEstimateLabAsinPerformance = {
+  company: string;
+  productFamily: string;
+  asin: string;
+  productName: string;
+  months: number;
+  positiveMonths: number;
+  latestMonth: string | null;
+  latestObservedRevenue: number | null;
+  latestPredictedRevenue: number | null;
+  latestObservedSales: number | null;
+  latestPredictedSales: number | null;
+  revenueMetrics: AmazonEstimateLabMetrics;
+  salesMetrics: AmazonEstimateLabMetrics;
+  confidence: AmazonEstimateLabConfidence;
+};
+
 export type AmazonEstimateLabQuarterlyEstimate = {
   company: string;
   quarter: string;

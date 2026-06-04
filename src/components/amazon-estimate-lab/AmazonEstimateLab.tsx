@@ -10,6 +10,7 @@ import {
   amazonEstimateLabData,
   getAmazonEstimateAsinCoverage,
   getAmazonEstimateAsins,
+  getAmazonEstimateAsinPerformance,
   getAmazonEstimateCompanies,
   getAmazonEstimateDartComparison,
   getAmazonEstimateFamilies,
@@ -87,6 +88,15 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
   const quarterlyRows = selectedCompany ? getAmazonEstimateQuarterlyByCompany(selectedCompany) : [];
   const dartRows = selectedCompany ? getAmazonEstimateDartComparison(selectedCompany) : [];
   const selectedAsinStats = useMemo(() => asinRows.find((row) => row.asin === selectedAsin) ?? null, [asinRows, selectedAsin]);
+  const asinPerformanceRows = useMemo(() => {
+    const performanceRows = getAmazonEstimateAsinPerformance(selectedCompany, selectedFamily);
+    const selectedAsinSet = new Set(asinRows.map((row) => row.asin));
+    return performanceRows.filter((row) => selectedAsinSet.has(row.asin));
+  }, [asinRows, selectedCompany, selectedFamily]);
+  const selectedAsinPerformance = useMemo(
+    () => asinPerformanceRows.find((row) => row.asin === selectedAsin) ?? null,
+    [asinPerformanceRows, selectedAsin]
+  );
   const fullRevenueCount = asinCoverageRows.filter((row) => row.fullRevenueCoverage).length;
   const fullSalesCount = asinCoverageRows.filter((row) => row.fullSalesCoverage).length;
   const fullBothCount = asinCoverageRows.filter((row) => row.fullBothCoverage).length;
@@ -186,6 +196,65 @@ export function AmazonEstimateLab({ currency, usdKrw }: AmazonEstimateLabProps) 
         <CalibrationModelPanel selectedModel={selectedModel} calibrationResults={amazonEstimateLabData.calibrationResults} />
       </SectionCard>
 
+      <SectionCard eyebrow="Product Fit" title="ASIN-level accuracy">
+        {asinPerformanceRows.length ? (
+          <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <MiniPerformanceCard label="Selected ASIN" value={selectedAsinStats?.asin ?? "No data"} sublabel={selectedAsinStats?.productName ?? ""} />
+              <MiniPerformanceCard label="Revenue MAPE" value={formatMetric(selectedAsinPerformance?.revenueMetrics.mape)} sublabel={`R² ${formatMetric(selectedAsinPerformance?.revenueMetrics.r2, 3)}`} />
+              <MiniPerformanceCard label="Sales MAPE" value={formatMetric(selectedAsinPerformance?.salesMetrics.mape)} sublabel={`R² ${formatMetric(selectedAsinPerformance?.salesMetrics.r2, 3)}`} />
+              <MiniPerformanceCard label="Months" value={selectedAsinPerformance ? formatNumber(selectedAsinPerformance.months) : "No data"} sublabel={`Positive ${selectedAsinPerformance?.positiveMonths ?? 0}`} />
+            </div>
+
+            <div className="overflow-auto rounded-2xl ring-1 ring-toss-line">
+              <table className="min-w-[1180px] w-full bg-white text-left text-sm">
+                <thead className="bg-toss-wash text-xs font-bold uppercase tracking-wide text-toss-gray">
+                  <tr>
+                    <th className="px-4 py-3">ASIN</th>
+                    <th className="px-4 py-3">Product</th>
+                    <th className="px-4 py-3 text-right">Months</th>
+                    <th className="px-4 py-3 text-right">Positive</th>
+                    <th className="px-4 py-3 text-right">Revenue MAPE</th>
+                    <th className="px-4 py-3 text-right">Revenue R²</th>
+                    <th className="px-4 py-3 text-right">Revenue Spearman</th>
+                    <th className="px-4 py-3 text-right">Sales MAPE</th>
+                    <th className="px-4 py-3 text-right">Sales R²</th>
+                    <th className="px-4 py-3 text-right">Sales Spearman</th>
+                    <th className="px-4 py-3">Latest</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-toss-line">
+                  {asinPerformanceRows.map((row) => (
+                    <tr
+                      key={row.asin}
+                      className={`cursor-pointer hover:bg-toss-wash/70 ${row.asin === selectedAsin ? "bg-toss-blue/5" : ""}`}
+                      onClick={() => setSelectedAsin(row.asin)}
+                    >
+                      <td className="px-4 py-3 font-mono text-xs font-semibold text-toss-ink">{row.asin}</td>
+                      <td className="px-4 py-3">
+                        <p className="font-semibold text-toss-ink">{row.productName || "품명 미확인"}</p>
+                        <p className="text-xs font-bold uppercase tracking-wide text-toss-gray">{row.productFamily}</p>
+                      </td>
+                      <td className="px-4 py-3 text-right font-semibold text-toss-ink">{formatNumber(row.months)}</td>
+                      <td className="px-4 py-3 text-right font-semibold text-toss-ink">{formatNumber(row.positiveMonths)}</td>
+                      <td className="px-4 py-3 text-right">{formatMetric(row.revenueMetrics.mape)}</td>
+                      <td className="px-4 py-3 text-right">{formatMetric(row.revenueMetrics.r2, 3)}</td>
+                      <td className="px-4 py-3 text-right">{formatMetric(row.revenueMetrics.spearman, 3)}</td>
+                      <td className="px-4 py-3 text-right">{formatMetric(row.salesMetrics.mape)}</td>
+                      <td className="px-4 py-3 text-right">{formatMetric(row.salesMetrics.r2, 3)}</td>
+                      <td className="px-4 py-3 text-right">{formatMetric(row.salesMetrics.spearman, 3)}</td>
+                      <td className="px-4 py-3 text-xs text-toss-ink2">{row.latestMonth ?? "No data"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <EmptyState title="No data" description="선택한 회사/제품군에 대해 ASIN별 정확도 데이터를 만들 수 없습니다." />
+        )}
+      </SectionCard>
+
       <SectionCard eyebrow="Backcast" title="Monthly revenue backcast">
         <BackcastRevenueChart rows={visibleMonthlyRows} currency={currency} usdKrw={usdKrw} />
       </SectionCard>
@@ -263,6 +332,11 @@ function formatCell(value: number | null) {
   return value.toLocaleString("en-US", { maximumFractionDigits: 1 });
 }
 
+function formatMetric(value: number | null | undefined, digits = 1) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return "No data";
+  return digits === 1 ? `${value.toFixed(1)}%` : value.toFixed(digits);
+}
+
 function SelectField({
   label,
   value,
@@ -300,6 +374,16 @@ function EmptyState({ title, description }: { title: string; description: string
     <div className="rounded-2xl bg-toss-wash p-5">
       <p className="text-sm font-extrabold text-toss-ink">{title}</p>
       <p className="mt-2 text-sm leading-6 text-toss-ink2">{description}</p>
+    </div>
+  );
+}
+
+function MiniPerformanceCard({ label, value, sublabel }: { label: string; value: string; sublabel?: string }) {
+  return (
+    <div className="rounded-2xl bg-white p-4 ring-1 ring-toss-line">
+      <p className="text-xs font-bold uppercase tracking-wide text-toss-gray">{label}</p>
+      <p className="mt-1 text-lg font-extrabold text-toss-ink">{value}</p>
+      {sublabel ? <p className="mt-1 text-xs font-semibold text-toss-ink2">{sublabel}</p> : null}
     </div>
   );
 }
